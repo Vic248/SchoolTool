@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: url('background.png') repeat-x;
+        }
+
+        center {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 10px 10px;
+        }
+
+        #menu-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #333;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        #menu-btn:hover {
+            background-color: #555;
+        }
+
+        #menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: #333;
+            color: white;
+            padding-top: 50px;
+            transition: left 0.3s;
+            z-index: 999;
+        }
+
+        #menu a {
+            display: block;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+
+        #menu a:hover {
+            background-color: #555;
+        }
+
+        #menu.close {
+            left: -250px;
+        }
+        
+        #menu.open {
+            left: 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+    <button id="menu-btn">Menu</button>
+
+    <div id="menu" class="close">
+        <a href="index.html">Accueil</a>
+        <a href="CountDown.html">CountDown</a>
+        <a href="Clock.html">Horloge</a>
+        <a href="RogerTest.html">Game Test</a>
+        <a href="Schedule.html">Horaire</a>
+        <a href="Clicker.html">Clicker</a>
+        <a href="JoffreHomeScreen.html">Joffre</a>
+    </div>
+<script>
+
+    document.getElementById("menu-btn").addEventListener("click", function() {
+        const menu = document.getElementById("menu");
+        if (menu.classList.contains("open")) {
+            menu.classList.remove("open");
+            menu.classList.add("close");
+        } else {
+            menu.classList.remove("close");
+            menu.classList.add("open");
+        }
+    });
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+        // Taille des tuiles
+    const tileSize = 50; // 50x50 pixels pour les tuiles
+
+    // Chargement des images des tuiles
+    const tileImages = {
+        0: null, // Vide
+        1: loadImage('ground.png'), // Sol
+    };
+
+    let scrollOffset = 0;
+
+    // Charge les images des tuiles
+    function loadImage(src) {
+        const img = new Image();
+        img.src = src;
+        return img;
+    }
+
+
+    // Config du personnage
+    const player = {
+        x: 100,
+        y: canvas.height - 200, // Position de base (au sol)
+        width: 150,
+        height: 150,
+        speed: 5,
+        dx: 0,
+        dy: 0, // Vitesse verticale pour le saut
+        frame: 1,
+        maxFrame: 12,
+        flip: false,
+        isJumping: false,
+        gravity: 0.5,
+        jumpPower: -12, // Hauteur du saut
+        groundY: canvas.height - 200, // Position du sol
+    };
+
+    // Carte du niveau (tableau 2D)
+    const levelMap = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ];
+
+
+    let isMoving = false;
+    let frameCount = 0;
+
+    // Tableau des images de Roger
+    const frames = [];
+    for (let i = 1; i <= 12; i++) {
+        const img = new Image();
+        img.src = `pixil-frame-${i}.png`; // Images nommées frame1.png, frame2.png, etc.
+        frames.push(img);
+    }
+
+    function drawPlayer() {
+        ctx.save();
+        if (player.flip) {
+            ctx.scale(-1, 1);
+            ctx.drawImage(
+                frames[player.frame - 1],
+                -player.x - player.width,
+                player.y,
+                player.width,
+                player.height
+            );
+        } else {
+            ctx.drawImage(
+                frames[player.frame - 1],
+                player.x,
+                player.y,
+                player.width,
+                player.height
+            );
+        }
+        ctx.restore();
+    }
+
+    function drawLevel() {
+        for (let row = 0; row < levelMap.length; row++) {
+            for (let col = 0; col < levelMap[row].length; col++) {
+                const tile = levelMap[row][col];
+                if (tile !== 0) {
+                    const tileX = col * tileSize - scrollOffset; // Décale les tuiles
+                    const tileY = canvas.height - (levelMap.length - row) * tileSize;
+                    ctx.fillStyle = "#8B4513"; // Couleur des blocs (marron style Mario)
+                    ctx.fillRect(tileX, tileY, tileSize, tileSize);
+                }
+            }
+        }
+    }
+
+    function getTileAt(x, y) {
+        const col = Math.floor((x + scrollOffset) / tileSize); // Décalage ici
+        const row = Math.floor((canvas.height - y) / tileSize);
+
+        if (row >= 0 && row < levelMap.length && col >= 0 && col < levelMap[row].length) {
+            return levelMap[row][col];
+        }
+        return 0;
+    }
+
+
+    function updatePlayer() {
+        player.x += player.dx;
+
+        // Défilement du niveau si Roger avance vers les bords
+        const centerScreen = canvas.width / 2;
+
+        if (player.x > centerScreen && player.dx > 0) {
+            scrollOffset += player.dx;
+            player.x = centerScreen; // Garde Roger centré
+        } else if (player.x < centerScreen && scrollOffset > 0 && player.dx < 0) {
+            scrollOffset += player.dx;
+            player.x = centerScreen; // Même logique pour la gauche
+        }
+
+
+        // Empêche Roger de sortir de l'écran
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+        // Gestion des frames uniquement si Roger bouge
+        if (isMoving) {
+            frameCount++;
+            if (frameCount % 5 === 0) { // Change de frame toutes les 5 itérations
+                player.frame = (player.frame % player.maxFrame) + 1;
+            }
+        } else {
+            player.frame = 1; // Frame statique si pas de mouvement
+        }
+
+        checkCollision();
+
+        // Gestion du saut
+        if (player.isJumping || player.isMoving) {
+            player.y += player.dy; // Applique la vitesse verticale
+            player.dy += player.gravity; // Applique la gravité
+
+            // Si Roger touche le sol
+            if (player.y >= player.groundY) {
+                player.y = player.groundY;
+                player.isJumping = false;
+                player.dy = 0;
+            }
+        }
+    }
+
+    function checkCollision() {
+        let isOnGround = false;
+
+        // Dimensions de Roger pour simplifier
+        const playerLeft = player.x;
+        const playerRight = player.x + player.width;
+        const playerTop = player.y;
+        const playerBottom = player.y + player.height;
+
+        for (let row = 0; row < levelMap.length; row++) {
+            for (let col = 0; col < levelMap[row].length; col++) {
+                const tile = levelMap[row][col];
+                if (tile !== 0) {
+                    const tileX = col * tileSize;
+                    const tileY = canvas.height - (levelMap.length - row) * tileSize;
+
+                    // Collision horizontale uniquement si les pieds du joueur sont dans la même bande verticale que le bloc
+                    if (
+                        playerBottom > tileY &&
+                        playerTop < tileY + tileSize &&
+                        playerRight > tileX &&
+                        playerLeft < tileX + tileSize
+                    ) {
+
+                        if (player.dx > 0) {
+                            // Collision à droite
+                            player.x = tileX - player.width;
+                        } else if (player.dx < 0) {
+                            // Collision à gauche
+                            player.x = tileX + tileSize;
+                        }
+                        player.dx = 0;
+                    }
+
+                    if (
+                        playerRight > tileX &&
+                        playerLeft < tileX + tileSize &&
+                        playerBottom > tileY &&
+                        playerTop < tileY + tileSize
+                    ) {
+
+                        if (player.dy > 0) {
+                            // Collision avec le sol
+                            player.y = tileY - player.height;
+                            player.isJumping = false;
+                            player.dy = 0;
+                            isOnGround = true;
+                        } else if (player.dy < 0) {
+                            // Collision avec le plafond
+                            player.y = tileY + tileSize;
+                            player.dy = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function gameLoop() {
+        clearCanvas();
+        drawLevel();
+        updatePlayer();
+        drawPlayer();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Gestion des touches
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowRight') {
+            player.dx = player.speed;
+            player.flip = false;
+            isMoving = true;
+        } else if (event.key === 'ArrowLeft') {
+            player.dx = -player.speed;
+            player.flip = true;
+            isMoving = true;
+        } else if (event.key === ' ' && !player.isJumping) {
+            // Si on appuie sur ESPACE et que Roger n'est pas déjà en train de sauter
+            player.isJumping = true;
+            player.dy = player.jumpPower; // Applique la puissance du saut
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+            player.dx = 0;
+            isMoving = false;
+        }
+    });
+
+    // Lance le jeu après que les images sont chargées
+    frames[0].onload = () => {
+        gameLoop();
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <title>Clicker Game</title>
+
+        <style>
+            body {
+                background-color: #f5f7fa;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                padding-top: 10px 10px;
+            }
+
+            #menu-btn {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background-color: #333;
+                color: white;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                z-index: 1000;
+            }
+            
+            #menu-btn:hover {
+                background-color: #555;
+            }
+
+            #menu {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                width: 250px;
+                height: 100%;
+                background-color: #333;
+                color: white;
+                padding-top: 50px;
+                transition: left 0.3s;
+                z-index: 999;
+            }
+
+            #menu a {
+                display: block;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+            }
+
+            #menu a:hover {
+                background-color: #555;
+            }
+
+            #menu.close {
+                left: -250px;
+            }
+            
+            #menu.open {
+                left: 0;
+            }
+
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 28px;
+                }
+            }
+
+            center {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                z-index: 9999;
+            }
+
+            body {
+                background-color: white;
+                align-items: center;
+                justify-content: center;
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+            }
+
+            #clickButton {
+                width: 300px;
+                height: 100px;
+                border-radius: 10px;
+                font-size: 350%;
+                font-family: 'Courier New', Courier, monospace;
+            }
+
+            #buildingContainer {
+                right: 10px;
+                height: 75%;
+                width: 250px;
+                position: fixed;
+                padding: 30px;
+                flex-direction: column;
+            }
+
+            .building {
+                background-color: gray;
+                height: 50px;
+                width: 100%;
+                margin-bottom: 10px;
+                padding: 10px;
+                border-radius: 10px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+                transition: transform 0.1s, background-color 0.1s, box-shadow 0.1s;
+            }
+
+            .building.clicked {
+                transform: scale(0.95);
+                background-color: #888;
+                box-shadow: 0 0 10px #fff;
+                transition: transform 0.1s, background-color 0.1s, box-shadow 0.1s;
+            }
+
+            #cps {
+                font-size: x-large;
+            }
+
+            #clickDisplay {
+                font-size: xx-large;
+            }
+        </style>
+    </head>
+    <body>
+
+    <button id="menu-btn">Menu</button>
+
+    <div id="menu" class="close">
+        <a href="index.html">Accueil</a>
+        <a href="CountDown.html">CountDown</a>
+        <a href="Clock.html">Horloge</a>
+        <a href="RogerTest.html">Game Test</a>
+        <a href="Schedule.html">Horaire</a>
+        <a href="Clicker.html">Clicker</a>
+        <a href="JoffreHomeScreen.html">Joffre</a>
+    </div>
+
+        <h1 id="cps">Clicks Per Second: 0</h1>
+        <h1 id="clickDisplay">Clicks: 0</h1>
+        <button id="clickButton">Click Me</button>
+
+        <div id="buildingContainer"></div>
+        <div id="upgradeContainer"></div>
+
+        <script>
+
+            document.getElementById("menu-btn").addEventListener("click", function() {
+                const menu = document.getElementById("menu");
+                if (menu.classList.contains("open")) {
+                    menu.classList.remove("open");
+                    menu.classList.add("close");
+                } else {
+                    menu.classList.remove("close");
+                    menu.classList.add("open");
+                }
+            });
+
+            const button = document.getElementById('clickButton');
+            const clickDisplay = document.getElementById('clickDisplay');
+            const cpsDisplay = document.getElementById('cps');
+
+            const buildingList = [
+                {
+                    name: "Mouse",
+                    baseCost: 10,
+                    cost: 10,
+                    cpsAdded: 1,
+                    clicksPerClickAdded: 1,
+                    count: 0
+                },
+                {
+                    name: "Building",
+                    baseCost: 100,
+                    cost: 100,
+                    cpsAdded: 5,
+                    clicksPerClickAdded: 1,
+                    count: 0
+                },
+                {
+                    name: "Sigma Boy",
+                    baseCost: 1000,
+                    cost: 1000,
+                    cpsAdded: 25,
+                    clicksPerClickAdded: 2,
+                    count: 0
+                },
+                {
+                    name: "I AM STEVE",
+                    baseCost: 10000,
+                    cost: 10000,
+                    cpsAdded: 100,
+                    clicksPerClickAdded: 4,
+                    count: 0
+                },
+                {
+                    name: "Le Ching Chong Originel",
+                    baseCost: 100000,
+                    cost: 100000,
+                    cpsAdded: 500,
+                    clicksPerClickAdded: 10,
+                    count: 0
+                }
+            ]
+
+            const upgradeList = [
+                {
+                    name: "",
+                    cost: 1,
+                    condition: "",
+                }
+            ]
+
+            let score = 0;
+            let cps = 0;
+            let clicksPerClick = 1;
+            let scoreDisplayed = 0;
+
+            button.addEventListener("click", function() {
+                score += clicksPerClick;
+                updateScore()
+            });
+
+            buildingList.forEach(function(buildingData) {
+                const buildingContainer = document.getElementById('buildingContainer');
+                const building = document.createElement('div');
+                const buildingTitle = document.createElement('div');
+
+                building.appendChild(buildingTitle);
+                buildingTitle.innerHTML = `<strong>${buildingData.name}, Cost: ${formatNombre(buildingData.cost)}, Count: ${building.count || 0}</strong>`;
+
+                buildingContainer.appendChild(building);
+                building.style.transition = `transform 0.1`;
+                building.id = `${buildingData.name}`;
+                building.className = "building";
+
+                building.onclick = () => {
+                    // Animation visuelle
+                    building.classList.add("clicked");
+                    setTimeout(() => {
+                        building.classList.remove("clicked");
+                    }, 100);
+
+                    // Fonction d’achat
+                    buildingBought(buildingData, buildingTitle);
+                };
+            });
+
+            function buildingBought(building, buildingTitle) {
+                if (building.cost > score) {
+                    return;
+                } else {
+                    score -= building.cost;
+                    cps += building.cpsAdded;
+
+                    building.cost = Math.floor(building.baseCost * Math.pow(1.15, building.count))+2;
+                    clicksPerClick += building.clicksPerClickAdded;
+
+                    building.count += 1;
+                }
+
+                buildingTitle.innerHTML = `<strong>${building.name}, Cost: ${formatNombre(building.cost)}, Count: ${building.count || 0}</strong>`
+
+                updateCps()
+                updateScore()
+            }
+
+            function checkUpgrade() {
+                const upgradeContainer = document.getElementById('upgradeContainer');
+                upgradeList.forEach(function() {
+                    
+                })
+            }
+
+            function updateScore() {
+                if (isNaN(score)) {
+                    console.warn("Score is NaN, resetting to 0");
+                    score = 0;
+                }
+
+                if (!isFinite(score)) {
+                    clickDisplay.innerHTML = "Clicks: ∞";
+                } else {
+                    clickDisplay.innerHTML = `Clicks: ${formatNombre(score)}`;
+                }
+
+                clickDisplay.innerHTML = `Clicks: ${formatNombre(score)}`;
+            }
+
+            function updateCps() {
+                cpsDisplay.innerHTML = `Clicks Per Second: ${cps}`;
+            }
+
+            function updateScorePerSecond() {
+                score += cps;
+                updateScore()
+            }
+
+            function formatNombre(n) {
+                if (n >= 1e15) return (n / 1e15).toPrecision(3) + "q"; // quadrillion
+                if (n >= 1e12) return (n / 1e12).toPrecision(3) + "t"; // trillion
+                if (n >= 1e9)  return (n / 1e9).toPrecision(3) + "b";  // milliard
+                if (n >= 1e6)  return (n / 1e6).toPrecision(3) + "m";  // million
+                if (n >= 1e3)  return (n / 1e3).toPrecision(3) + "k";  // mille
+                return n;
+            }
+
+            setInterval(updateScorePerSecond, 1000)
+        </script>
+    </body>
+</html>

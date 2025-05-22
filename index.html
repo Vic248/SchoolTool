@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Accueil</title>
+
+    <style>
+        body {
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 10px 10px;
+        }
+
+        #menu-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #333;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        #menu-btn:hover {
+            background-color: #555;
+        }
+
+        #menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: #333;
+            color: white;
+            padding-top: 50px;
+            transition: left 0.3s;
+            z-index: 999;
+        }
+
+        #menu a {
+            display: block;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+
+        #menu a:hover {
+            background-color: #555;
+        }
+
+        #menu.close {
+            left: -250px;
+        }
+        
+        #menu.open {
+            left: 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+        }
+
+        center {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+        }
+
+        h1 {
+            font-size: 100px;
+        }
+
+        #text-container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="menu-btn">Menu</button>
+
+    <div id="menu" class="close">
+        <a href="index.html">Accueil</a>
+        <a href="CountDown.html">CountDown</a>
+        <a href="Clock.html">Horloge</a>
+        <a href="RogerTest.html">Game Test</a>
+        <a href="Schedule.html">Horaire</a>
+        <a href="Clicker.html">Clicker</a>
+        <a href="JoffreHomeScreen.html">Joffre</a>
+    </div>
+
+    <div id="text-container">
+        <h1>Accueil</h1>
+    </div>
+
+    <script>
+    document.getElementById("menu-btn").addEventListener("click", function() {
+        const menu = document.getElementById("menu");
+        if (menu.classList.contains("open")) {
+            menu.classList.remove("open");
+            menu.classList.add("close");
+        } else {
+            menu.classList.remove("close");
+            menu.classList.add("open");
+        }
+    });
+    </script>
+</body>
+</html>
