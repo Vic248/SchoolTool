@@ -69,6 +69,20 @@
                     font-size: 28px;
                 }
             }
+            #form {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+            }
+            #submit {
+                font-family: 'Times New Roman', Times, serif;
+            }
+            label {
+                font-size: xx-large;
+            }
+            button {
+                size: 100px;
+            }
         </style>
     </head>
     <body>
@@ -84,6 +98,17 @@
             <a href="Clicker.html">Clicker</a>
             <a href="JoffreHomeScreen.html">Joffre</a>
             <a href="suggestionForm.html">Suggestion</a>
+        </div>
+
+        <div id="form">
+            <form name="contact" method="POST" netlify>
+                <p>
+                    <label>Your suggestion: <textarea name="message"></textarea></label>
+                </p>
+                <p>
+                    <button type="submit" id="submit">Send</button>
+                </p>
+            </form>
         </div>
         <script>
             document.getElementById("menu-btn").addEventListener("click", function() {
