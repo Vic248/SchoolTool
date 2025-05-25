@@ -292,6 +292,7 @@
         // Toutes les images sont chargées
         document.getElementById("loading-screen").style.display = "none";
         document.getElementById("game-content").style.display = "block";
+        startTakingPhase();
       }
     };
 
@@ -923,7 +924,6 @@
     shuffleDeck();
     deal();
     renderHands();
-    startTakingPhase();
     log("À vous de jouer");
   </script>
 </body>
