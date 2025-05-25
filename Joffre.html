@@ -487,9 +487,9 @@
             takerPoints = bid;
             log(`🤖 Bot ${currentAskingIndex} prend ${bid} points !`);
             isTakingPhase = false;
+            botPlayStep(currentAskingIndex);
             setTimeout(() => {
               document.getElementById('take-interface').style.display = 'none';
-              botPlayStep(currentAskingIndex);
             }, 1500);
           } else {
             log(`🤖 Bot ${currentAskingIndex} passe.`);
@@ -501,9 +501,9 @@
               takerPoints = 7;
               log(`👑 Le donneur (joueur ${dealerIndex}) est obligé de prendre (7 points).`);
               isTakingPhase = false;
+              botPlayStep(currentAskingIndex);
               setTimeout(() => {
                 document.getElementById('take-interface').style.display = 'none';
-                botPlayStep(currentAskingIndex);
               }, 2000);
             } else {
               askNextPlayerToTake();
