@@ -244,6 +244,17 @@
   </div>
   <div id="log"></div>
 
+  <div id="take-interface" style="display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+  background-color: #333; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px black; z-index: 999;">
+    <h2>Souhaitez-vous prendre ?</h2>
+    <label>Points (≥7) : </label>
+    <input id="bidInput" type="number" min="7" value="7" style="width: 60px;" />
+    <div style="margin-top: 10px;">
+      <button id="btnTake">Prendre</button>
+      <button id="btnPass">Passer</button>
+    </div>
+  </div>
+
   <script>
     document.getElementById("menu-btn").addEventListener("click", function() {
         const menu = document.getElementById("menu");
@@ -345,6 +356,11 @@
     let teamTwoScore = 0;
     let waitingForSpace = false;
     let currentLeader = 0;
+    let dealerIndex = Math.floor(Math.random() * 4);
+    let takerIndex = -1;
+    let takerPoints = 0;
+    let currentAskingIndex = 0;
+    let isTakingPhase = false;
 
     function log(text) {
       document.getElementById('log').textContent = text;
@@ -447,6 +463,60 @@
           el.appendChild(img);
         }
       }
+    }
+
+    function startTakingPhase() {
+      isTakingPhase = true;
+      takerIndex = -1;
+      takerPoints = 0;
+      currentAskingIndex = (dealerIndex + 1) % 4;
+      askNextPlayerToTake();
+    }
+
+    function askNextPlayerToTake() {
+      if (currentAskingIndex === 0) {
+        // Affiche l'interface pour le joueur
+        document.getElementById('take-interface').style.display = 'block';
+        log("Souhaitez-vous prendre ?");
+      } else {
+        // Tour du bot
+        setTimeout(() => {
+          const bid = decideBotBid(currentAskingIndex);
+          if (bid > 0) {
+            takerIndex = currentAskingIndex;
+            takerPoints = bid;
+            log(`🤖 Bot ${currentAskingIndex} prend ${bid} points !`);
+            isTakingPhase = false;
+            setTimeout(() => {
+              document.getElementById('take-interface').style.display = 'none';
+              startRound();
+            }, 1500);
+          } else {
+            log(`🤖 Bot ${currentAskingIndex} passe.`);
+            currentAskingIndex = (currentAskingIndex + 1) % 4;
+
+            if (currentAskingIndex === dealerIndex) {
+              // Le donneur est obligé
+              takerIndex = dealerIndex;
+              takerPoints = 7;
+              log(`👑 Le donneur (joueur ${dealerIndex}) est obligé de prendre (7 points).`);
+              isTakingPhase = false;
+              setTimeout(() => {
+                document.getElementById('take-interface').style.display = 'none';
+                startRound();
+              }, 2000);
+            } else {
+              askNextPlayerToTake();
+            }
+          }
+        }, 1000);
+      }
+    }
+
+    function decideBotBid(botIndex) {
+      // Exemple simple : 40% de chance de prendre
+      if (Math.random() < 0.4) return 0; // passe
+      return 7 + Math.floor(Math.random() * 4); // prend entre 7 et 10 points
     }
 
     function playCard(player, card) {
@@ -806,6 +876,28 @@
       scoreTitle.innerHTML = `Team 1: ${teamOneScore} | Team 2: ${teamTwoScore}`
     }
 
+    document.getElementById("btnTake").onclick = () => {
+      const bid = parseInt(document.getElementById("bidInput").value);
+      if (isNaN(bid) || bid < 7) {
+        alert("Tu dois prendre au moins 7 points.");
+        return;
+      }
+
+      takerIndex = 0;
+      takerPoints = bid;
+      isTakingPhase = false;
+      document.getElementById('take-interface').style.display = 'none';
+      log(`🧍 Tu prends ${bid} points.`);
+      startRound();
+    };
+
+    document.getElementById("btnPass").onclick = () => {
+      document.getElementById('take-interface').style.display = 'none';
+      log("🧍 Tu passes.");
+      currentAskingIndex = (currentAskingIndex + 1) % 4;
+      askNextPlayerToTake();
+    };
+
     document.addEventListener("keydown", function(event) {
       if (event.code === "Enter" && waitingForSpace) {
         waitingForSpace = false;
@@ -813,6 +905,7 @@
         if (hands[0].length === 0 && hands[1].length === 0 && hands[2].length === 0 && hands[3].length === 0) {
           shuffleDeck();
           deal();
+          startTakingPhase();
         }
         updateCenter();
         renderHands();
@@ -830,6 +923,7 @@
     shuffleDeck();
     deal();
     renderHands();
+    startTakingPhase();
     log("À vous de jouer");
   </script>
 </body>
