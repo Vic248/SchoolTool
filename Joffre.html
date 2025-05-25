@@ -489,7 +489,7 @@
             isTakingPhase = false;
             setTimeout(() => {
               document.getElementById('take-interface').style.display = 'none';
-              startRound();
+              botPlayStep(currentAskingIndex);
             }, 1500);
           } else {
             log(`🤖 Bot ${currentAskingIndex} passe.`);
@@ -503,7 +503,7 @@
               isTakingPhase = false;
               setTimeout(() => {
                 document.getElementById('take-interface').style.display = 'none';
-                startRound();
+                botPlayStep(currentAskingIndex);
               }, 2000);
             } else {
               askNextPlayerToTake();
@@ -888,7 +888,7 @@
       isTakingPhase = false;
       document.getElementById('take-interface').style.display = 'none';
       log(`🧍 Tu prends ${bid} points.`);
-      startRound();
+      botPlayStep(0);
     };
 
     document.getElementById("btnPass").onclick = () => {
