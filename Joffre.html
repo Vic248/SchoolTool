@@ -209,7 +209,7 @@
 
     <div id="menu" class="close">
         <a href="index.html">Accueil</a>
-        <a href="CountDown.html">CountDown</a>
+        <a href="CountDown.html">Compte à rebours</a>
         <a href="Clock.html">Horloge</a>
         <a href="RogerTest.html">Game Test</a>
         <a href="Schedule.html">Horaire</a>
@@ -292,7 +292,6 @@
         // Toutes les images sont chargées
         document.getElementById("loading-screen").style.display = "none";
         document.getElementById("game-content").style.display = "block";
-        startTakingPhase();
       }
     };
 
@@ -464,60 +463,6 @@
           el.appendChild(img);
         }
       }
-    }
-
-    function startTakingPhase() {
-      isTakingPhase = true;
-      takerIndex = -1;
-      takerPoints = 0;
-      currentAskingIndex = (dealerIndex + 1) % 4;
-      askNextPlayerToTake();
-    }
-
-    function askNextPlayerToTake() {
-      if (currentAskingIndex === 0) {
-        // Affiche l'interface pour le joueur
-        document.getElementById('take-interface').style.display = 'block';
-        log("Souhaitez-vous prendre ?");
-      } else {
-        // Tour du bot
-        setTimeout(() => {
-          const bid = decideBotBid(currentAskingIndex);
-          if (bid > 0) {
-            takerIndex = currentAskingIndex;
-            takerPoints = bid;
-            log(`🤖 Bot ${currentAskingIndex} prend ${bid} points !`);
-            isTakingPhase = false;
-            botPlayStep(currentAskingIndex);
-            setTimeout(() => {
-              document.getElementById('take-interface').style.display = 'none';
-            }, 1500);
-          } else {
-            log(`🤖 Bot ${currentAskingIndex} passe.`);
-            currentAskingIndex = (currentAskingIndex + 1) % 4;
-
-            if (currentAskingIndex === dealerIndex) {
-              // Le donneur est obligé
-              takerIndex = dealerIndex;
-              takerPoints = 7;
-              log(`👑 Le donneur (joueur ${dealerIndex}) est obligé de prendre (7 points).`);
-              isTakingPhase = false;
-              botPlayStep(currentAskingIndex);
-              setTimeout(() => {
-                document.getElementById('take-interface').style.display = 'none';
-              }, 2000);
-            } else {
-              askNextPlayerToTake();
-            }
-          }
-        }, 1000);
-      }
-    }
-
-    function decideBotBid(botIndex) {
-      // Exemple simple : 40% de chance de prendre
-      if (Math.random() < 0.4) return 0; // passe
-      return 7 + Math.floor(Math.random() * 4); // prend entre 7 et 10 points
     }
 
     function playCard(player, card) {
@@ -906,7 +851,6 @@
         if (hands[0].length === 0 && hands[1].length === 0 && hands[2].length === 0 && hands[3].length === 0) {
           shuffleDeck();
           deal();
-          startTakingPhase();
         }
         updateCenter();
         renderHands();
