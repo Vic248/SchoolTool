@@ -92,6 +92,9 @@
         #button {
             font-size: x-large;
         }
+        #password-text-box {
+            resize: none;
+        }
         #lock-screen {
             position: fixed;
             top: 0;
@@ -129,7 +132,7 @@
 
     <div id="lock-screen">
         <h1 id="question-text">Quel est le mot de passe?</h1>
-        <textarea></textarea>
+        <textarea id="password-text-box"></textarea>
         <button id="button">Ok</button>
     </div>
 
@@ -145,16 +148,26 @@
     </div>
 
     <script>
-    document.getElementById("menu-btn").addEventListener("click", function() {
-        const menu = document.getElementById("menu");
-        if (menu.classList.contains("open")) {
-            menu.classList.remove("open");
-            menu.classList.add("close");
-        } else {
-            menu.classList.remove("close");
-            menu.classList.add("open");
-        }
-    });
+        document.getElementById("menu-btn").addEventListener("click", function() {
+            const menu = document.getElementById("menu");
+            if (menu.classList.contains("open")) {
+                menu.classList.remove("open");
+                menu.classList.add("close");
+            } else {
+                menu.classList.remove("close");
+                menu.classList.add("open");
+            }
+        });
+
+        document.getElementById(`button`).addEventListener("click", function() {
+            var textarea = document.getElementById(`password-text-box`);
+            var word = 'ching chong';
+            var textValue = textarea.value;
+
+            if (textValue.indexOf(word)!=-1) {
+                this.parentElement.remove
+            }
+        });
     </script>
 </body>
 </html>
