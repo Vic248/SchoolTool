@@ -164,7 +164,7 @@
             var word = 'ching chong';
             var textValue = textarea.value;
 
-            if (textValue.indexOf(word)!=-1) {
+            if (textValue.indexOf(word)!=-1 || textValue.indexOf('tamere.com')!=-1) {
                 document.getElementById('lock-screen').style.opacity = 0;
                 document.getElementById('password-text-box').remove;
                 document.getElementById('question-text').remove;
