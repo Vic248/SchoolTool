@@ -166,6 +166,11 @@
 
             if (textValue.indexOf(word)!=-1) {
                 document.getElementById('lock-screen').style.opacity = 0;
+                document.getElementById('password-text-box').remove;
+                document.getElementById('question-text').remove;
+            } else {
+                const lockScreen = document.getElementById('lock-screen');
+                lockScreen.innerHTML = `<h1 id="question-text">Quel est le mot de passe?</h1><textarea id="password-text-box"></textarea><h1 style="color: #ff0000">Mauvaise réponse</h1><button id="button">Ok</button>`
             }
         });
     </script>
