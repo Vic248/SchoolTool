@@ -165,20 +165,30 @@
             }
         });
 
-        document.getElementById(`button`).addEventListener("click", function() {
-            var textarea = document.getElementById(`password-text-box`);
-            var word = 'ching chong';
-            var textValue = textarea.value;
+        function attachButtonHandler() {
+            document.getElementById("button").addEventListener("click", function() {
+                var textarea = document.getElementById(`password-text-box`);
+                var word = 'ching chong';
+                var textValue = textarea.value;
 
-            if (textValue.indexOf(word)!=-1 || textValue.indexOf('tamere.com')!=-1) {
-                document.getElementById('lock-screen').style.opacity = 0;
-                document.getElementById('password-text-box').remove;
-                document.getElementById('question-text').remove;
-            } else {
-                const lockScreen = document.getElementById('lock-screen');
-                lockScreen.innerHTML = `<h1 id="question-text">Quel est le mot de passe?</h1><textarea id="password-text-box"></textarea><h1 style="color: #ff0000; font-size: large">Mauvaise réponse</h1><button id="button">Ok</button>`
-            }
-        });
+                if (textValue.indexOf(word) !== -1 || textValue.indexOf('tamere.com') !== -1) {
+                    document.getElementById('lock-screen').style.opacity = 0;
+                    document.getElementById('password-text-box').remove();
+                    document.getElementById('question-text').remove();
+                } else {
+                    const lockScreen = document.getElementById('lock-screen');
+                    lockScreen.innerHTML = `
+                        <h1 id="question-text">Quel est le mot de passe?</h1>
+                        <textarea id="password-text-box"></textarea>
+                        <h1 style="color: #ff0000; font-size: large">Mauvaise réponse</h1>
+                        <button id="button">Ok</button>
+                    `;
+                    attachButtonHandler(); // Réattache le gestionnaire après mise à jour
+                }
+            });
+        }
+
+        attachButtonHandler(); // Attache initialement
     </script>
 </body>
 </html>
