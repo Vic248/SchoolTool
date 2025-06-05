@@ -122,10 +122,10 @@
     let score = 0;
 
     document.addEventListener('keydown', event => {
-      if ((event.key === 'ArrowUp' || event.key === 'KeyW') && direction !== 'DOWN') direction = 'UP';
-      else if ((event.key === 'ArrowDown' || event.key === 'KeyS') && direction !== 'UP') direction = 'DOWN';
-      else if ((event.key === 'ArrowLeft' || event.key === 'KeyA') && direction !== 'RIGHT') direction = 'LEFT';
-      else if ((event.key === 'ArrowRight' || event.key === 'KeyD') && direction !== 'LEFT') direction = 'RIGHT';
+      if ((event.key === 'ArrowUp' || event.key === 'w') && direction !== 'DOWN') direction = 'UP';
+      else if ((event.key === 'ArrowDown' || event.key === 's') && direction !== 'UP') direction = 'DOWN';
+      else if ((event.key === 'ArrowLeft' || event.key === 'a') && direction !== 'RIGHT') direction = 'LEFT';
+      else if ((event.key === 'ArrowRight' || event.key === 'd') && direction !== 'LEFT') direction = 'RIGHT';
     });
 
     function spawnFood() {
