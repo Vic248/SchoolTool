@@ -1,108 +1,200 @@
 <!DOCTYPE html>
-<html lang="fr-CA">
-    <head>
-        <title>Snake</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Snake Game</title>
+  <style>
+        body {
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 10px 10px;
+        }
 
-        <style>
-            body {
-                background-color: #f5f7fa;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                padding-top: 10px 10px;
-            }
+        #menu-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #333;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        #menu-btn:hover {
+            background-color: #555;
+        }
 
-            #menu-btn {
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                background-color: #333;
-                color: white;
-                padding: 10px 15px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                z-index: 1000;
-            }
-            
-            #menu-btn:hover {
-                background-color: #555;
-            }
+        #menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: #333;
+            color: white;
+            padding-top: 50px;
+            transition: left 0.3s;
+            z-index: 999;
+        }
 
-            #menu {
-                position: fixed;
-                top: 0;
-                left: -250px;
-                width: 250px;
-                height: 100%;
-                background-color: #333;
-                color: white;
-                padding-top: 50px;
-                transition: left 0.3s;
-                z-index: 999;
-            }
+        #menu a {
+            display: block;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
 
-            #menu a {
-                display: block;
-                color: white;
-                padding: 10px 20px;
-                text-decoration: none;
-            }
+        #menu a:hover {
+            background-color: #555;
+        }
 
-            #menu a:hover {
-                background-color: #555;
-            }
+        #menu.close {
+            left: -250px;
+        }
+        
+        #menu.open {
+            left: 0;
+        }
 
-            #menu.close {
-                left: -250px;
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
             }
-            
-            #menu.open {
-                left: 0;
-            }
+        }
+    body {
+      margin: 0;
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      font-family: sans-serif;
+    }
 
-            @media (max-width: 768px) {
-                h1 {
-                    font-size: 28px;
-                }
-            }
-            canvas {
-                border: #333;
-                border-width: ;
-            }
-        </style>
-    </head>
-    <body>
-        <button id="menu-btn">Menu</button>
+    canvas {
+      background: #222;
+      border: 2px solid #444;
+    }
 
-        <div id="menu" class="close">
-            <a href="index.html">Accueil</a>
-            <a href="CountDown.html" accesskey="c">Compte à rebours</a>
-            <a href="Clock.html">Horloge</a>
-            <a href="RogerTest.html">Game Test</a>
-            <a href="Schedule.html">Horaire</a>
-            <a href="Clicker.html">Clicker</a>
-            <a href="JoffreHomeScreen.html">Joffre</a>
-            <a href="suggestionForm.html">Suggestion</a>
-            <a href="https://www.mozaikportail.ca" accesskey="m">Mozaik</a>
-        </div>
+    #score {
+      position: absolute;
+      top: 20px;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div id="score">Score: 0</div>
+  <canvas id="game" width="400" height="400"></canvas>
 
-        <canvas id="gameCanvas"></canvas>
+    <button id="menu-btn">Menu</button>
 
-        <script>
-            document.getElementById("menu-btn").addEventListener("click", function() {
-                const menu = document.getElementById("menu");
-                if (menu.classList.contains("open")) {
-                    menu.classList.remove("open");
-                    menu.classList.add("close");
-                } else {
-                    menu.classList.remove("close");
-                    menu.classList.add("open");
-                }
-            });
-        </script>
-    </body>
+    <div id="menu" class="close">
+        <a href="index.html">Accueil</a>
+        <a href="CountDown.html">Compte à rebours</a>
+        <a href="Clock.html">Horloge</a>
+        <a href="RogerTest.html">Game Test</a>
+        <a href="Schedule.html">Horaire</a>
+        <a href="Clicker.html">Clicker</a>
+        <a href="JoffreHomeScreen.html">Joffre</a>
+        <a href="suggestionForm.html">Suggestion</a>
+        <a href="https://www.mozaikportail.ca" accesskey="m">Mozaik</a>
+    </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const box = 20; // size of snake block
+    const rows = canvas.width / box;
+
+    let snake = [{ x: 10, y: 10 }];
+    let direction = 'RIGHT';
+    let food = spawnFood();
+    let score = 0;
+
+    document.addEventListener('keydown', event => {
+      if ((event.key === 'ArrowUp' || event.key === 'KeyW') && direction !== 'DOWN') direction = 'UP';
+      else if ((event.key === 'ArrowDown' || event.key === 'KeyS') && direction !== 'UP') direction = 'DOWN';
+      else if ((event.key === 'ArrowLeft' || event.key === 'KeyA') && direction !== 'RIGHT') direction = 'LEFT';
+      else if ((event.key === 'ArrowRight' || event.key === 'KeyD') && direction !== 'LEFT') direction = 'RIGHT';
+    });
+
+    function spawnFood() {
+      return {
+        x: Math.floor(Math.random() * rows),
+        y: Math.floor(Math.random() * rows)
+      };
+    }
+
+    function gameLoop() {
+      const head = { ...snake[0] };
+
+      if (direction === 'UP') head.y--;
+      if (direction === 'DOWN') head.y++;
+      if (direction === 'LEFT') head.x--;
+      if (direction === 'RIGHT') head.x++;
+
+      // Game over: wall or self collision
+      if (
+        head.x < 0 || head.x >= rows ||
+        head.y < 0 || head.y >= rows ||
+        snake.some(segment => segment.x === head.x && segment.y === head.y)
+      ) {
+        alert("Game Over! Your score: " + score);
+        snake = [{ x: 10, y: 10 }];
+        direction = 'RIGHT';
+        food = spawnFood();
+        score = 0;
+        document.getElementById('score').textContent = "Score: 0";
+        return;
+      }
+
+      snake.unshift(head);
+
+      // Eat food
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        document.getElementById('score').textContent = "Score: " + score;
+        food = spawnFood();
+      } else {
+        snake.pop();
+      }
+
+      // Draw everything
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw snake
+      ctx.fillStyle = '#0f0';
+      snake.forEach(part => {
+        ctx.fillRect(part.x * box, part.y * box, box - 1, box - 1);
+      });
+
+      // Draw food
+      ctx.fillStyle = 'red';
+      ctx.fillRect(food.x * box, food.y * box, box - 1, box - 1);
+    }
+
+    setInterval(gameLoop, 100);
+
+    document.getElementById("menu-btn").addEventListener("click", function() {
+        const menu = document.getElementById("menu");
+        if (menu.classList.contains("open")) {
+            menu.classList.remove("open");
+            menu.classList.add("close");
+        } else {
+            menu.classList.remove("close");
+            menu.classList.add("open");
+        }
+    });
+  </script>
+</body>
 </html>
