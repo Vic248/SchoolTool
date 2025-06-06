@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr-CA">
 <head>
   <meta charset="UTF-8" />
   <title>Snake Game</title>
@@ -120,6 +120,7 @@
     let direction = 'RIGHT';
     let food = spawnFood();
     let score = 0;
+    let speed = 300;
 
     document.addEventListener('keydown', event => {
       if ((event.key === 'ArrowUp' || event.key === 'w') && direction !== 'DOWN') direction = 'UP';
@@ -165,6 +166,7 @@
         score++;
         document.getElementById('score').textContent = "Score: " + score;
         food = spawnFood();
+        speed = speed/2;
       } else {
         snake.pop();
       }
@@ -183,7 +185,7 @@
       ctx.fillRect(food.x * box, food.y * box, box - 1, box - 1);
     }
 
-    setInterval(gameLoop, 200);
+    setInterval(gameLoop, speed)
 
     document.getElementById("menu-btn").addEventListener("click", function() {
         const menu = document.getElementById("menu");
