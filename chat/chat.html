@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini Chat</title>
+  <style>
+    #messages { max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
+    .msg { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>Chat</h1>
+  <div id="messages"></div>
+  <form id="chat-form">
+    <input type="text" id="username" placeholder="Nom" required />
+    <input type="text" id="message" placeholder="Message" required />
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <script>
+    async function loadMessages() {
+      const res = await fetch('/.netlify/functions/get-messages');
+      const messages = await res.json();
+      const div = document.getElementById('messages');
+      div.innerHTML = '';
+      messages.reverse().forEach(msg => {
+        div.innerHTML += `<div class="msg"><strong>${msg.username}:</strong> ${msg.text}</div>`;
+      });
+    }
+
+    document.getElementById('chat-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const text = document.getElementById('message').value;
+      await fetch('/.netlify/functions/send-message', {
+        method: 'POST',
+        body: JSON.stringify({ username, text }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      document.getElementById('message').value = '';
+      loadMessages();
+    });
+
+    loadMessages();
+    setInterval(loadMessages, 3000); // rafraîchir toutes les 3 secondes
+  </script>
+</body>
+</html>
