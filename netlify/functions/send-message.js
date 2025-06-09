@@ -1,19 +1,38 @@
 // netlify/functions/send-message.js
-import { set } from '@netlify/blobs';
+import { set, get } from '@netlify/blobs';
+import { json } from '@netlify/functions';
 
-export default async (req, res) => {
-  const { username, text } = JSON.parse(req.body);
+export const handler = async (event) => {
+  try {
+    const { username, text } = JSON.parse(event.body || '{}');
 
-  const timestamp = Date.now();
-  const message = { username, text, timestamp };
+    if (!username || !text) {
+      return json({ error: "Nom et message requis" }, { status: 400 });
+    }
 
-  // Sauvegarder sous forme de tableau JSON
-  const existing = await fetch(`${process.env.URL}/.netlify/functions/get-messages`);
-  const oldMessages = await existing.json();
+    // Lire les anciens messages (ou liste vide)
+    let messages = [];
+    try {
+      const blob = await get('chat/messages');
+      if (blob?.body) messages = JSON.parse(blob.body);
+    } catch (_) {
+      messages = [];
+    }
 
-  const newMessages = [...oldMessages, message];
+    // Ajouter le nouveau message
+    messages.push({
+      username,
+      text,
+      timestamp: Date.now()
+    });
 
-  await set('chat/messages', JSON.stringify(newMessages), { contentType: 'application/json' });
+    // Écrire le nouveau blob
+    await set('chat/messages', JSON.stringify(messages), {
+      contentType: 'application/json',
+    });
 
-  return res.status(200).json({ success: true });
+    return json({ success: true });
+  } catch (err) {
+    return json({ error: err.message }, { status: 500 });
+  }
 };
