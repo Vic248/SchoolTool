@@ -90,6 +90,36 @@
       top: 20px;
       font-size: 24px;
     }
+
+    .deadScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 1000;
+      background: linear-gradient(45deg, blue, lightblue)
+    }
+
+    .deadScreen iframe {
+      width: 100%;
+      height: 100%;
+    }
+
+    .deadScreenTitle {
+      position: absolute;
+      top: 10%;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      font-size: 50px;
+      font-family: Impact;
+    }
   </style>
 </head>
 <body>
@@ -130,6 +160,14 @@
       else if ((event.key === 'ArrowRight' || event.key === 'd') && direction !== 'LEFT') direction = 'RIGHT';
     });
 
+    function openDeadScreen(url, title) {
+        const fullscreenDiv = document.createElement("div");
+        fullscreenDiv.style.textAlign = "center";
+        fullscreenDiv.className = "deadScreen";
+        fullscreenDiv.innerHTML = `<iframe></iframe><p class="fullscreenTitle">${title}</p>`;
+        document.body.appendChild(fullscreenDiv);
+    }
+
     function spawnFood() {
       return {
         x: Math.floor(Math.random() * rows),
@@ -151,7 +189,9 @@
         head.y < 0 || head.y >= rows ||
         snake.some(segment => segment.x === head.x && segment.y === head.y)
       ) {
-        alert("Game Over! Your score: " + score);
+
+        
+
         snake = [{ x: 10, y: 10 }];
         direction = 'RIGHT';
         food = spawnFood();

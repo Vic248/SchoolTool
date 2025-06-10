@@ -170,10 +170,15 @@
         function attachButtonHandler() {
             document.getElementById("button").addEventListener("click", function() {
                 var textarea = document.getElementById(`password-text-box`);
-                var word = 'ching chong';
+                var word = '';
                 var textValue = textarea.value;
+                const day = getDay();
 
-                if (textValue.indexOf(word) !== -1 || textValue.indexOf('tamere.com') !== -1) {
+                if (day === 2) {
+                    word = 'ching chong'
+                }
+
+                if (textValue.indexOf(word) !== -1) {
                     document.getElementById('lock-screen').style.opacity = 0;
                     document.getElementById('password-text-box').remove();
                     document.getElementById('question-text').remove();
