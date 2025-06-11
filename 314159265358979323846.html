@@ -172,10 +172,10 @@
                 var textarea = document.getElementById(`password-text-box`);
                 var word = '';
                 var textValue = textarea.value;
-                const day = getDay();
-                alert(day)
+                const today = new Date;
+                const dayOfTheWeek = today.getDay();
 
-                if (day === 2) {
+                if (dayOfTheWeek === 3) {
                     word = 'ching chong'
                 }
 
