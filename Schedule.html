@@ -352,12 +352,13 @@
 
         const jour = getJourCycle();
         const div = document.getElementById("contenuHoraire");
+        const today = new Date().toISOString().split("T")[0];
 
         if (jour && horairesParJour[jour]) {
             const cours = horairesParJour[jour];
 
             let affichage = [];
-
+            
             if (today === "2025-06-16" || today === "2025-06-17" || today === "2025-06-18") {
                 affichage = [
                     { label: "Avant-midi", matiere: cours[0] },
