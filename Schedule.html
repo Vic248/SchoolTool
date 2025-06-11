@@ -337,7 +337,7 @@
                 "2025-06-06": 8,
                 "2025-06-09": 9,
                 "2025-06-10": 1,
-                "2025-06-11": 10,
+                "2025-06-11": 2,
                 "2025-06-12": 3,
                 "2025-06-13": 4,
                 "2025-06-16": 10,
@@ -356,21 +356,23 @@
         if (jour && horairesParJour[jour]) {
             const cours = horairesParJour[jour];
 
-            const affichage = [
-                { label: "Période 1", matiere: cours[0] },
-                { label: "Période 2", matiere: cours[1] },
-                { label: "Midi", matiere: cours[2] || "Libre" },
-                { label: "Période 3", matiere: cours[3] },
-                { label: "Période 4", matiere: cours[4] }
-            ];
+            let affichage = [];
 
-            if (today === "2025-06-16" || today === "2025-06-17" || today === "2025-06-18" || today === "2025-06-11") {
+            if (today === "2025-06-16" || today === "2025-06-17" || today === "2025-06-18") {
                 affichage = [
                     { label: "Avant-midi", matiere: cours[0] },
                     { label: "Midi", matiere: cours[1] || "Libre" },
                     { label: "Après-midi", matiere: cours[2] }
                 ];
-            }
+            } else {
+                affichage = [
+                  { label: "Période 1", matiere: cours[0] },
+                  { label: "Période 2", matiere: cours[1] },
+                  { label: "Midi", matiere: cours[2] || "Libre" },
+                  { label: "Période 3", matiere: cours[3] },
+                  { label: "Période 4", matiere: cours[4] }
+                ];
+            };
 
             div.innerHTML = affichage
                 .map(item => `<div class="horaire">${item.label} : ${item.matiere || "Libre"}</div>`)
