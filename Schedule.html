@@ -153,7 +153,10 @@
             6: ["Musique", "Sciences", "Harmonie", "Éthique", "Lm"],
             7: ["Français", "Univers Social", "", "Anglais", "Math"],
             8: ["Lm", "Univers Social", "", "Sciences", "Math"],
-            9: ["Éduc", "Français", "", "Univers Social", "Anglais"]
+            9: ["Éduc", "Français", "", "Univers Social", "Anglais"],
+            10:["Math", "", "Sciences"],
+            11:["Anglais", "", "Univers Social"],
+            12:["Français", "", "Libre/Pu d'école/Rien"]
         };
 
         function getJourCycle() {
@@ -334,12 +337,12 @@
                 "2025-06-06": 8,
                 "2025-06-09": 9,
                 "2025-06-10": 1,
-                "2025-06-11": 2,
+                "2025-06-11": 10,
                 "2025-06-12": 3,
                 "2025-06-13": 4,
-                "2025-06-16": 5,
-                "2025-06-17": 6,
-                "2025-06-18": 7,
+                "2025-06-16": 10,
+                "2025-06-17": 11,
+                "2025-06-18": 12,
                 "2025-06-19": 8,
                 "2025-06-20": 9
             };
@@ -360,6 +363,14 @@
                 { label: "Période 3", matiere: cours[3] },
                 { label: "Période 4", matiere: cours[4] }
             ];
+
+            if (today === "2025-06-16" || today === "2025-06-17" || today === "2025-06-18" || today === "2025-06-11") {
+                affichage = [
+                    { label: "Avant-midi", matiere: cours[0] },
+                    { label: "Midi", matiere: cours[1] || "Libre" },
+                    { label: "Après-midi", matiere: cours[2] }
+                ];
+            }
 
             div.innerHTML = affichage
                 .map(item => `<div class="horaire">${item.label} : ${item.matiere || "Libre"}</div>`)
