@@ -359,11 +359,11 @@
 
     // Gestion des touches
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowRight') {
+        if (event.key === 'ArrowRight' || event.key === 'a') {
             player.dx = player.speed;
             player.flip = false;
             isMoving = true;
-        } else if (event.key === 'ArrowLeft') {
+        } else if (event.key === 'ArrowLeft' || event.key === 'd') {
             player.dx = -player.speed;
             player.flip = true;
             isMoving = true;
