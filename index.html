@@ -131,7 +131,7 @@
 <body>
 
   <!-- Bouton menu -->
-  <button id="menu-btn">☰ Menu</button>
+  <button id="menu-btn">Menu</button>
 
   <!-- Menu latéral -->
   <div id="menu" class="close">
@@ -156,22 +156,25 @@
   <pre id="profile"></pre>
 
   <script>
-    // Gestion du menu
+    // Menu toggle
     document.getElementById("menu-btn").addEventListener("click", function () {
       const menu = document.getElementById("menu");
       menu.classList.toggle("open");
     });
 
-    // Auth0
-    let auth0 = null;
+    // Charge Auth0 quand le SDK est prêt
+    async function loadAuth0WhenReady() {
+      while (typeof createAuth0Client === 'undefined') {
+        await new Promise(resolve => setTimeout(resolve, 100)); // attend 100ms
+      }
 
-    const initAuth0 = async () => {
-      auth0 = await createAuth0Client({
+      let auth0 = await createAuth0Client({
         domain: "schooltool.ca.auth0.com",
         client_id: "qbdK5IqBjfrRs3xLQvhSziekXNt9bXwr",
         cacheLocation: 'localstorage'
       });
 
+      // Callback post-login
       if (window.location.search.includes("code=")) {
         await auth0.handleRedirectCallback();
         window.history.replaceState({}, document.title, "/");
@@ -183,18 +186,23 @@
         const user = await auth0.getUser();
         document.getElementById("profile").textContent = JSON.stringify(user, null, 2);
       }
-    };
 
-    window.onload = async () => {
-      await initAuth0();
+      // Boutons login/logout
+      document.getElementById("login").onclick = () => {
+        auth0.loginWithRedirect({
+          redirect_uri: window.location.origin
+        });
+      };
 
-      document.getElementById("login").onclick = () => auth0.loginWithRedirect({
-        redirect_uri: window.location.origin
-      });
+      document.getElementById("logout").onclick = () => {
+        auth0.logout({
+          returnTo: window.location.origin
+        });
+      };
+    }
 
-      document.getElementById("logout").onclick = () => auth0.logout({
-        returnTo: window.location.origin
-      });
+    window.onload = () => {
+      loadAuth0WhenReady();
     };
   </script>
 </body>
