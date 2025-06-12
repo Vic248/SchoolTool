@@ -2,7 +2,7 @@
 <html lang="fr-CA">
 <head>
     <title>Accueil</title>
-
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <style>
         body {
             background-color: #f5f7fa;
@@ -107,6 +107,10 @@
 
     <a href="https://www.bonk.io" accesskey="w"></a>
 
+    <button id="login">Login</button>
+    <button id="logout">Logout</button>
+    <pre id="profile"></pre>
+
     <div id="text-container">
         <h1>Accueil</h1>
     </div>
@@ -122,6 +126,41 @@
                 menu.classList.add("open");
             }
         });
+
+        let auth0 = null;
+
+        const initAuth0 = async () => {
+        auth0 = await createAuth0Client({
+            domain: "schooltool.ca.auth0.com",
+            client_id: "qbdK5IqBjfrRs3xLQvhSziekXNt9bXwr",
+            cacheLocation: 'localstorage'
+        });
+
+        // Gérer redirection après login
+        if (window.location.search.includes("code=")) {
+            await auth0.handleRedirectCallback();
+            window.history.replaceState({}, document.title, "/");
+        }
+
+        const isAuthenticated = await auth0.isAuthenticated();
+
+        if (isAuthenticated) {
+            const user = await auth0.getUser();
+            document.getElementById("profile").textContent = JSON.stringify(user, null, 2);
+        }
+        };
+
+        window.onload = async () => {
+        await initAuth0();
+
+        document.getElementById("login").onclick = () => auth0.loginWithRedirect({
+            redirect_uri: window.location.origin
+        });
+
+        document.getElementById("logout").onclick = () => auth0.logout({
+            returnTo: window.location.origin
+        });
+        };
     </script>
 </body>
 </html>
