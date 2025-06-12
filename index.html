@@ -1,166 +1,201 @@
 <!DOCTYPE html>
 <html lang="fr-CA">
 <head>
-    <title>Accueil</title>
-    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <style>
-        body {
-            background-color: #f5f7fa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding-top: 10px 10px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
 
-        #menu-btn {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: #333;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 1000;
-        }
-        
-        #menu-btn:hover {
-            background-color: #555;
-        }
+    body {
+      background: linear-gradient(to bottom right, #f5f7fa, #e4ebf5);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
 
-        #menu {
-            position: fixed;
-            top: 0;
-            left: -250px;
-            width: 250px;
-            height: 100%;
-            background-color: #333;
-            color: white;
-            padding-top: 50px;
-            transition: left 0.3s;
-            z-index: 999;
-        }
+    h1 {
+      font-size: 60px;
+      font-weight: 900;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-align: center;
+    }
 
-        #menu a {
-            display: block;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-        }
+    #menu-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background-color: #2c3e50;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
 
-        #menu a:hover {
-            background-color: #555;
-        }
+    #menu-btn:hover {
+      background-color: #34495e;
+    }
 
-        #menu.close {
-            left: -250px;
-        }
-        
-        #menu.open {
-            left: 0;
-        }
+    #menu {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 260px;
+      height: 100%;
+      background-color: #2c3e50;
+      color: white;
+      padding-top: 60px;
+      transition: left 0.3s ease;
+      z-index: 999;
+    }
 
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 28px;
-            }
-        }
+    #menu a {
+      display: block;
+      color: white;
+      padding: 12px 24px;
+      text-decoration: none;
+      font-weight: 500;
+    }
 
-        center {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 9999;
-        }
+    #menu a:hover {
+      background-color: #34495e;
+    }
 
-        h1 {
-            font-size: 100px;
-        }
+    #menu.open {
+      left: 0;
+    }
 
-        #text-container {
-            text-align: center;
-        }
-    </style>
+    #login, #logout {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      background-color: #3498db;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    #logout {
+      background-color: #e74c3c;
+    }
+
+    #login:hover {
+      background-color: #2980b9;
+    }
+
+    #logout:hover {
+      background-color: #c0392b;
+    }
+
+    #profile {
+      margin-top: 20px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 36px;
+      }
+      #menu-btn {
+        padding: 8px 14px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <a href="314159265358979323846.html" accesskey="s"></a>
 
-    <button id="menu-btn">Menu</button>
+  <!-- Bouton menu -->
+  <button id="menu-btn">☰ Menu</button>
 
-    <div id="menu" class="close">
-        <a href="index.html">Accueil</a>
-        <a href="CountDown.html" accesskey="c">Compte à rebours</a>
-        <a href="Clock.html">Horloge</a>
-        <a href="RogerTest.html">Game Test</a>
-        <a href="Schedule.html">Horaire</a>
-        <a href="Clicker.html">Clicker</a>
-        <a href="JoffreHomeScreen.html">Joffre</a>
-        <a href="suggestionForm.html">Suggestion</a>
-        <a href="snake.html">Snake</a>
-        <a href="https://www.mozaikportail.ca" accesskey="m">Mozaik</a>
-    </div>
+  <!-- Menu latéral -->
+  <div id="menu" class="close">
+    <a href="index.html">Accueil</a>
+    <a href="CountDown.html">Compte à rebours</a>
+    <a href="Clock.html">Horloge</a>
+    <a href="RogerTest.html">Game Test</a>
+    <a href="Schedule.html">Horaire</a>
+    <a href="Clicker.html">Clicker</a>
+    <a href="JoffreHomeScreen.html">Joffre</a>
+    <a href="suggestionForm.html">Suggestion</a>
+    <a href="snake.html">Snake</a>
+    <a href="https://www.mozaikportail.ca">Mozaik</a>
+  </div>
 
-    <a href="https://www.bonk.io" accesskey="w"></a>
+  <!-- Contenu principal -->
+  <h1>Accueil</h1>
+  <div>
+    <button id="login">Se connecter</button>
+    <button id="logout">Se déconnecter</button>
+  </div>
+  <pre id="profile"></pre>
 
-    <button id="login">Login</button>
-    <button id="logout">Logout</button>
-    <pre id="profile"></pre>
+  <script>
+    // Gestion du menu
+    document.getElementById("menu-btn").addEventListener("click", function () {
+      const menu = document.getElementById("menu");
+      menu.classList.toggle("open");
+    });
 
-    <div id="text-container">
-        <h1>Accueil</h1>
-    </div>
+    // Auth0
+    let auth0 = null;
 
-    <script>
-        document.getElementById("menu-btn").addEventListener("click", function() {
-            const menu = document.getElementById("menu");
-            if (menu.classList.contains("open")) {
-                menu.classList.remove("open");
-                menu.classList.add("close");
-            } else {
-                menu.classList.remove("close");
-                menu.classList.add("open");
-            }
-        });
+    const initAuth0 = async () => {
+      auth0 = await createAuth0Client({
+        domain: "schooltool.ca.auth0.com",
+        client_id: "qbdK5IqBjfrRs3xLQvhSziekXNt9bXwr",
+        cacheLocation: 'localstorage'
+      });
 
-        let auth0 = null;
+      if (window.location.search.includes("code=")) {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+      }
 
-        const initAuth0 = async () => {
-        auth0 = await createAuth0Client({
-            domain: "schooltool.ca.auth0.com",
-            client_id: "qbdK5IqBjfrRs3xLQvhSziekXNt9bXwr",
-            cacheLocation: 'localstorage'
-        });
+      const isAuthenticated = await auth0.isAuthenticated();
 
-        // Gérer redirection après login
-        if (window.location.search.includes("code=")) {
-            await auth0.handleRedirectCallback();
-            window.history.replaceState({}, document.title, "/");
-        }
+      if (isAuthenticated) {
+        const user = await auth0.getUser();
+        document.getElementById("profile").textContent = JSON.stringify(user, null, 2);
+      }
+    };
 
-        const isAuthenticated = await auth0.isAuthenticated();
+    window.onload = async () => {
+      await initAuth0();
 
-        if (isAuthenticated) {
-            const user = await auth0.getUser();
-            document.getElementById("profile").textContent = JSON.stringify(user, null, 2);
-        }
-        };
+      document.getElementById("login").onclick = () => auth0.loginWithRedirect({
+        redirect_uri: window.location.origin
+      });
 
-        window.onload = async () => {
-        await initAuth0();
-
-        document.getElementById("login").onclick = () => auth0.loginWithRedirect({
-            redirect_uri: window.location.origin
-        });
-
-        document.getElementById("logout").onclick = () => auth0.logout({
-            returnTo: window.location.origin
-        });
-        };
-    </script>
+      document.getElementById("logout").onclick = () => auth0.logout({
+        returnTo: window.location.origin
+      });
+    };
+  </script>
 </body>
 </html>
