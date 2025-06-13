@@ -156,26 +156,23 @@
   <pre id="profile"></pre>
 
   <script>
-    // Menu toggle
-    document.getElementById("menu-btn").addEventListener("click", function () {
-      const menu = document.getElementById("menu");
-      menu.classList.toggle("open");
-    });
+    let auth0 = null;
 
-    // Charge Auth0 quand le SDK est prêt
-    async function loadAuth0WhenReady() {
+    async function initAuth0() {
+      // Attendre que le SDK soit bien chargé
       while (typeof createAuth0Client === 'undefined') {
-        await new Promise(resolve => setTimeout(resolve, 100)); // attend 100ms
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      let auth0 = await createAuth0Client({
+      auth0 = await createAuth0Client({
         domain: "schooltool.ca.auth0.com",
         client_id: "qbdK5IqBjfrRs3xLQvhSziekXNt9bXwr",
-        cacheLocation: 'localstorage'
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true
       });
 
-      // Callback post-login
-      if (window.location.search.includes("code=")) {
+      // Redirection post-login
+      if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
         await auth0.handleRedirectCallback();
         window.history.replaceState({}, document.title, "/");
       }
@@ -186,8 +183,11 @@
         const user = await auth0.getUser();
         document.getElementById("profile").textContent = JSON.stringify(user, null, 2);
       }
+    }
 
-      // Boutons login/logout
+    window.onload = async () => {
+      await initAuth0();
+
       document.getElementById("login").onclick = () => {
         auth0.loginWithRedirect({
           redirect_uri: window.location.origin
@@ -199,10 +199,6 @@
           returnTo: window.location.origin
         });
       };
-    }
-
-    window.onload = () => {
-      loadAuth0WhenReady();
     };
   </script>
 </body>
