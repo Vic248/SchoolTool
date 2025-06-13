@@ -4,42 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accueil</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
-      background: linear-gradient(to bottom right, #f5f7fa, #e4ebf5);
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #eef2f7, #d9e4f5);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      overflow-x: hidden;
     }
 
     h1 {
-      font-size: 60px;
-      font-weight: 900;
+      font-size: 3.5rem;
       color: #2c3e50;
-      margin-bottom: 30px;
       text-align: center;
+      margin-top: -200px;
+      animation: fadeIn 1s ease;
     }
 
     #menu-btn {
       position: fixed;
-      top: 15px;
-      left: 15px;
+      top: 20px;
+      left: 20px;
       background-color: #2c3e50;
       color: white;
-      padding: 10px 18px;
       border: none;
-      border-radius: 6px;
+      padding: 12px 18px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1001;
+      transition: background-color 0.3s;
     }
 
     #menu-btn:hover {
-      background-color: #34495e;
+      background-color: #1f2e3a;
     }
 
     #menu {
@@ -50,57 +53,82 @@
       height: 100%;
       background-color: #2c3e50;
       color: white;
-      padding-top: 60px;
+      padding-top: 70px;
       transition: left 0.3s ease;
-      z-index: 999;
+      z-index: 1000;
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #menu.open {
+      left: 0;
     }
 
     #menu a {
-      display: block;
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
       color: white;
-      padding: 12px 24px;
       text-decoration: none;
+      font-size: 1rem;
       font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    #menu a i {
+      margin-right: 12px;
+      width: 20px;
     }
 
     #menu a:hover {
       background-color: #34495e;
     }
 
-    #menu.open {
-      left: 0;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2.2rem;
+        margin-top: -100px;
+        padding: 0 20px;
+      }
+
+      #menu-btn {
+        padding: 10px 14px;
+      }
+
+      #menu a {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Bouton menu -->
-  <button id="menu-btn">Menu</button>
+  <button id="menu-btn"><i class="fas fa-bars"></i> Menu</button>
 
-  <!-- Menu latéral -->
-  <div id="menu" class="close">
-    <a href="index.html">Accueil</a>
-    <a href="CountDown.html">Compte à rebours</a>
-    <a href="Clock.html">Horloge</a>
-    <a href="RogerTest.html">Game Test</a>
-    <a href="Schedule.html">Horaire</a>
-    <a href="Clicker.html">Clicker</a>
-    <a href="JoffreHomeScreen.html">Joffre</a>
-    <a href="suggestionForm.html">Suggestion</a>
-    <a href="snake.html">Snake</a>
-    <a href="https://www.mozaikportail.ca">Mozaik</a>
+  <div id="menu">
+    <a href="index.html"><i class="fas fa-home"></i> Accueil</a>
+    <a href="CountDown.html"><i class="fas fa-hourglass-half"></i> Compte à rebours</a>
+    <a href="Clock.html"><i class="fas fa-clock"></i> Horloge</a>
+    <a href="RogerTest.html"><i class="fas fa-gamepad"></i> Game Test</a>
+    <a href="Schedule.html"><i class="fas fa-calendar-alt"></i> Horaire</a>
+    <a href="Clicker.html"><i class="fas fa-mouse-pointer"></i> Clicker</a>
+    <a href="JoffreHomeScreen.html"><i class="fas fa-layer-group"></i> Joffre</a>
+    <a href="suggestionForm.html"><i class="fas fa-comment-dots"></i> Suggestion</a>
+    <a href="snake.html"><i class="fas fa-apple-alt"></i> Snake</a>
+    <a href="https://www.mozaikportail.ca"><i class="fas fa-link"></i> Mozaik</a>
   </div>
+
+  <h1>Bienvenue sur SchoolTool</h1>
+
   <script>
-        document.getElementById("menu-btn").addEventListener("click", function() {
-            const menu = document.getElementById("menu");
-            if (menu.classList.contains("open")) {
-                menu.classList.remove("open");
-                menu.classList.add("close");
-            } else {
-                menu.classList.remove("close");
-                menu.classList.add("open");
-            }
-        });
+    document.getElementById("menu-btn").addEventListener("click", function () {
+      const menu = document.getElementById("menu");
+      menu.classList.toggle("open");
+    });
   </script>
 </body>
 </html>
