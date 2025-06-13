@@ -4,17 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accueil</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
-
     body {
       background: linear-gradient(to bottom right, #f5f7fa, #e4ebf5);
       min-height: 100vh;
@@ -80,52 +70,6 @@
     #menu.open {
       left: 0;
     }
-
-    #login, #logout {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      font-weight: 600;
-      color: white;
-      background-color: #3498db;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    #logout {
-      background-color: #e74c3c;
-    }
-
-    #login:hover {
-      background-color: #2980b9;
-    }
-
-    #logout:hover {
-      background-color: #c0392b;
-    }
-
-    #profile {
-      margin-top: 20px;
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 600px;
-      width: 100%;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      white-space: pre-wrap;
-      font-size: 14px;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 36px;
-      }
-      #menu-btn {
-        padding: 8px 14px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -146,60 +90,17 @@
     <a href="snake.html">Snake</a>
     <a href="https://www.mozaikportail.ca">Mozaik</a>
   </div>
-
-  <!-- Contenu principal -->
-  <h1>Accueil</h1>
-  <div>
-    <button id="login">Se connecter</button>
-    <button id="logout">Se déconnecter</button>
-  </div>
-  <pre id="profile"></pre>
-
   <script>
-    let auth0 = null;
-
-    async function initAuth0() {
-      // Attendre que le SDK soit bien chargé
-      while (typeof createAuth0Client === 'undefined') {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-
-      auth0 = await createAuth0Client({
-        domain: "schooltool.ca.auth0.com",
-        client_id: "qbdK5IqBjfrRs3xLQvhSziekXNt9bXwr",
-        cacheLocation: 'localstorage',
-        useRefreshTokens: true
-      });
-
-      // Redirection post-login
-      if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-        await auth0.handleRedirectCallback();
-        window.history.replaceState({}, document.title, "/");
-      }
-
-      const isAuthenticated = await auth0.isAuthenticated();
-
-      if (isAuthenticated) {
-        const user = await auth0.getUser();
-        document.getElementById("profile").textContent = JSON.stringify(user, null, 2);
-      }
-    }
-
-    window.onload = async () => {
-      await initAuth0();
-
-      document.getElementById("login").onclick = () => {
-        auth0.loginWithRedirect({
-          redirect_uri: window.location.origin
+        document.getElementById("menu-btn").addEventListener("click", function() {
+            const menu = document.getElementById("menu");
+            if (menu.classList.contains("open")) {
+                menu.classList.remove("open");
+                menu.classList.add("close");
+            } else {
+                menu.classList.remove("close");
+                menu.classList.add("open");
+            }
         });
-      };
-
-      document.getElementById("logout").onclick = () => {
-        auth0.logout({
-          returnTo: window.location.origin
-        });
-      };
-    };
   </script>
 </body>
 </html>
