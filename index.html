@@ -138,6 +138,7 @@
     <a href="Clock.html"><i class="fas fa-clock"></i> Horloge</a>
     <a href="RogerTest.html"><i class="fas fa-gamepad"></i> Game Test</a>
     <a href="Schedule.html"><i class="fas fa-calendar-alt"></i> Horaire</a>
+    <a href="calculator.html"><i class="fa-solid fa-calculator"></i></a>
     <a href="Clicker.html"><i class="fas fa-mouse-pointer"></i> Clicker</a>
     <a href="JoffreHomeScreen.html"><i class="fas fa-layer-group"></i> Joffre</a>
     <a href="suggestionForm.html"><i class="fas fa-comment-dots"></i> Suggestion</a>
@@ -166,6 +167,18 @@
   <script>
     document.getElementById("menu-btn").addEventListener("click", function () {
       document.getElementById("menu").classList.toggle("open");
+    });
+
+    const calcTab = document.getElementById('myElement');
+
+    calcTab.addEventListener('mouseenter', function(event) {
+      calcTab.classList.remove('fa-solid fa-calculator');
+      calcTab.classList.add('fa-solid fa-calculator fa-bounce');
+    });
+
+    calcTab.addEventListener('mouseleave', function(event) {
+      calcTab.classList.remove('fa-solid fa-calculator fa-bounce');
+      calcTab.classList.add('fa-solid fa-calculator')
     });
   </script>
 </body>
