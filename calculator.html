@@ -100,10 +100,11 @@
     }
 
     #calc-display {
-      width: 100%;
+      width: 93%;
       font-size: 1.5rem;
       text-align: right;
       padding: 10px;
+      margin-bottom: 10px;
     }
 
     .calc-buttons {
@@ -126,7 +127,7 @@
     }
 
     textarea {
-      width: 100%;
+      width: 95%;
       font-size: 1rem;
       padding: 10px;
       border-radius: 6px;
@@ -185,10 +186,10 @@
 
       <button onclick="appendCalc('0')">0</button>
       <button onclick="appendCalc('.')">.</button>
-      <button onclick="calculateResult()">=</button>
+      <button onclick="clearCalc()" style="background-color: #fca5a5;">C</button>
       <button onclick="appendCalc('+')">+</button>
 
-      <button onclick="clearCalc()" style="grid-column: span 4; background-color: #fca5a5;">C</button>
+      <button onclick="calculateResult()" style="grid-column: span 4; background-color: rgb(0, 255, 0);">=</button>
     </div>
   </div>
 
@@ -238,7 +239,7 @@
       const total = grades.reduce((a, b) => a + b, 0);
       const average = total / grades.length;
 
-      document.getElementById("average-result").innerText = `Moyenne : ${average.toFixed(2)}%`;
+      document.getElementById("average-result").innerText = `Moyenne : ${average.toFixed(0)}%`;
     }
   </script>
 
