@@ -201,6 +201,10 @@
         food = spawnFood();
         score = 0;
         document.getElementById('score').textContent = "Score: 0";
+        canvas.classList.add('fa-bounce');
+        setTimeout(function() {
+          canvas.classList.remove('fa-bounce')
+        }, 900);
         return;
       }
 
