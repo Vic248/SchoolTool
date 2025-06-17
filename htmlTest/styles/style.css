@@ -26,3 +26,20 @@ main {
   height: 100%;
   width: 100%;
 }
+
+#preview {
+  flex: 1;
+  border: none;
+  background: white;
+}
+
+#run-btn {
+  background: #007acc;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 1rem;
+}
