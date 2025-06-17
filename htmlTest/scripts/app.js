@@ -26,3 +26,15 @@ require(['vs/editor/editor.main'], function () {
     preview.src = URL.createObjectURL(blob);
   });
 });
+
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+fullscreenBtn.addEventListener('click', () => {
+  if (preview.requestFullscreen) {
+    preview.requestFullscreen();
+  } else if (preview.webkitRequestFullscreen) {
+    preview.webkitRequestFullscreen();
+  } else if (preview.msRequestFullscreen) {
+    preview.msRequestFullscreen();
+  }
+});
