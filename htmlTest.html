@@ -69,6 +69,7 @@
     .editor-actions {
       display: flex;
       gap: 0.5rem;
+      margin-top: 0.5rem;
     }
 
     .editor-actions button {
@@ -91,6 +92,14 @@
       opacity: 0.9;
     }
 
+    .auto-fullscreen {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
     .preview-panel {
       flex: 1 1 400px;
       background: var(--panel-bg);
@@ -101,14 +110,35 @@
     }
 
     .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-weight: bold;
       margin-bottom: 0.5rem;
     }
 
-    .preview-panel iframe {
+    .fullscreen-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--primary);
+    }
+
+    .iframe-container {
       flex: 1;
       border: 1px solid var(--border);
       border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+      flex: 1;
     }
   </style>
 </head>
@@ -135,27 +165,50 @@
         <button id="run-btn">Exécuter</button>
         <button id="reset-btn" class="secondary">Réinitialiser</button>
       </div>
+      <div class="auto-fullscreen">
+        <input type="checkbox" id="auto-fullscreen" />
+        <label for="auto-fullscreen">Agrandir automatiquement à l'exécution</label>
+      </div>
     </section>
 
     <section class="preview-panel">
-      <div class="preview-header">Aperçu</div>
-      <iframe id="preview"></iframe>
+      <div class="preview-header">
+        Aperçu
+        <button class="fullscreen-btn" id="fullscreen-toggle">🖥️ Plein écran</button>
+      </div>
+      <div class="iframe-container" id="iframe-container">
+        <iframe id="preview"></iframe>
+      </div>
     </section>
   </main>
 
   <script>
     const runBtn = document.getElementById('run-btn');
     const resetBtn = document.getElementById('reset-btn');
+    const iframe = document.getElementById('preview');
+    const container = document.getElementById('iframe-container');
+    const autoFullscreenCheckbox = document.getElementById('auto-fullscreen');
+    const fullscreenToggle = document.getElementById('fullscreen-toggle');
+
+    // Restaurer préférence
+    autoFullscreenCheckbox.checked = localStorage.getItem("autoFullscreen") === "true";
+
+    autoFullscreenCheckbox.addEventListener("change", () => {
+      localStorage.setItem("autoFullscreen", autoFullscreenCheckbox.checked);
+    });
 
     function runCode() {
       const html = document.getElementById('html-code').value;
       const css = "<style>" + document.getElementById('css-code').value + "</style>";
       const js = "<script>" + document.getElementById('js-code').value + "<\/script>";
-      const iframe = document.getElementById('preview');
       const doc = iframe.contentDocument || iframe.contentWindow.document;
       doc.open();
       doc.write(css + html + js);
       doc.close();
+
+      if (autoFullscreenCheckbox.checked) {
+        openFullscreen();
+      }
     }
 
     function resetCode() {
@@ -165,10 +218,44 @@
       runCode();
     }
 
+    function openFullscreen() {
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      }
+    }
+
+    function closeFullscreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+
+    fullscreenToggle.addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        openFullscreen();
+      } else {
+        closeFullscreen();
+      }
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+      if (document.fullscreenElement) {
+        fullscreenToggle.textContent = "❌ Quitter plein écran";
+      } else {
+        fullscreenToggle.textContent = "🖥️ Plein écran";
+      }
+    });
+
     runBtn.addEventListener('click', runCode);
     resetBtn.addEventListener('click', resetCode);
-
-    // Lancer au chargement
     runCode();
   </script>
 </body>
