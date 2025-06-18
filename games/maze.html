@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="../schooltoolicon.png" type="image/x-icon">
+  <title>Labyrinthe Généré</title>
+  <style>
+    #menu-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1001;
+      transition: background-color 0.3s;
+    }
+
+    #menu-btn:hover {
+      background-color: #1f2e3a;
+    }
+
+    #menu {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 260px;
+      height: 100%;
+      background-color: #2c3e50;
+      color: white;
+      padding-top: 70px;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #menu.open {
+      left: 0;
+    }
+
+    #menu a {
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    #menu a i {
+      margin-right: 12px;
+      width: 20px;
+    }
+
+    #menu a:hover {
+      background-color: #34495e;
+    }
+    body {
+      background: #222;
+      font-family: Arial, sans-serif;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-top: 10px;
+    }
+
+    #maze {
+      display: grid;
+      margin: 20px auto;
+      gap: 1px;
+    }
+
+    .cell {
+      width: 20px;
+      height: 20px;
+      box-sizing: border-box;
+    }
+
+    .wall { background: #444; }
+    .path { background: #eee; }
+    .player { background: #2196f3; }
+    .exit { background: #4caf50; }
+
+    .info {
+      font-size: 18px;
+      margin: 10px;
+    }
+
+    #restart {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background: white;
+      color: black;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+    <!-- Bouton de menu -->
+  <button id="menu-btn"><i class="fas fa-bars"></i> Menu</button>
+
+  <!-- Menu latéral -->
+  <div id="menu">
+    <a href="../index.html" onmouseenter="mouseEnter(`home`)" onmouseleave="mouseLeave(`home`)"><i class="fas fa-home" id="home"></i> Accueil</a>
+    <a href="../CountDown.html" onmouseenter="mouseEnter(`cd`)" onmouseleave="mouseLeave(`cd`)"><i class="fas fa-hourglass-half" id="cd"></i> Compte à rebours</a>
+    <a href="../Clock.html" onmouseenter="mouseEnter(`clock`)" onmouseleave="mouseLeave(`clock`)"><i class="fas fa-clock" id="clock"></i> Horloge</a>
+    <a href="../Schedule.html" onmouseenter="mouseEnter(`schedule`)" onmouseleave="mouseLeave(`schedule`)"><i class="fas fa-calendar-alt" id="schedule"></i> Horaire</a>
+    <a href="../calculator.html" onmouseleave="mouseLeave(`calc`)" onmouseenter="mouseEnter(`calc`)"><i class="fa-solid fa-calculator" id="calc"></i> Calculatrice</a>
+    <a href="gameHome.html" onmouseenter="mouseEnter(`gameIcon`)" onmouseleave="mouseLeave(`gameIcon`)"><i class="fa-solid fa-gamepad" id="gameIcon"></i> Menu des jeux</a>
+    <a href="../suggestionForm.html" onmouseenter="mouseEnter(`sugg`)" onmouseleave="mouseLeave(`sugg`)"><i class="fas fa-comment-dots" id="sugg"></i> Suggestion</a>
+    <a href="https://www.mozaikportail.ca" accesskey="m" onmouseenter="mouseEnter(`mozaik`)" onmouseleave="mouseLeave(`mozaik`)"><i class="fas fa-link" id="mozaik"></i> Mozaik</a>
+  </div>
+
+  <a href="https://www.bonk.io" accesskey="w"></a>
+
+  <h1>🧩 Labyrinthe Aléatoire</h1>
+  <div class="info">⏱ Temps : <span id="timer">0</span> sec</div>
+  <div class="info">🔢 Mouvements : <span id="moves">0</span></div>
+  <div id="maze"></div>
+  <h2 id="status"></h2>
+  <button id="restart">🔄 Rejouer</button>
+
+  <script>
+    document.getElementById("menu-btn").addEventListener("click", function () {
+      document.getElementById("menu").classList.toggle("open");
+    });
+
+    function mouseEnter(id) {
+      const newId = document.getElementById(id);
+      newId.classList.add('fa-bounce');
+    }
+    
+    function mouseLeave(id) {
+      const newId = document.getElementById(id);
+      newId.classList.remove('fa-bounce');
+    }
+
+    const size = 21;
+    let mazeData = [];
+    let playerX = 1;
+    let playerY = 1;
+    let moves = 0;
+    let seconds = 0;
+    let timerInterval;
+
+    const maze = document.getElementById("maze");
+    maze.style.gridTemplateColumns = `repeat(${size}, 20px)`;
+    maze.style.gridTemplateRows = `repeat(${size}, 20px)`;
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      seconds = 0;
+      document.getElementById("timer").textContent = "0";
+      timerInterval = setInterval(() => {
+        seconds++;
+        document.getElementById("timer").textContent = seconds;
+      }, 1000);
+    }
+
+    function drawMaze() {
+      maze.innerHTML = "";
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const cell = document.createElement("div");
+          cell.classList.add("cell");
+
+          if (x === playerX && y === playerY) {
+            cell.classList.add("player");
+          } else if (x === size - 2 && y === size - 2) {
+            cell.classList.add("exit");
+          } else if (mazeData[y][x] === 1) {
+            cell.classList.add("wall");
+          } else {
+            cell.classList.add("path");
+          }
+
+          maze.appendChild(cell);
+        }
+      }
+    }
+
+    function move(dx, dy) {
+      const newX = playerX + dx;
+      const newY = playerY + dy;
+      if (mazeData[newY]?.[newX] === 1) return;
+
+      playerX = newX;
+      playerY = newY;
+      moves++;
+      document.getElementById("moves").textContent = moves;
+      drawMaze();
+
+      if (playerX === size - 2 && playerY === size - 2) {
+        clearInterval(timerInterval);
+        document.getElementById("status").textContent =
+          `🎉 Gagné en ${seconds}s et ${moves} mouvements !`;
+        window.removeEventListener("keydown", handleKey);
+      }
+    }
+
+    function handleKey(e) {
+      switch (e.key) {
+        case "ArrowUp": move(0, -1); break;
+        case "ArrowDown": move(0, 1); break;
+        case "ArrowLeft": move(-1, 0); break;
+        case "ArrowRight": move(1, 0); break;
+      }
+    }
+
+    function generateMaze() {
+      mazeData = Array.from({ length: size }, () => Array(size).fill(1));
+      const visited = Array.from({ length: size }, () => Array(size).fill(false));
+
+      function shuffle(arr) {
+        return arr.sort(() => Math.random() - 0.5);
+      }
+
+      function carve(x, y) {
+        visited[y][x] = true;
+        mazeData[y][x] = 0;
+
+        const dirs = shuffle([
+          [0, -2],
+          [0, 2],
+          [-2, 0],
+          [2, 0]
+        ]);
+
+        for (const [dx, dy] of dirs) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx > 0 && ny > 0 && nx < size - 1 && ny < size - 1 && !visited[ny][nx]) {
+            mazeData[y + dy / 2][x + dx / 2] = 0;
+            carve(nx, ny);
+          }
+        }
+      }
+
+      carve(1, 1);
+      mazeData[size - 2][size - 2] = 0;
+    }
+
+    function startGame() {
+      generateMaze();
+      playerX = 1;
+      playerY = 1;
+      moves = 0;
+      seconds = 0;
+      document.getElementById("moves").textContent = "0";
+      document.getElementById("timer").textContent = "0";
+      document.getElementById("status").textContent = "";
+      drawMaze();
+      startTimer();
+      window.addEventListener("keydown", handleKey);
+    }
+
+    document.getElementById("restart").addEventListener("click", () => {
+      window.removeEventListener("keydown", handleKey);
+      startGame();
+    });
+
+    startGame();
+  </script>
+</body>
+</html>
