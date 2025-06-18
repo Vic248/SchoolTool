@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Environnement de test – SchoolTool</title>
+  <style>
+    :root {
+      --primary: #0a74da;
+      --background: #f9f9f9;
+      --panel-bg: #fff;
+      --border: #ddd;
+      --text: #333;
+      --font: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--background);
+      color: var(--text);
+    }
+
+    .st-header {
+      background: var(--primary);
+      padding: 1rem;
+      color: #fff;
+      text-align: center;
+    }
+
+    .st-main {
+      display: flex;
+      flex-wrap: wrap;
+      height: calc(100vh - 64px);
+    }
+
+    .editor-panel {
+      flex: 1 1 400px;
+      background: var(--panel-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      border-right: 1px solid var(--border);
+      box-sizing: border-box;
+    }
+
+    .editor-section {
+      margin-bottom: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-section label {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .editor-section textarea {
+      flex: 1;
+      resize: vertical;
+      font-family: monospace;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      min-height: 100px;
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .editor-actions button {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: background 0.3s ease;
+    }
+
+    .editor-actions .secondary {
+      background: #777;
+    }
+
+    .editor-actions button:hover {
+      opacity: 0.9;
+    }
+
+    .auto-fullscreen {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .preview-panel {
+      flex: 1 1 400px;
+      background: var(--panel-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .fullscreen-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--primary);
+    }
+
+    .iframe-container {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <header class="st-header">
+    <h1>Environnement de test</h1>
+  </header>
+
+  <main class="st-main">
+    <section class="editor-panel">
+      <div class="editor-section">
+        <label for="html-code">HTML</label>
+        <textarea id="html-code">&lt;h1&gt;Bonjour SchoolTool!&lt;/h1&gt;</textarea>
+      </div>
+      <div class="editor-section">
+        <label for="css-code">CSS</label>
+        <textarea id="css-code">h1 { color: var(--primary); }</textarea>
+      </div>
+      <div class="editor-section">
+        <label for="js-code">JavaScript</label>
+        <textarea id="js-code">console.log("Test réussi 🎉");</textarea>
+      </div>
+      <div class="editor-actions">
+        <button id="run-btn">Exécuter</button>
+        <button id="reset-btn" class="secondary">Réinitialiser</button>
+      </div>
+      <div class="auto-fullscreen">
+        <input type="checkbox" id="auto-fullscreen" />
+        <label for="auto-fullscreen">Agrandir automatiquement à l'exécution</label>
+      </div>
+    </section>
+
+    <section class="preview-panel">
+      <div class="preview-header">
+        Aperçu
+        <button class="fullscreen-btn" id="fullscreen-toggle">🖥️ Plein écran</button>
+      </div>
+      <div class="iframe-container" id="iframe-container">
+        <iframe id="preview"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const runBtn = document.getElementById('run-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const iframe = document.getElementById('preview');
+    const container = document.getElementById('iframe-container');
+    const autoFullscreenCheckbox = document.getElementById('auto-fullscreen');
+    const fullscreenToggle = document.getElementById('fullscreen-toggle');
+
+    // Restaurer préférence
+    autoFullscreenCheckbox.checked = localStorage.getItem("autoFullscreen") === "true";
+
+    autoFullscreenCheckbox.addEventListener("change", () => {
+      localStorage.setItem("autoFullscreen", autoFullscreenCheckbox.checked);
+    });
+
+    function runCode() {
+      const html = document.getElementById('html-code').value;
+      const css = "<style>" + document.getElementById('css-code').value + "</style>";
+      const js = "<script>" + document.getElementById('js-code').value + "<\/script>";
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(css + html + js);
+      doc.close();
+
+      if (autoFullscreenCheckbox.checked) {
+        openFullscreen();
+      }
+    }
+
+    function resetCode() {
+      document.getElementById('html-code').value = '';
+      document.getElementById('css-code').value = '';
+      document.getElementById('js-code').value = '';
+      runCode();
+    }
+
+    function openFullscreen() {
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      }
+    }
+
+    function closeFullscreen() {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+
+    fullscreenToggle.addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        openFullscreen();
+      } else {
+        closeFullscreen();
+      }
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+      if (document.fullscreenElement) {
+        fullscreenToggle.textContent = "❌ Quitter plein écran";
+      } else {
+        fullscreenToggle.textContent = "🖥️ Plein écran";
+      }
+    });
+
+    runBtn.addEventListener('click', runCode);
+    resetBtn.addEventListener('click', resetCode);
+    runCode();
+  </script>
+</body>
+</html>
