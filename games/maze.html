@@ -151,7 +151,7 @@
       newId.classList.remove('fa-bounce');
     }
 
-    const size = 21;
+    const size = 31;
     let mazeData = [];
     let playerX = 1;
     let playerY = 1;
@@ -216,10 +216,10 @@
 
     function handleKey(e) {
       switch (e.key) {
-        case "ArrowUp": move(0, -1); break;
-        case "ArrowDown": move(0, 1); break;
-        case "ArrowLeft": move(-1, 0); break;
-        case "ArrowRight": move(1, 0); break;
+        case "w": move(0, -1); break;
+        case "s": move(0, 1); break;
+        case "a": move(-1, 0); break;
+        case "d": move(1, 0); break;
       }
     }
 
