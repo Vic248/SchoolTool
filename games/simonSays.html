@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Simon Says</title>
+  <style>
+        body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(to bottom right, #eef2f7, #d9e4f5);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-x: hidden;
+        }
+
+        #menu-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 1001;
+        transition: background-color 0.3s;
+        }
+
+        #menu-btn:hover {
+        background-color: #1f2e3a;
+        }
+
+        #menu {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 260px;
+        height: 100%;
+        background-color: #2c3e50;
+        color: white;
+        padding-top: 70px;
+        transition: left 0.3s ease;
+        z-index: 1000;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #menu.open {
+        left: 0;
+        }
+
+        #menu a {
+        display: flex;
+        align-items: center;
+        padding: 14px 24px;
+        color: white;
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        }
+
+        #menu a i {
+        margin-right: 12px;
+        width: 20px;
+        }
+
+        #menu a:hover {
+        background-color: #34495e;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+        }
+
+    body {
+      background-color: #222;
+      color: white;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      padding-top: 30px;
+    }
+
+    h1 {
+      font-size: 36px;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(2, 150px);
+      grid-gap: 20px;
+      justify-content: center;
+      margin: 40px auto;
+    }
+
+    .btn {
+      width: 150px;
+      height: 150px;
+      border-radius: 20px;
+      cursor: pointer;
+      opacity: 0.9;
+      transition: 0.2s;
+    }
+
+    .green { background-color: green; }
+    .red { background-color: red; }
+    .yellow { background-color: gold; }
+    .blue { background-color: blue; }
+
+    .active {
+      opacity: 1;
+      box-shadow: 0 0 20px white;
+    }
+
+    #start {
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none;
+      background-color: white;
+      color: #222;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    #score {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+    <button id="menu-btn"><i class="fas fa-bars"></i> Menu</button>
+
+  <!-- Menu latéral -->
+    <div id="menu">
+        <a href="../index.html" onmouseenter="mouseEnter(`home`)" onmouseleave="mouseLeave(`home`)"><i class="fas fa-home" id="home"></i> Accueil</a>
+        <a href="../CountDown.html" onmouseenter="mouseEnter(`cd`)" onmouseleave="mouseLeave(`cd`)"><i class="fas fa-hourglass-half" id="cd"></i> Compte à rebours</a>
+        <a href="../Clock.html" onmouseenter="mouseEnter(`clock`)" onmouseleave="mouseLeave(`clock`)"><i class="fas fa-clock" id="clock"></i> Horloge</a>
+        <a href="../Schedule.html" onmouseenter="mouseEnter(`schedule`)" onmouseleave="mouseLeave(`schedule`)"><i class="fas fa-calendar-alt" id="schedule"></i> Horaire</a>
+        <a href="../calculator.html" onmouseleave="mouseLeave(`calc`)" onmouseenter="mouseEnter(`calc`)"><i class="fa-solid fa-calculator" id="calc"></i> Calculatrice</a>
+        <a href="gameHome.html" onmouseenter="mouseEnter(`gameIcon`)" onmouseleave="mouseLeave(`gameIcon`)"><i class="fa-solid fa-gamepad" id="gameIcon"></i> Menu des jeux</a>
+        <a href="../suggestionForm.html" onmouseenter="mouseEnter(`sugg`)" onmouseleave="mouseLeave(`sugg`)"><i class="fas fa-comment-dots" id="sugg"></i> Suggestion</a>
+        <a href="https://www.mozaikportail.ca" accesskey="m" onmouseenter="mouseEnter(`mozaik`)" onmouseleave="mouseLeave(`mozaik`)"><i class="fas fa-link" id="mozaik"></i> Mozaik</a>
+    </div>
+
+    <a href="https://www.bonk.io" accesskey="w"></a>
+
+  <h1>Simon Says</h1>
+  <div id="score">Score : 0</div>
+  <div id="game-board">
+    <div class="btn green" id="green"></div>
+    <div class="btn red" id="red"></div>
+    <div class="btn yellow" id="yellow"></div>
+    <div class="btn blue" id="blue"></div>
+  </div>
+  <button id="start">Démarrer</button>
+
+  <script>
+    document.getElementById("menu-btn").addEventListener("click", function () {
+        document.getElementById("menu").classList.toggle("open");
+    });
+
+    function mouseEnter(id) {
+      const newId = document.getElementById(id);
+      newId.classList.add('fa-bounce');
+    }
+    
+    function mouseLeave(id) {
+      const newId = document.getElementById(id);
+      newId.classList.remove('fa-bounce');
+    }
+
+    const colors = ['green', 'red', 'yellow', 'blue'];
+    let sequence = [];
+    let playerSequence = [];
+    let score = 0;
+    let clickable = false;
+
+    const buttons = colors.reduce((acc, color) => {
+      acc[color] = document.getElementById(color);
+      return acc;
+    }, {});
+
+    const playSound = (color) => {
+      const audio = new Audio(`https://s3.amazonaws.com/freecodecamp/simonSound${colors.indexOf(color)+1}.mp3`);
+      audio.play();
+    };
+
+    const flash = (color) => {
+      return new Promise((resolve) => {
+        const btn = buttons[color];
+        btn.classList.add('active');
+        playSound(color);
+        setTimeout(() => {
+          btn.classList.remove('active');
+          setTimeout(resolve, 200);
+        }, 400);
+      });
+    };
+
+    const playSequence = async () => {
+      clickable = false;
+      for (let color of sequence) {
+        await flash(color);
+      }
+      clickable = true;
+    };
+
+    const nextRound = () => {
+      const nextColor = colors[Math.floor(Math.random() * colors.length)];
+      sequence.push(nextColor);
+      playerSequence = [];
+      document.getElementById("score").textContent = "Score : " + score;
+      playSequence();
+    };
+
+    const handleClick = (color) => {
+      if (!clickable) return;
+      playerSequence.push(color);
+      playSound(color);
+
+      const index = playerSequence.length - 1;
+      if (playerSequence[index] !== sequence[index]) {
+        gameOver();
+        return;
+      }
+
+      if (playerSequence.length === sequence.length) {
+        score++;
+        setTimeout(nextRound, 1000);
+      }
+    };
+
+    const gameOver = () => {
+      alert("💥 Mauvaise couleur ! Score final : " + score);
+      sequence = [];
+      playerSequence = [];
+      score = 0;
+      document.getElementById("score").textContent = "Score : 0";
+    };
+
+    document.getElementById("start").addEventListener("click", () => {
+      score = 0;
+      sequence = [];
+      nextRound();
+    });
+
+    for (let color of colors) {
+      buttons[color].addEventListener("click", () => handleClick(color));
+    }
+  </script>
+</body>
+</html>
