@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Multimonde Idle — Usines • Ferme • Restaurant • Mine</title>
+<style>
+  :root{
+    --bg:#071021; --panel:#0b1624; --accent:#00c2b8; --muted:#9eb0c3; --card:#0f2430;
+    --good:#9ef29e; --danger:#ff8b8b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{background:linear-gradient(180deg,#041021 0%, #071427 100%);color:#e6f2f7;padding:18px;display:flex;gap:16px}
+  header{display:flex;gap:12px;align-items:center;width:100%}
+  .left{width:72%;background:linear-gradient(180deg,#072235,#05202a);border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(2,6,23,.6)}
+  .right{width:28%;background:linear-gradient(180deg,#07202a,#041620);border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(2,6,23,.6)}
+  h1{margin:0;font-size:18px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .stats{display:flex;gap:8px;align-items:center;margin-top:10px}
+  .stat{background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;color:var(--muted);font-weight:700}
+  .world-tabs{display:flex;gap:8px;margin-top:12px}
+  .tab{padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.02);cursor:pointer}
+  .tab.active{background:linear-gradient(90deg,var(--accent),#6fd3ff);color:#022; font-weight:800}
+  .panel{margin-top:12px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .card{background:var(--card);padding:10px;border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
+  .machine{display:flex;gap:10px;align-items:center}
+  .machine .info{flex:1}
+  .machine .controls{display:flex;gap:6px;align-items:center}
+  .btn{background:var(--accent);border:none;color:#022;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+  .btn.secondary{background:rgba(255,255,255,0.06);color:var(--muted)}
+  .small{font-size:12px;color:var(--muted)}
+  .progress{height:8px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;margin-top:6px}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,#ffd166,#00c2b8)}
+  .resources{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .res{background:rgba(255,255,255,0.02);padding:6px 8px;border-radius:8px;font-weight:700;color:var(--muted)}
+  .shop{display:flex;gap:8px;align-items:center;margin-top:8px}
+  .buy-amount{background:rgba(255,255,255,0.02);padding:6px 8px;border-radius:8px;cursor:pointer}
+  .goal{background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;margin-top:8px;color:var(--muted)}
+  .world-header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .footer{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+  .right h2{margin:0 0 8px 0;font-size:16px}
+  .mini{font-size:13px;color:var(--muted)}
+  .save-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  textarea{width:100%;height:80px;background:rgba(255,255,255,0.02);color:#dff6ff;border-radius:8px;padding:8px;border:none;outline:none}
+  .bigbtn{width:100%;padding:10px;border-radius:10px;border:none;background:linear-gradient(90deg,#00c2b8,#6fd3ff);font-weight:800;color:#012}
+  .unlocked{color:var(--good);font-weight:800}
+  .locked{color:var(--muted)}
+  .objective-complete{background:linear-gradient(90deg,#6fffb0,#7ad0ff);padding:8px;border-radius:8px;color:#042}
+  .danger{color:var(--danger)}
+  .statline{display:flex;justify-content:space-between;align-items:center}
+  .sell-all{background:#ff7b7b;color:#2b0b0b;border-radius:8px;padding:6px 8px;border:none;cursor:pointer;font-weight:700}
+  .top-actions{display:flex;gap:8px;align-items:center}
+  footerpage{display:block}
+  @media (max-width:1000px){
+    body{flex-direction:column}
+    .left,.right{width:100%}
+    .panel{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="topbar">
+      <div>
+        <h1>Multimonde Idle — Gestion & progression</h1>
+        <div class="small">Complète chaque monde pour débloquer le suivant — sauvegarde automatique incluse</div>
+      </div>
+      <div class="top-actions">
+        <div class="stat">Argent: <span id="money">0</span> $</div>
+        <div class="stat">Total gagné: <span id="totalEarned">0</span> $</div>
+        <div class="stat">Temps joué: <span id="playTime">0s</span></div>
+        <div class="stat">Monde: <span id="currentWorldName">—</span></div>
+      </div>
+    </div>
+
+    <div class="world-tabs" id="worldTabs"></div>
+
+    <div class="panel" id="worldPanel">
+      <!-- left column: machines -->
+      <div>
+        <div class="card">
+          <div class="world-header">
+            <div>
+              <strong id="worldTitle">Monde</strong>
+              <div class="small" id="worldDesc">Description</div>
+            </div>
+            <div>
+              <button class="btn" id="btnEnterWorld">Entrer</button>
+            </div>
+          </div>
+
+          <div id="worldContent" style="margin-top:12px">
+            <div class="resources" id="worldResources"></div>
+            <div style="height:8px"></div>
+            <div id="machinesList"></div>
+            <div class="goal" id="worldGoal"></div>
+          </div>
+
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <strong>Améliorations globales</strong>
+          <div class="small">Boosts qui s'appliquent à ce monde seulement</div>
+          <div style="height:8px"></div>
+          <div id="globalUpgrades"></div>
+        </div>
+      </div>
+
+      <!-- right column: actions / details -->
+      <div>
+        <div class="card">
+          <h2>Marché</h2>
+          <div class="small">Vends tes ressources pour de l'argent. Prix affichés par res.</div>
+          <div style="height:8px"></div>
+          <div id="marketList"></div>
+          <div style="height:8px"></div>
+          <button class="sell-all" id="sellAll">Vendre tout</button>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h2>Objectifs & progression</h2>
+          <div id="objectivesList"></div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h2>Sauvegarde</h2>
+          <div class="small">Sauvegarde auto toutes les 10s. Tu peux exporter/importer manuellement ici.</div>
+          <div style="height:8px"></div>
+          <div class="save-actions">
+            <button class="btn secondary" id="exportSave">Exporter</button>
+            <button class="btn secondary" id="importSaveBtn">Importer</button>
+            <button class="btn secondary" id="resetSave">Réinitialiser</button>
+          </div>
+          <div style="height:8px"></div>
+          <textarea id="saveBox" placeholder="Export / Import"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">Astuce: Utilise les achats x10/x100 pour accélérer. Le jeu calcule les gains hors-ligne à la réouverture.</div>
+  </div>
+
+  <div class="right">
+    <h2>Stats & Options</h2>
+    <div class="card">
+      <div class="statline"><span class="mini">Total ressources</span><span id="totalResources" class="mini">0</span></div>
+      <div style="height:8px"></div>
+      <div class="mini">Vitesse globale</div>
+      <div style="height:8px"></div>
+      <div class="small">Contrôles rapides</div>
+      <div style="height:8px"></div>
+      <div>
+        <button class="btn bigbtn" id="fastForward">×2 vitesse (temporaire)</button>
+      </div>
+      <div style="height:8px"></div>
+      <div class="small">Export sauvegarde pour la partager</div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h2>Monde actuel</h2>
+      <div class="mini" id="rightWorldDesc"></div>
+      <div style="height:8px"></div>
+      <div><strong>État : </strong><span id="worldStatus">—</span></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h2>Stats globales</h2>
+      <div class="small">Argent total gagné: <span id="globalEarned">0</span></div>
+      <div class="small">Sessions totales: <span id="sessionsCount">0</span></div>
+      <div style="height:8px"></div>
+      <button class="btn secondary" id="debugAdd">+5000$ (DEBUG)</button>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   GAME DATA & INITIAL SETUP
+   ========================= */
+
+/* Global save key */
+const SAVE_KEY = 'mm_idle_save_v1';
+
+/* Game tick (per second) */
+const TICK = 0.25; // update every 250ms for smooth progress
+
+/* Default game state */
+const defaultState = {
+  money: 200,
+  totalEarned: 200,
+  playTime: 0,
+  sessions: 0,
+  worlds: {},
+  currentWorld: 'cakes',
+  lastSaved: Date.now(),
+  createdAt: Date.now(),
+  global: { earnedAllTime: 0 },
+};
+
+/* Define worlds, machines and resources */
+const WORLD_TEMPLATES = {
+  cakes: {
+    id: 'cakes',
+    name: 'Usine de gâteaux',
+    desc: 'Produis de la pâte, cuit des gâteaux et emballe-les pour vendre.',
+    unlocked: true,
+    goal: { type:'produce', resource:'cake_packaged', amount: 200 }, // objective
+    resources: {
+      dough: { name: 'Pâte', price: 1 },
+      cake_raw: { name: 'Gâteau cru', price: 3 },
+      cake_baked: { name: 'Gâteau cuit', price: 8 },
+      cake_packaged: { name: 'Gâteau emballé', price: 15 }
+    },
+    machines: [
+      { id:'mixer', name:'Mélangeur', baseCost: 50, costMult:1.15, produces:'dough', perCycle:5, time:4, unlockedAt:0 },
+      { id:'oven', name:'Four', baseCost: 120, costMult:1.17, consumes:{dough:3}, produces:'cake_raw', perCycle:1, time:6, unlockedAt:100 },
+      { id:'baker', name:'Boulanger', baseCost:220, costMult:1.2, consumes:{cake_raw:1}, produces:'cake_baked', perCycle:1, time:5, unlockedAt:300 },
+      { id:'pack', name:'Emballeuse', baseCost:400, costMult:1.22, consumes:{cake_baked:1}, produces:'cake_packaged', perCycle:1, time:3, unlockedAt:800 }
+    ]
+  },
+
+  farm: {
+    id:'farm',
+    name:'Ferme',
+    desc:'Plante et récolte blé, maïs et fraises. Transforme pour vendre plus cher.',
+    unlocked:false,
+    goal:{ type:'produce', resource:'jam', amount:120 },
+    resources:{
+      wheat:'Blé',
+      flour:'Farine',
+      corn:'Maïs',
+      strawberry:'Fraises',
+      jam:'Confiture'
+    },
+    machines:[
+      { id:'field_wheat', name:'Champ de blé', baseCost:60, costMult:1.15, produces:'wheat', perCycle:10, time:10, unlockedAt:0 },
+      { id:'mill', name:'Moulin', baseCost:150, costMult:1.18, consumes:{wheat:5}, produces:'flour', perCycle:1, time:6, unlockedAt:150 },
+      { id:'field_corn', name:'Champ de maïs', baseCost:80, costMult:1.16, produces:'corn', perCycle:8, time:9, unlockedAt:80 },
+      { id:'berry', name:'Plantation de fraises', baseCost:140, costMult:1.17, produces:'strawberry', perCycle:6, time:12, unlockedAt:220 },
+      { id:'jam_maker', name:'Confiturier', baseCost:300, costMult:1.2, consumes:{strawberry:4}, produces:'jam', perCycle:1, time:8, unlockedAt:500 }
+    ]
+  },
+
+  restaurant: {
+    id:'restaurant',
+    name:'Restaurant',
+    desc:'Cuisine des plats populaires. Combine ingrédients pour créer des plats à forte marge.',
+    unlocked:false,
+    goal:{ type:'serve', resource:'served', amount:600 },
+    resources:{
+      burger_patty:'Steak', bun:'Pain', burger:'Burger',
+      soup_veg:'Soupe', served:'Clients servis'
+    },
+    machines:[
+      { id:'grill', name:'Grill', baseCost:120, costMult:1.16, consumes:{burger_patty:1,bun:1}, produces:'burger', perCycle:1, time:4, unlockedAt:0 },
+      { id:'butcher', name:'Boucher', baseCost:90, costMult:1.15, produces:'burger_patty', perCycle:4, time:6, unlockedAt:10 },
+      { id:'bakery', name:'Boulangerie', baseCost:140, costMult:1.16, produces:'bun', perCycle:6, time:6, unlockedAt:40 },
+      { id:'soup', name:'Potte de soupe', baseCost:200, costMult:1.18, produces:'soup_veg', perCycle:2, time:8, unlockedAt:200 },
+      { id:'counter', name:'Comptoir', baseCost:320, costMult:1.2, consumes:{burger:1,soup_veg:1}, produces:'served', perCycle:2, time:3, unlockedAt:600 }
+    ]
+  },
+
+  mine: {
+    id:'mine',
+    name:'Mine',
+    desc:'Extrait des minerais, raffine et forge des alliages précieux.',
+    unlocked:false,
+    goal:{ type:'craft', resource:'gold_statue', amount:1 },
+    resources:{
+      ore:'Minerai', metal:'Métal', alloy:'Alliage', gold_statue:'Statue dorée'
+    },
+    machines:[
+      { id:'quarry', name:'Carrière', baseCost:100, costMult:1.16, produces:'ore', perCycle:10, time:8, unlockedAt:0 },
+      { id:'refinery', name:'Raffinerie', baseCost:220, costMult:1.18, consumes:{ore:6}, produces:'metal', perCycle:1, time:10, unlockedAt:200 },
+      { id:'forge', name:'Forge', baseCost:420, costMult:1.22, consumes:{metal:3}, produces:'alloy', perCycle:1, time:14, unlockedAt:600 },
+      { id:'gild', name:'Atelier d\'or', baseCost:1200, costMult:1.25, consumes:{alloy:4,metal:6}, produces:'gold_statue', perCycle:1, time:30, unlockedAt:2000 }
+    ]
+  }
+};
+
+/* State loaded/saved */
+let state = null;
+
+/* UI elements */
+const moneyEl = document.getElementById('money');
+const totalEarnedEl = document.getElementById('totalEarned');
+const playTimeEl = document.getElementById('playTime');
+const worldTabsEl = document.getElementById('worldTabs');
+const worldTitleEl = document.getElementById('worldTitle');
+const worldDescEl = document.getElementById('worldDesc');
+const worldResourcesEl = document.getElementById('worldResources');
+const machinesListEl = document.getElementById('machinesList');
+const marketListEl = document.getElementById('marketList');
+const worldGoalEl = document.getElementById('worldGoal');
+const currentWorldNameEl = document.getElementById('currentWorldName');
+const objectivesListEl = document.getElementById('objectivesList');
+const worldStatusEl = document.getElementById('worldStatus');
+const rightWorldDescEl = document.getElementById('rightWorldDesc');
+const totalResourcesEl = document.getElementById('totalResources');
+const globalEarnedEl = document.getElementById('globalEarned');
+const sessionsCountEl = document.getElementById('sessionsCount');
+const saveBox = document.getElementById('saveBox');
+
+/* Utility helpers */
+function fmt(n){ return Math.round(n*100)/100; }
+function formatTime(s){
+  if(s < 60) return Math.round(s)+'s';
+  if(s < 3600) return Math.floor(s/60)+'m '+Math.round(s%60)+'s';
+  return Math.floor(s/3600)+'h '+Math.floor((s%3600)/60)+'m';
+}
+
+/* ======================
+   SAVE / LOAD / OFFLINE
+   ====================== */
+
+function initialState(){
+  const st = JSON.parse(JSON.stringify(defaultState));
+  // initialize each world
+  for(const key of Object.keys(WORLD_TEMPLATES)){
+    const tpl = WORLD_TEMPLATES[key];
+    st.worlds[key] = {
+      unlocked: !!tpl.unlocked,
+      resources: {},
+      machines: {},
+      upgrades: { speedMult:1, prodMult:1 }, // world-wide upgrades
+      stats: { produced:{} },
+      goalCompleted: false
+    };
+    // resources 0
+    for(const r in tpl.resources) st.worlds[key].resources[r] = 0;
+    // machines
+    for(const m of tpl.machines){
+      st.worlds[key].machines[m.id] = {
+        count: 0,
+        level: 0,
+        progress: 0,
+        lastTick: Date.now()
+      };
+      st.worlds[key].stats.produced[m.produces] = 0;
+    }
+  }
+  return st;
+}
+
+function saveGame(){
+  state.lastSaved = Date.now();
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  // brief visual feedback
+  saveBox.value = 'Sauvegarde exportable... (utilise Export)';
+}
+
+function loadGame(){
+  const raw = localStorage.getItem(SAVE_KEY);
+  if(!raw){
+    state = initialState();
+    state.sessions = 0;
+    state.global.earnedAllTime = 0;
+    saveGame();
+    return;
+  }
+  try{
+    state = JSON.parse(raw);
+    // in case new worlds added in template, merge safely
+    for(const id in WORLD_TEMPLATES){
+      if(!state.worlds[id]){
+        state.worlds[id] = {
+          unlocked: !!WORLD_TEMPLATES[id].unlocked,
+          resources: {},
+          machines: {},
+          upgrades:{ speedMult:1, prodMult:1 },
+          stats:{ produced:{} },
+          goalCompleted:false
+        };
+        for(const r in WORLD_TEMPLATES[id].resources) state.worlds[id].resources[r] = 0;
+        for(const m of WORLD_TEMPLATES[id].machines){
+          state.worlds[id].machines[m.id] = { count:0, level:0, progress:0, lastTick:Date.now() };
+          state.worlds[id].stats.produced[m.produces] = 0;
+        }
+      }
+    }
+  }catch(e){
+    console.error('Load failed', e);
+    state = initialState();
+  }
+  // offline progress
+  const now = Date.now();
+  const dt = Math.floor((now - (state.lastSaved || state.createdAt || now)) / 1000); // seconds
+  if(dt > 3){
+    const offlineMsg = computeOffline(dt);
+    console.log('Offline progressed for', dt, 's:', offlineMsg);
+  }
+}
+
+/* Compute offline production for dt seconds */
+function computeOffline(dtSeconds){
+  let summary = {};
+  for(const key in state.worlds){
+    const wtpl = WORLD_TEMPLATES[key];
+    if(!state.worlds[key].unlocked) continue;
+    const wst = state.worlds[key];
+    // for each machine, compute how many cycles completed in dt
+    for(const mTpl of wtpl.machines){
+      const machineState = wst.machines[mTpl.id];
+      if(!machineState) continue;
+      const count = machineState.count;
+      if(count <= 0) continue;
+      const baseTime = mTpl.time / (wst.upgrades.speedMult || 1);
+      const cyclesPerMachine = Math.floor( dtSeconds / baseTime );
+      const totalCycles = cyclesPerMachine * count;
+      // for consumed resources we will clamp production based on availability
+      if(mTpl.consumes){
+        // determine how many cycles possible by checking resource stock
+        let possibleCycles = Infinity;
+        for(const r in mTpl.consumes){
+          const needed = mTpl.consumes[r] * totalCycles;
+          possibleCycles = Math.min(possibleCycles, Math.floor((wst.resources[r] || 0) / mTpl.consumes[r]));
+        }
+        const realCycles = Math.min(totalCycles, possibleCycles);
+        // consume
+        for(const r in mTpl.consumes) wst.resources[r] -= mTpl.consumes[r] * realCycles;
+        // produce
+        const amount = realCycles * (mTpl.perCycle || 1) * (wst.upgrades.prodMult || 1);
+        wst.resources[mTpl.produces] = (wst.resources[mTpl.produces]||0) + amount;
+        wst.stats.produced[mTpl.produces] = (wst.stats.produced[mTpl.produces]||0) + amount;
+        summary[key] = summary[key] || {};
+        summary[key][mTpl.produces] = (summary[key][mTpl.produces]||0) + amount;
+      } else {
+        // no consumption
+        const amount = totalCycles * (mTpl.perCycle || 1) * (wst.upgrades.prodMult || 1);
+        wst.resources[mTpl.produces] = (wst.resources[mTpl.produces]||0) + amount;
+        wst.stats.produced[mTpl.produces] = (wst.stats.produced[mTpl.produces]||0) + amount;
+        summary[key] = summary[key] || {};
+        summary[key][mTpl.produces] = (summary[key][mTpl.produces]||0) + amount;
+      }
+    }
+  }
+  return summary;
+}
+
+/* Export / Import */
+document.getElementById('exportSave').addEventListener('click', ()=>{
+  saveBox.value = JSON.stringify(state);
+  saveBox.select();
+});
+document.getElementById('importSaveBtn').addEventListener('click', ()=>{
+  try{
+    const parsed = JSON.parse(saveBox.value);
+    if(parsed){
+      state = parsed;
+      saveGame();
+      renderAll();
+      alert('Sauvegarde importée.');
+    }
+  }catch(e){
+    alert('Import invalide.');
+  }
+});
+document.getElementById('resetSave').addEventListener('click', ()=>{
+  if(!confirm('Réinitialiser la sauvegarde ?')) return;
+  localStorage.removeItem(SAVE_KEY);
+  state = initialState();
+  saveGame();
+  renderAll();
+});
+
+/* =========================
+   WORLD & UI RENDER FUNCTIONS
+   ========================= */
+
+function renderWorldTabs(){
+  worldTabsEl.innerHTML = '';
+  for(const key in WORLD_TEMPLATES){
+    const tpl = WORLD_TEMPLATES[key];
+    const btn = document.createElement('div');
+    btn.className = 'tab' + (state.currentWorld===key ? ' active':'');
+    btn.textContent = tpl.name + (state.worlds[key].unlocked ? '' : ' 🔒');
+    btn.onclick = ()=>{
+      state.currentWorld = key;
+      renderAll();
+    };
+    worldTabsEl.appendChild(btn);
+  }
+  currentWorldNameEl.textContent = WORLD_TEMPLATES[state.currentWorld].name;
+}
+
+/* Render machines, resources, goal etc. */
+function renderWorldPanel(){
+  const key = state.currentWorld;
+  const tpl = WORLD_TEMPLATES[key];
+  const wst = state.worlds[key];
+  worldTitleEl.textContent = tpl.name;
+  worldDescEl.textContent = tpl.desc;
+  rightWorldDescEl.textContent = tpl.desc;
+  // resources
+  worldResourcesEl.innerHTML = '';
+  for(const r in tpl.resources){
+    const resName = typeof tpl.resources[r] === 'string' ? tpl.resources[r] : tpl.resources[r].name;
+    const div = document.createElement('div');
+    div.className = 'res';
+    div.innerHTML = `${resName}: <strong>${fmt(wst.resources[r]||0)}</strong>`;
+    worldResourcesEl.appendChild(div);
+  }
+
+  // machines
+  machinesListEl.innerHTML = '';
+  for(const m of tpl.machines){
+    const ms = wst.machines[m.id];
+    const unlocked = state.money >= 0 && (ms ? true : false); // machine exists in state if world unlocked
+    const card = document.createElement('div');
+    card.className = 'card';
+    const shaft = document.createElement('div');
+    shaft.className = 'machine';
+    const info = document.createElement('div');
+    info.className = 'info';
+    const title = document.createElement('div');
+    title.innerHTML = `<strong>${m.name}</strong> <span class="small">Coût: ${m.baseCost}$</span>`;
+    const sub = document.createElement('div');
+    sub.className = 'small';
+    const consumes = m.consumes ? Object.entries(m.consumes).map(([k,v])=> `${v} ${tpl.resources[k]||k}`).join(', ') : '—';
+    sub.textContent = `Produit: ${(tpl.resources[m.produces]||m.produces)} • Consomme: ${consumes} • Temps: ${m.time}s`;
+    info.appendChild(title);
+    info.appendChild(sub);
+
+    const controls = document.createElement('div');
+    controls.className = 'controls';
+    // count / buy buttons
+    const count = document.createElement('div');
+    count.className = 'small';
+    count.textContent = `x${ms.count||0}`;
+    const buy1 = document.createElement('button');
+    buy1.className = 'btn';
+    buy1.textContent = 'Acheter x1';
+    buy1.onclick = ()=> buyMachine(key, m.id, 1);
+    const buy10 = document.createElement('button');
+    buy10.className = 'btn secondary';
+    buy10.textContent = 'x10';
+    buy10.onclick = ()=> buyMachine(key, m.id, 10);
+    controls.appendChild(count);
+    controls.appendChild(buy1);
+    controls.appendChild(buy10);
+
+    // upgrade buttons
+    const upSpd = document.createElement('button');
+    upSpd.className = 'btn secondary';
+    upSpd.textContent = 'Améliorer vitesse';
+    upSpd.onclick = ()=> upgradeMachine(key, m.id, 'speed');
+
+    const upProd = document.createElement('button');
+    upProd.className = 'btn secondary';
+    upProd.textContent = 'Améliorer prod';
+    upProd.onclick = ()=> upgradeMachine(key, m.id, 'prod');
+
+    // progress bar
+    const progressWrap = document.createElement('div');
+    progressWrap.className = 'small';
+    const pLabel = document.createElement('div');
+    pLabel.textContent = 'Progress:';
+    const prog = document.createElement('div');
+    prog.className = 'progress';
+    const inner = document.createElement('i');
+
+    prog.appendChild(inner);
+    progressWrap.appendChild(pLabel);
+    progressWrap.appendChild(prog);
+
+    shaft.appendChild(info);
+    shaft.appendChild(controls);
+    card.appendChild(shaft);
+    card.appendChild(progressWrap);
+
+    machinesListEl.appendChild(card);
+
+    // update progress with a small function
+    window.requestAnimationFrame(()=> {
+      const ms = state.worlds[key].machines[m.id];
+      const cycleTime = m.time / (state.worlds[key].upgrades.speedMult || 1);
+      const percent = cycleTime>0 ? Math.min(100, (ms.progress / cycleTime) * 100) : 0;
+      inner.style.width = percent + '%';
+      inner.style.transition = 'width 200ms linear';
+    });
+  }
+
+  // world goal
+  const g = tpl.goal;
+  if(g){
+    const has = state.worlds[key].resources[g.resource] || 0;
+    worldGoalEl.innerHTML = `<strong>Objectif : </strong> ${goalDescription(g)}<div style="height:6px"></div>`;
+    if(has >= g.amount){
+      worldGoalEl.innerHTML += `<div class="objective-complete">Objectif atteint ! Monde complété.</div>`;
+    } else {
+      worldGoalEl.innerHTML += `<div class="small">Progression: ${fmt(has)} / ${g.amount}</div>`;
+    }
+  }
+
+  // global upgrades render
+  renderGlobalUpgrades(key);
+  renderMarket(key);
+  renderObjectives();
+  updateRightPanel();
+}
+
+function goalDescription(g){
+  if(g.type === 'produce') return `Produire ${g.amount} ${g.resource}`;
+  if(g.type === 'serve') return `Servir ${g.amount} clients`;
+  if(g.type === 'craft') return `Fabriquer ${g.amount} objet(s) : ${g.resource}`;
+  return JSON.stringify(g);
+}
+
+function renderGlobalUpgrades(worldKey){
+  const cont = document.getElementById('globalUpgrades');
+  cont.innerHTML = '';
+  const wst = state.worlds[worldKey];
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<div class="small">Boost vitesse globale: x${fmt(wst.upgrades.speedMult)}</div>
+                    <div class="small">Boost production: x${fmt(wst.upgrades.prodMult)}</div>`;
+  const buySpeed = document.createElement('button');
+  buySpeed.className = 'btn';
+  buySpeed.textContent = 'Acheter +10% vitesse (coût 500$)';
+  buySpeed.onclick = ()=>{
+    if(state.money >= 500){
+      state.money -= 500;
+      wst.upgrades.speedMult *= 1.1;
+      saveGame();
+      renderAll();
+    } else alert('Pas assez d\'argent');
+  };
+  const buyProd = document.createElement('button');
+  buyProd.className = 'btn';
+  buyProd.textContent = 'Acheter +10% prod (coût 700$)';
+  buyProd.onclick = ()=>{
+    if(state.money >= 700){
+      state.money -= 700;
+      wst.upgrades.prodMult *= 1.1;
+      saveGame();
+      renderAll();
+    } else alert('Pas assez d\'argent');
+  };
+  card.appendChild(buySpeed);
+  card.appendChild(buyProd);
+  cont.appendChild(card);
+}
+
+/* Market: sell resources */
+function renderMarket(worldKey){
+  marketListEl.innerHTML = '';
+  const tpl = WORLD_TEMPLATES[worldKey];
+  const wst = state.worlds[worldKey];
+  for(const r in tpl.resources){
+    const info = tpl.resources[r];
+    const label = typeof info === 'string' ? info : info.name;
+    const amount = wst.resources[r] || 0;
+    const price = (typeof info === 'object' && info.price) ? info.price : (TPL_PRICE_OVERRIDE(worldKey, r) || ( (r.length<7)?1:5) );
+    const row = document.createElement('div');
+    row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.margin='6px 0';
+    row.innerHTML = `<div>${label} <span class="small">(${fmt(amount)})</span></div>`;
+    const right = document.createElement('div');
+    const sellBtn = document.createElement('button');
+    sellBtn.className = 'btn';
+    sellBtn.textContent = `Vendre x1 (+${price}$)`;
+    sellBtn.onclick = ()=> sellResource(worldKey, r, 1, price);
+    const sell10 = document.createElement('button');
+    sell10.className = 'btn secondary';
+    sell10.textContent = `x10`;
+    sell10.onclick = ()=> sellResource(worldKey, r, 10, price);
+    right.appendChild(sellBtn); right.appendChild(sell10);
+    row.appendChild(right);
+    marketListEl.appendChild(row);
+  }
+}
+
+/* Simple function to set price overrides per resource */
+function TPL_PRICE_OVERRIDE(worldKey, resourceKey){
+  // priority: make final products valuable
+  if(resourceKey.includes('pack') || resourceKey.includes('served') || resourceKey.includes('statue') || resourceKey.includes('gold')) return 50;
+  if(resourceKey.includes('baked') || resourceKey.includes('jam') || resourceKey.includes('alloy')) return 20;
+  if(resourceKey.includes('metal') || resourceKey.includes('cake') || resourceKey.includes('flour')) return 8;
+  return 2;
+}
+
+/* Render objectives list & world unlock status */
+function renderObjectives(){
+  objectivesListEl.innerHTML = '';
+  for(const key in WORLD_TEMPLATES){
+    const tpl = WORLD_TEMPLATES[key];
+    const wst = state.worlds[key];
+    const div = document.createElement('div');
+    div.style.marginBottom='8px';
+    const unlocked = wst.unlocked;
+    div.innerHTML = `<strong>${tpl.name}</strong> - ${unlocked ? '<span class="unlocked">Débloqué</span>' : '<span class="locked">Verrouillé</span>'}
+                     <div class="small">${tpl.desc}</div>`;
+    if(!wst.unlocked && checkUnlockCondition(key)){
+      const unlockBtn = document.createElement('button');
+      unlockBtn.className = 'btn';
+      unlockBtn.textContent = 'Débloquer maintenant';
+      unlockBtn.onclick = ()=>{
+        state.worlds[key].unlocked = true;
+        saveGame();
+        renderAll();
+      };
+      div.appendChild(unlockBtn);
+    }
+    objectivesListEl.appendChild(div);
+  }
+}
+
+/* Check unlocking condition: previous world completion */
+function checkUnlockCondition(key){
+  // worlds in order: cakes -> farm -> restaurant -> mine
+  const order = ['cakes','farm','restaurant','mine'];
+  const idx = order.indexOf(key);
+  if(idx <= 0) return false;
+  const prev = order[idx-1];
+  return state.worlds[prev].goalCompleted;
+}
+
+/* Update right panel monitors */
+function updateRightPanel(){
+  const key = state.currentWorld;
+  const tpl = WORLD_TEMPLATES[key];
+  const wst = state.worlds[key];
+  worldStatusEl.textContent = (wst.unlocked ? (wst.goalCompleted ? 'Complété' : 'En cours') : 'Verrouillé');
+  // totals
+  let tot = 0;
+  for(const wk in state.worlds) for(const r in state.worlds[wk].resources) tot += (state.worlds[wk].resources[r] || 0);
+  totalResourcesEl.textContent = fmt(tot);
+  globalEarnedEl.textContent = fmt(state.global.earnedAllTime || 0);
+  sessionsCountEl.textContent = state.sessions || 0;
+}
+
+/* ============================
+   Core Game Actions (buy/sell)
+   ============================ */
+
+function buyMachine(worldKey, machineId, qty){
+  const tpl = WORLD_TEMPLATES[worldKey];
+  const mTpl = tpl.machines.find(m=>m.id===machineId);
+  const ms = state.worlds[worldKey].machines[machineId];
+  if(!mTpl || !ms) return;
+  let totalCost = 0;
+  let base = mTpl.baseCost;
+  let already = ms.count;
+  for(let i=0;i<qty;i++){
+    totalCost += Math.floor(base * Math.pow(mTpl.costMult, already+i));
+  }
+  if(state.money < totalCost){ alert('Pas assez d\'argent'); return; }
+  state.money -= totalCost;
+  state.totalEarned += 0; // money spent not earned
+  ms.count += qty;
+  saveGame();
+  renderAll();
+}
+
+function upgradeMachine(worldKey, machineId, type){
+  // simple upgrades: increases either speedMult or prodMult at machine-level by adding to world upgrades
+  const cost = type === 'speed' ? 150 : 200;
+  if(state.money < cost){ alert('Pas assez d\'argent'); return; }
+  state.money -= cost;
+  if(type === 'speed') state.worlds[worldKey].upgrades.speedMult *= 1.15;
+  else state.worlds[worldKey].upgrades.prodMult *= 1.18;
+  saveGame();
+  renderAll();
+}
+
+function sellResource(worldKey, resKey, qty, price){
+  const wst = state.worlds[worldKey];
+  const have = wst.resources[resKey] || 0;
+  const sellQty = Math.min(have, qty);
+  if(sellQty <= 0) return;
+  wst.resources[resKey] -= sellQty;
+  const gain = sellQty * price;
+  state.money += gain;
+  state.totalEarned += gain;
+  state.global.earnedAllTime = (state.global.earnedAllTime||0) + gain;
+  saveGame();
+  renderAll();
+}
+
+document.getElementById('sellAll').addEventListener('click', ()=>{
+  for(const key in state.worlds){
+    const tpl = WORLD_TEMPLATES[key];
+    const wst = state.worlds[key];
+    for(const r in tpl.resources){
+      const price = TPL_PRICE_OVERRIDE(key, r) || 2;
+      const qty = wst.resources[r] || 0;
+      if(qty > 0){
+        state.money += qty * price;
+        state.totalEarned += qty * price;
+        state.global.earnedAllTime = (state.global.earnedAllTime||0) + qty*price;
+        wst.resources[r] = 0;
+      }
+    }
+  }
+  saveGame();
+  renderAll();
+});
+
+/* Debug */
+document.getElementById('debugAdd').addEventListener('click', ()=>{
+  state.money += 5000;
+  saveGame();
+  renderAll();
+});
+
+/* Fast forward temporary */
+document.getElementById('fastForward').addEventListener('click', ()=>{
+  // speed up for 20s
+  gameSpeedMultiplier = 2;
+  setTimeout(()=> gameSpeedMultiplier = 1, 20000);
+});
+
+/* Export box auto select */
+saveBox.addEventListener('focus', ()=> saveBox.select());
+
+/* ====================
+   Game loop & updates
+   ==================== */
+
+let gameInterval = null;
+let gameSpeedMultiplier = 1;
+
+function tickUpdate(dt){
+  state.playTime += dt;
+  // for each world, tick each machine and produce resources
+  for(const key in state.worlds){
+    const tpl = WORLD_TEMPLATES[key];
+    const wst = state.worlds[key];
+    if(!wst.unlocked) continue;
+    for(const mTpl of tpl.machines){
+      const ms = wst.machines[mTpl.id];
+      if(!ms || ms.count <= 0) continue;
+      const effectiveTime = (mTpl.time / (wst.upgrades.speedMult || 1)) / gameSpeedMultiplier;
+      // increment progress
+      ms.progress += dt * ms.count;
+      // compute number of cycles completed
+      while(ms.progress >= effectiveTime){
+        // attempt to run one cycle per loop
+        // check resources
+        let canRun = true;
+        if(mTpl.consumes){
+          for(const r in mTpl.consumes){
+            const need = mTpl.consumes[r];
+            if((wst.resources[r]||0) < need){ canRun = false; break; }
+          }
+        }
+        if(canRun){
+          // consume
+          if(mTpl.consumes){
+            for(const r in mTpl.consumes){
+              wst.resources[r] -= mTpl.consumes[r];
+            }
+          }
+          // produce
+          const amount = (mTpl.perCycle || 1) * (wst.upgrades.prodMult || 1);
+          wst.resources[mTpl.produces] = (wst.resources[mTpl.produces]||0) + amount;
+          wst.stats.produced[mTpl.produces] = (wst.stats.produced[mTpl.produces]||0) + amount;
+          // special: if production corresponds to goals (like served or final items), update goal completion
+          checkWorldGoal(key);
+        } else {
+          // can't run because not enough input, break to avoid infinite loop
+          break;
+        }
+        ms.progress -= effectiveTime;
+      }
+    }
+  }
+  // update UI
+  updateUI();
+}
+
+function updateUI(){
+  moneyEl.textContent = fmt(state.money);
+  totalEarnedEl.textContent = fmt(state.totalEarned);
+  playTimeEl.textContent = formatTime(state.playTime);
+  globalEarnedEl.textContent = fmt(state.global.earnedAllTime||0);
+  sessionsCountEl.textContent = state.sessions||0;
+  // animate progress bars: already handled on renderWorldPanel by setting widths
+  // re-render some dynamic parts
+  renderWorldPanel();
+}
+
+/* Goal checking and unlocking next worlds */
+function checkWorldGoal(worldKey){
+  const tpl = WORLD_TEMPLATES[worldKey];
+  const wst = state.worlds[worldKey];
+  if(wst.goalCompleted) return;
+  const g = tpl.goal;
+  if(!g) return;
+  const have = wst.resources[g.resource] || 0;
+  if(have >= g.amount){
+    wst.goalCompleted = true;
+    // reward player
+    const reward = 1000 + Math.random()*500;
+    state.money += reward;
+    state.totalEarned += 0;
+    // unlock next world automatically
+    const order = ['cakes','farm','restaurant','mine'];
+    const idx = order.indexOf(worldKey);
+    if(idx < order.length - 1){
+      const next = order[idx+1];
+      state.worlds[next].unlocked = true;
+      alert(`${tpl.name} complété ! Tu débloques ${WORLD_TEMPLATES[next].name} et reçois ${Math.round(reward)}$ !`);
+    } else {
+      alert(`${tpl.name} complété ! Tu as fini tous les mondes !`);
+    }
+    saveGame();
+    renderAll();
+  }
+}
+
+/* Start / stop loop */
+function startGameLoop(){
+  if(gameInterval) clearInterval(gameInterval);
+  let last = Date.now();
+  gameInterval = setInterval(()=>{
+    const now = Date.now();
+    const dt = (now - last) / 1000 * TICK; // scale by TICK to make dt small
+    last = now;
+    tickUpdate(dt);
+  }, TICK*1000);
+}
+
+/* Periodic save */
+setInterval(()=> saveGame(), 10000);
+
+/* initial render */
+function renderAll(){
+  renderWorldTabs();
+  renderWorldPanel();
+  updateRightPanel();
+  currentWorldNameEl.textContent = WORLD_TEMPLATES[state.currentWorld].name;
+}
+
+/* ============================
+   Initialization & start game
+   ============================ */
+
+loadGame();
+state.sessions = (state.sessions||0) + 1;
+saveGame();
+renderAll();
+startGameLoop();
+
+/* compute playTime since lastSaved if needed */
+(function resumeOffline(){
+  const now = Date.now();
+  const last = state.lastSaved || state.createdAt || now;
+  const delta = Math.floor((now - last)/1000);
+  if(delta > 2){
+    computeOffline(delta);
+  }
+})();
+
+/* Save box shows current save */
+saveBox.value = JSON.stringify(state);
+
+/* Update playTime display per second */
+setInterval(()=>{
+  saveBox.value = JSON.stringify(state);
+  renderAll();
+}, 1000);
+
+/* Export/Import helper: manual paste in textarea then click Import */
+
+
+</script>
+</body>
+</html>
