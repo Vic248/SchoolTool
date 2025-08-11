@@ -120,6 +120,28 @@
       transform: translateY(-3px);
     }
 
+    /* Boutons login/logout */
+    #login-btn, #logout-btn {
+      margin-top: 10px;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #login-btn:hover, #logout-btn:hover {
+      background-color: #1f2e3a;
+    }
+
+    #user-info {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -143,10 +165,12 @@
     <a href="https://www.mozaikportail.ca" accesskey="m" onmouseenter="mouseEnter(`mozaik`)" onmouseleave="mouseLeave(`mozaik`)"><i class="fas fa-link" id="mozaik"></i> Mozaik</a>
   </div>
 
-  <a href="314159265358979323846.html" accesskey="s"></a>
-  <a href="https://www.bonk.io" accesskey="w"></a>
-
   <h1>Accueil</h1>
+
+  <!-- Boutons login/logout -->
+  <button id="login-btn">Se connecter / S’inscrire</button>
+  <button id="logout-btn" style="display:none;">Se déconnecter</button>
+  <p id="user-info"></p>
 
   <!-- Grille de boutons -->
   <div class="button-grid">
@@ -164,14 +188,47 @@
     });
 
     function mouseEnter(id) {
-      const newId = document.getElementById(id);
-      newId.classList.add('fa-bounce');
+      document.getElementById(id).classList.add('fa-bounce');
     }
     
     function mouseLeave(id) {
-      const newId = document.getElementById(id);
-      newId.classList.remove('fa-bounce');
+      document.getElementById(id).classList.remove('fa-bounce');
     }
   </script>
+
+  <!-- Netlify Identity -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    netlifyIdentity.init();
+
+    const loginBtn = document.getElementById("login-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+    const userInfo = document.getElementById("user-info");
+
+    loginBtn.addEventListener("click", () => netlifyIdentity.open());
+    logoutBtn.addEventListener("click", () => netlifyIdentity.logout());
+
+    netlifyIdentity.on("login", (user) => {
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "inline-block";
+      userInfo.innerText = `Bonjour, ${user.user_metadata.full_name || user.email}`;
+      netlifyIdentity.close();
+    });
+
+    netlifyIdentity.on("logout", () => {
+      loginBtn.style.display = "inline-block";
+      logoutBtn.style.display = "none";
+      userInfo.innerText = "";
+    });
+
+    netlifyIdentity.on("init", (user) => {
+      if (user) {
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+        userInfo.innerText = `Bonjour, ${user.user_metadata.full_name || user.email}`;
+      }
+    });
+  </script>
+
 </body>
 </html>
