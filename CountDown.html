@@ -302,6 +302,51 @@
     <div id="message"></div>
 </div>
 <script src="/auth.js"></script>
+<!-- Ajoute ceci juste avant ton script principal -->
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+<script>
+  // Initialisation Netlify Identity
+  netlifyIdentity.init();
+
+  // Événements par défaut (toujours visibles)
+  let extraEvents = [
+    {
+      name: "Avant la fin du mandat de Trump",
+      date: "2029-01-20",
+      time: "00:00"
+    }
+  ];
+
+  // Fonction pour ajouter "Avant ma fête" si rôle Victor
+  function addVictorEventIfAllowed(user) {
+    if (user && user.app_metadata && Array.isArray(user.app_metadata.roles) && user.app_metadata.roles.includes("Victor")) {
+      extraEvents.push({
+        name: "Avant ma fête",
+        date: "2026-04-01",
+        time: "04:38"
+      });
+    }
+  }
+
+  // Quand l'utilisateur est déjà connecté
+  netlifyIdentity.on("init", (user) => {
+    addVictorEventIfAllowed(user);
+    updateCountdowns();
+  });
+
+  // Quand l'utilisateur se connecte
+  netlifyIdentity.on("login", (user) => {
+    addVictorEventIfAllowed(user);
+    updateCountdowns();
+  });
+
+  // Quand l'utilisateur se déconnecte → on retire l'événement Victor
+  netlifyIdentity.on("logout", () => {
+    extraEvents = extraEvents.filter(e => e.name !== "Avant ma fête");
+    updateCountdowns();
+  });
+</script>
 <script>
     const bellTimes = [
         "09:10",
@@ -317,21 +362,6 @@
         "14:50",
         "14:55",
         "16:10"
-    ];
-
-    const extraEvents = [
-        {
-            name: "Avant la fin du mandat de Trump",
-            date: "2029-01-20",
-            time: "00:00",
-            role: "open"
-        },
-        {
-            name: "Avant ma fête",
-            date: "2026-04-01",
-            time: "04:38",
-            role: "Victor"
-        }
     ];
 
     function getNextBellTime() {
@@ -407,7 +437,7 @@
                 const eventDateTime = new Date(`${event.date}T${event.time}`);
                 createCountdown(
                     `${event.name} - Le ${eventDateTime.toLocaleDateString('fr-CA')} à ${eventDateTime.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}`,
-                    eventDateTime, event.role
+                    eventDateTime
                 );
             });
         }
@@ -430,12 +460,7 @@
         document.getElementById("main-countdown").onclick = () => openFullscreen(countdownUrl, title);
     }
 
-    function createCountdown(title, dateTime, role) {
-        if (role === "Victor" && ifRole("Victor")) {
-            return;
-        } else {
-            
-        }
+    function createCountdown(title, dateTime) {
         const formattedTime = new Date(dateTime.getTime() - (dateTime.getTimezoneOffset() * 60000)).toISOString().replace(/-|:|\.\d+/g, "");
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const countdownUrl = `https://embed-countdown.onlinealarmkur.com/fr/#${formattedTime}@${encodeURIComponent(timezone)}`;
