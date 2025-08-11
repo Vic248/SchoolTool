@@ -59,3 +59,11 @@ function requireRole(role) {
         }
     });
 }
+
+function ifRole(role) {
+    netlifyIdentity.on("init", (user) => {
+        if (!user || !user.app_metadata.roles.includes(role)) {
+            return true;
+        }
+    });
+}

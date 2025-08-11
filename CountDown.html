@@ -323,12 +323,14 @@
         {
             name: "Avant la fin du mandat de Trump",
             date: "2029-01-20",
-            time: "00:00"
+            time: "00:00",
+            role: "open"
         },
         {
-            name: "Avant la sortie de Donkey Kong Bananza",
-            date: "2025-07-12",
-            time: "00:00"
+            name: "Avant ma fête",
+            date: "2026-04-01",
+            time: "04:38",
+            role: "Victor"
         }
     ];
 
@@ -405,7 +407,7 @@
                 const eventDateTime = new Date(`${event.date}T${event.time}`);
                 createCountdown(
                     `${event.name} - Le ${eventDateTime.toLocaleDateString('fr-CA')} à ${eventDateTime.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}`,
-                    eventDateTime
+                    eventDateTime, event.role
                 );
             });
         }
@@ -417,7 +419,12 @@
         }
     }
 
-    function createMainCountdown(title, dateTime) {
+    function createMainCountdown(title, dateTime, role) {
+        if (role === "Victor") {
+            return;
+        } else {
+
+        }
         const formattedTime = new Date(dateTime.getTime() - (dateTime.getTimezoneOffset() * 60000)).toISOString().replace(/-|:|\.\d+/g, "");
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const countdownUrl = `https://embed-countdown.onlinealarmkur.com/fr/#${formattedTime}@${encodeURIComponent(timezone)}`;
