@@ -181,7 +181,11 @@
       </div>
     </section>
   </main>
-
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="/auth.js"></script>
+  <script>
+    requireLogin();
+  </script>
   <script>
     const runBtn = document.getElementById('run-btn');
     const resetBtn = document.getElementById('reset-btn');
