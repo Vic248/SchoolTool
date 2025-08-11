@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SchoolTool - Connexion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    #login-btn, #logout-btn {
+      background-color: white;
+      color: #333;
+      border: none;
+      padding: 12px 24px;
+      margin: 10px;
+      font-size: 1.1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    #login-btn:hover, #logout-btn:hover {
+      background-color: #f0f0f0;
+      transform: translateY(-2px);
+    }
+
+    #user-info {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1><i class="fas fa-school"></i> SchoolTool</h1>
+  <button id="login-btn">Se connecter / S'inscrire</button>
+  <button id="logout-btn" style="display:none;">Se déconnecter</button>
+  <p id="user-info"></p>
+
+  <footer>© 2025 SchoolTool</footer>
+
+  <!-- Netlify Identity Script -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    // Ouverture du widget
+    document.getElementById("login-btn").addEventListener("click", () => {
+      netlifyIdentity.open();
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      netlifyIdentity.logout();
+    });
+
+    // Connexion
+    netlifyIdentity.on("login", (user) => {
+      console.log("Connecté :", user);
+      document.getElementById("login-btn").style.display = "none";
+      document.getElementById("logout-btn").style.display = "inline-block";
+      document.getElementById("user-info").innerText = `Bonjour, ${user.user_metadata.full_name || user.email}`;
+      netlifyIdentity.close();
+    });
+
+    // Déconnexion
+    netlifyIdentity.on("logout", () => {
+      console.log("Déconnecté");
+      document.getElementById("login-btn").style.display = "inline-block";
+      document.getElementById("logout-btn").style.display = "none";
+      document.getElementById("user-info").innerText = "";
+    });
+
+    // Initialisation
+    netlifyIdentity.init();
+  </script>
+</body>
+</html>
