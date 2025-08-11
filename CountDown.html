@@ -301,7 +301,7 @@
     <div id="countdown-list"></div>
     <div id="message"></div>
 </div>
-
+<script src="/auth.js"></script>
 <script>
     const bellTimes = [
         "09:10",
@@ -419,13 +419,7 @@
         }
     }
 
-    function createMainCountdown(title, dateTime, role) {
-        if (role === "Victor") {
-            alert("Allo")
-            return;
-        } else {
-
-        }
+    function createMainCountdown(title, dateTime) {
         const formattedTime = new Date(dateTime.getTime() - (dateTime.getTimezoneOffset() * 60000)).toISOString().replace(/-|:|\.\d+/g, "");
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const countdownUrl = `https://embed-countdown.onlinealarmkur.com/fr/#${formattedTime}@${encodeURIComponent(timezone)}`;
@@ -436,7 +430,12 @@
         document.getElementById("main-countdown").onclick = () => openFullscreen(countdownUrl, title);
     }
 
-    function createCountdown(title, dateTime) {
+    function createCountdown(title, dateTime, role) {
+        if (role === "Victor" && ifRole("Victor")) {
+            return;
+        } else {
+            
+        }
         const formattedTime = new Date(dateTime.getTime() - (dateTime.getTimezoneOffset() * 60000)).toISOString().replace(/-|:|\.\d+/g, "");
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const countdownUrl = `https://embed-countdown.onlinealarmkur.com/fr/#${formattedTime}@${encodeURIComponent(timezone)}`;
