@@ -50,3 +50,12 @@ function requireLogin() {
         }
     });
 }
+
+function requireRole(role) {
+    netlifyIdentity.on("init", (user) => {
+        if (!user || !user.app_metadata.roles.includes(role)) {
+            alert(`Vous devez être ${role} pour accéder à cette page.`);
+            window.location.href = "/";
+        }
+    });
+}
