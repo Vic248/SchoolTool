@@ -1,5 +1,5 @@
 function loadMenu() {
-    fetch("menu.json")
+    fetch("/menu.json")
         .then(response => response.json())
         .then(menuLinks => {
             const menuContainer = document.createElement("div");
