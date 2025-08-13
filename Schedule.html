@@ -146,18 +146,6 @@
 
     <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
 
-  <!-- Menu latéral -->
-    <div id="menu">
-        <a href="index.html" onmouseenter="mouseEnter(`home`)" onmouseleave="mouseLeave(`home`)"><i class="fas fa-home" id="home"></i> Accueil</a>
-        <a href="CountDown.html" onmouseenter="mouseEnter(`cd`)" onmouseleave="mouseLeave(`cd`)"><i class="fas fa-hourglass-half" id="cd"></i> Compte à rebours</a>
-        <a href="Clock.html" onmouseenter="mouseEnter(`clock`)" onmouseleave="mouseLeave(`clock`)"><i class="fas fa-clock" id="clock"></i> Horloge</a>
-        <a href="Schedule.html" onmouseenter="mouseEnter(`schedule`)" onmouseleave="mouseLeave(`schedule`)"><i class="fas fa-calendar-alt" id="schedule"></i> Horaire</a>
-        <a href="calculator.html" onmouseleave="mouseLeave(`calc`)" onmouseenter="mouseEnter(`calc`)"><i class="fa-solid fa-calculator" id="calc"></i> Calculatrice</a>
-        <a href="games/gameHome.html" onmouseenter="mouseEnter(`gameIcon`)" onmouseleave="mouseLeave(`gameIcon`)"><i class="fa-solid fa-gamepad" id="gameIcon"></i> Menu des jeux</a>
-        <a href="suggestionForm.html" onmouseenter="mouseEnter(`sugg`)" onmouseleave="mouseLeave(`sugg`)"><i class="fas fa-comment-dots" id="sugg"></i> Suggestion</a>
-        <a href="https://www.mozaikportail.ca" accesskey="m" onmouseenter="mouseEnter(`mozaik`)" onmouseleave="mouseLeave(`mozaik`)"><i class="fas fa-link" id="mozaik"></i> Mozaik</a>
-    </div>
-
     <a href="https://www.bonk.io" accesskey="w"></a>
 
     <h2>Horaire scolaire du jour</h2>
@@ -166,7 +154,10 @@
     <script src="/auth.js"></script>
     <!-- Script Netlify Identity -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
+    <script src="/menu.js"></script>
+    <script>
+        loadMenu();
+    </script>
     <script>
     netlifyIdentity.init();
 
