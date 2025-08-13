@@ -1,10 +1,11 @@
 [
-    { "href": "index.html", "icon": "fas fa-home", "id": "home", "text": "Accueil" },
-    { "href": "CountDown.html", "icon": "fas fa-hourglass-half", "id": "cd", "text": "Compte à rebours" },
-    { "href": "Clock.html", "icon": "fas fa-clock", "id": "clock", "text": "Horloge" },
-    { "href": "Schedule.html", "icon": "fas fa-calendar-alt", "id": "schedule", "text": "Horaire" },
-    { "href": "calculator.html", "icon": "fa-solid fa-calculator", "id": "calc", "text": "Calculatrice" },
-    { "href": "games/gameHome.html", "icon": "fa-solid fa-gamepad", "id": "gameIcon", "text": "Menu des jeux" },
-    { "href": "suggestionForm.html", "icon": "fas fa-comment-dots", "id": "sugg", "text": "Suggestion" },
+    { "href": "/index.html", "icon": "fas fa-home", "id": "home", "text": "Accueil" },
+    { "href": "/CountDown.html", "icon": "fas fa-hourglass-half", "id": "cd", "text": "Compte à rebours" },
+    { "href": "/Clock.html", "icon": "fas fa-clock", "id": "clock", "text": "Horloge" },
+    { "href": "/weather.html", "icon": "fas fa-sun", "id": "weather", "text": "Météo"},
+    { "href": "/Schedule.html", "icon": "fas fa-calendar-alt", "id": "schedule", "text": "Horaire" },
+    { "href": "/calculator.html", "icon": "fa-solid fa-calculator", "id": "calc", "text": "Calculatrice" },
+    { "href": "/games/gameHome.html", "icon": "fa-solid fa-gamepad", "id": "gameIcon", "text": "Menu des jeux" },
+    { "href": "/suggestionForm.html", "icon": "fas fa-comment-dots", "id": "sugg", "text": "Suggestion" },
     { "href": "https://www.mozaikportail.ca", "icon": "fas fa-link", "id": "mozaik", "text": "Mozaik" }
 ]
