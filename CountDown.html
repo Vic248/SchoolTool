@@ -257,6 +257,20 @@
     loadMenu();
 </script>
 <script>
+document.getElementById("menu-btn").addEventListener("click", function () {
+        document.getElementById("menu").classList.toggle("open");    
+    });
+
+    function mouseEnter(id) {
+      const newId = document.getElementById(id);
+      newId.classList.add('fa-bounce');
+    }
+    
+    function mouseLeave(id) {
+      const newId = document.getElementById(id);
+      newId.classList.remove('fa-bounce');
+    }
+
 netlifyIdentity.init();
 const authBtn = document.getElementById("auth-btn");
 
