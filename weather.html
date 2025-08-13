@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <link rel="icon" href="../schooltoolicon.png" type="image/x-icon">
+        <title>Météo</title>
+
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+                color: #fff;
+                text-align: center;
+                margin: 0;
+                padding: 20px;
+            }
+            .weather-widget {
+                background: rgba(20, 20, 20, 0.85);
+                border-radius: 16px;
+                padding: 20px;
+                width: 95%;
+                max-width: 900px;
+                margin: auto;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            }
+            .current {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+            .forecast {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+                margin-top: 15px;
+                padding-bottom: 10px;
+            }
+            .forecast-day {
+                background: rgba(40, 40, 40, 0.9);
+                padding: 10px;
+                border-radius: 10px;
+                min-width: 90px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                transition: transform 0.2s;
+            }
+            .forecast-day:hover {
+                transform: scale(1.05);
+                background: rgba(60, 60, 60, 0.9);
+            }
+            img {
+                width: 50px;
+                height: 50px;
+                filter: drop-shadow(0 0 3px rgba(255,255,255,0.3));
+            }
+            h2, h3 {
+                color: #ffd700;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="weather-widget">
+            <h2 id="location">📍 Chargement...</h2>
+            <div class="current">
+                <div id="temp"></div>
+                <div id="feels"></div>
+                <div id="desc"></div>
+            </div>
+
+            <h3>Prévisions horaires</h3>
+            <div class="forecast" id="hourly"></div>
+
+            <h3>Prévisions sur 7 jours</h3>
+            <div class="forecast" id="daily7"></div>
+
+            <h3>Prévisions sur 14 jours</h3>
+            <div class="forecast" id="daily14"></div>
+        </div>
+
+        <script>
+            function getWeatherIcon(code) {
+            const icons = {
+                0: "☀️", 1: "🌤", 2: "⛅", 3: "☁️",
+                45: "🌫", 48: "🌫", 51: "🌦", 61: "🌧",
+                71: "❄️", 80: "🌦", 95: "⛈"
+            };
+            return icons[code] || "❔";
+            }
+
+            navigator.geolocation.getCurrentPosition(pos => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,apparent_temperature,weathercode&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,weathercode&forecast_days=14&timezone=auto`)
+                .then(res => res.json())
+                .then(data => {
+                document.getElementById("location").textContent = `📍 Position détectée`;
+                document.getElementById("temp").textContent = `🌡 ${Math.round(data.current_weather.temperature)}°C`;
+                document.getElementById("feels").textContent = `💨 Ressenti : ${Math.round(data.hourly.apparent_temperature[0])}°C`;
+                document.getElementById("desc").textContent = getWeatherIcon(data.current_weather.weathercode);
+
+                // Prévisions horaires
+                let hourlyHTML = "";
+                for (let i = 0; i < 24; i++) {
+                    hourlyHTML += `<div class="forecast-day">
+                    <div>${new Date(data.hourly.time[i]).getHours()}h</div>
+                    <div>${getWeatherIcon(data.hourly.weathercode[i])}</div>
+                    <div>${Math.round(data.hourly.temperature_2m[i])}°C</div>
+                    </div>`;
+                }
+                document.getElementById("hourly").innerHTML = hourlyHTML;
+
+                // Prévisions 7 jours
+                let daily7HTML = "";
+                for (let i = 0; i < 7; i++) {
+                    daily7HTML += `<div class="forecast-day">
+                    <div>${new Date(data.daily.time[i]).toLocaleDateString("fr-FR", { weekday: 'short' })}</div>
+                    <div>${getWeatherIcon(data.daily.weathercode[i])}</div>
+                    <div>${Math.round(data.daily.temperature_2m_min[i])}° / ${Math.round(data.daily.temperature_2m_max[i])}°C</div>
+                    </div>`;
+                }
+                document.getElementById("daily7").innerHTML = daily7HTML;
+
+                // Prévisions 14 jours
+                let daily14HTML = "";
+                for (let i = 0; i < 14; i++) {
+                    daily14HTML += `<div class="forecast-day">
+                    <div>${new Date(data.daily.time[i]).toLocaleDateString("fr-FR", { weekday: 'short' })}</div>
+                    <div>${getWeatherIcon(data.daily.weathercode[i])}</div>
+                    <div>${Math.round(data.daily.temperature_2m_min[i])}° / ${Math.round(data.daily.temperature_2m_max[i])}°C</div>
+                    </div>`;
+                }
+                document.getElementById("daily14").innerHTML = daily14HTML;
+                })
+                .catch(err => {
+                console.error(err);
+                document.getElementById("location").textContent = "Erreur de chargement météo";
+                });
+            });
+        </script>
+    </body>
+</html>
