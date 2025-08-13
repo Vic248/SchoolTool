@@ -1,206 +1,174 @@
 <!DOCTYPE html>
 <html lang="fr-CA">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <title>Comptes à Rebours</title>
-    <style>
-        body {
-            font-family: 'Poppins', Arial, sans-serif;
-            background-color: #f5f7fa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        @keyframes morningBackgroundAnimation {
-            0% {
-                background-color: yellow;
-            }
-            50% {
-                background-color: orange;
-            }
-            100% {
-                background-color: yellow;
-            }
-        }
-
-        @keyframes afternoonBackgroundAnimation {
-            0% {
-                background-color: blue;
-            }
-            50% {
-                background-color: lightblue;
-            }
-            100% {
-                background-color: blue;
-            }
-        }
-
-        @keyframes eveningBackgroundAnimation {
-            0% {
-                background-color: darkblue;
-            }
-            50% {
-                background-color: #333333;
-            }
-            100% {
-                background-color: darkblue;
-            }
-        }
-
-        @keyframes nightBackgroundAnimation {
-            0% {
-                background-color: gray;
-            }
-            50% {
-                background-color: black;
-            }
-            100% {
-                background-color: gray;
-            }
-        }
-
-        #countdown-container {
-            width: 90%;
-            max-width: 1200px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 36px;
-            color: white;
-            margin-top: 20px;
-        }
-
-        #main-countdown {
-            background-color: #ffedcc;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        #main-countdown iframe {
-            width: 400px; /* Largeur fixe */
-            height: 120px; /* Hauteur fixe */
-            border: none;
-        }
-
-        #main-countdown:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        #countdown-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Largeur fixe de 400px */
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .countdown-wrapper {
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-align: center;
-        }
-
-        .countdown-wrapper:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        iframe {
-            border: none;
-            width: 400px; /* Largeur fixe */
-            height: 120px; /* Hauteur fixe */
-        }
-
-        #message {
-            font-size: 18px;
-            margin-top: 20px;
-            color: #666;
-        }
-
-        .fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            z-index: 1000;
-            background: linear-gradient(45deg, blue, lightblue)
-        }
-
-        .fullscreen iframe {
-            width: 100%;
-            height: 100%;
-        }
-
-        .fullscreenTitle {
-            position: absolute;
-            top: 10%;
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            font-size: 50px;
-            font-family: Impact;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.5);
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 28px;
-            }
-            #main-countdown iframe {
-                height: 100px;
-                width: 100%; /* Pour les petits écrans, occuper toute la largeur */
-            }
-            #countdown-list {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        body {
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<title>Comptes à Rebours</title>
+<style>
+    body {
+        font-family: 'Poppins', Arial, sans-serif;
         margin: 0;
-        font-family: 'Segoe UI', sans-serif;
-        background: linear-gradient(to bottom right, #eef2f7, #d9e4f5);
-        min-height: 100vh;
+        padding: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
+        min-height: 100vh;
         overflow-x: hidden;
-        }
+        animation: morningBackgroundAnimation 10s ease-in-out infinite;
+        background-attachment: fixed;
+    }
 
-        #menu-btn {
+    /* Animations fond */
+    @keyframes morningBackgroundAnimation {
+        0% { background-color: yellow; }
+        50% { background-color: orange; }
+        100% { background-color: yellow; }
+    }
+    @keyframes afternoonBackgroundAnimation {
+        0% { background-color: blue; }
+        50% { background-color: lightblue; }
+        100% { background-color: blue; }
+    }
+    @keyframes eveningBackgroundAnimation {
+        0% { background-color: darkblue; }
+        50% { background-color: #333333; }
+        100% { background-color: darkblue; }
+    }
+    @keyframes nightBackgroundAnimation {
+        0% { background-color: gray; }
+        50% { background-color: black; }
+        100% { background-color: gray; }
+    }
+
+    h1 {
+        font-size: 36px;
+        color: white;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    /* Bloc prochaine cloche */
+    #main-countdown {
+        background-color: #ffedcc;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        margin-top: 20px;
+        max-width: 600px;
+        width: 90%;
+        text-align: center;
+    }
+    #main-countdown iframe {
+        width: 100%;
+        height: 120px;
+        border: none;
+    }
+
+    /* Formulaire */
+    #countdown-form {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+    #countdown-form input, #countdown-form button {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+    #countdown-form button {
+        background: #2c3e50;
+        color: white;
+        cursor: pointer;
+    }
+    #countdown-form button:hover {
+        background: #1f2e3a;
+    }
+
+    /* Liste événements */
+    #countdown-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+        width: 90%;
+        max-width: 1200px;
+    }
+
+    .countdown-wrapper {
+        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-align: center;
+        position: relative;
+    }
+    .countdown-wrapper:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    iframe {
+        border: none;
+        width: 100%;
+        height: 120px;
+    }
+
+    /* Bouton suppression */
+    .delete-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: red;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        display: none;
+    }
+    .countdown-wrapper:hover .delete-btn {
+        display: inline-block;
+    }
+    .delete-btn:hover {
+        background: darkred;
+    }
+
+    /* Bouton connexion */
+    #auth-btn {
+        position: fixed;
+        top: 15px;
+        right: 20px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        z-index: 1002;
+    }
+    #auth-btn:hover {
+        background-color: #1f2e3a;
+    }
+
+    /* Message vide */
+    #message {
+        margin-top: 20px;
+        font-size: 18px;
+        color: white;
+        text-align: center;
+    }
+    #menu-btn {
         position: fixed;
         top: 20px;
         left: 20px;
@@ -257,314 +225,190 @@
         #menu a:hover {
         background-color: #34495e;
         }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 28px;
-            }
-        }
-
-        center {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 9999;
-        }
-        #auth-btn {
-            position: fixed;
-            top: 15px;
-            right: 20px;
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 1002;
-            transition: background 0.3s;
-        }
-
-        #auth-btn:hover {
-            background-color: #1f2e3a;
-        }
-    </style>
+</style>
 </head>
 <body>
-    <!-- Bouton connexion/déconnexion -->
-    <button id="auth-btn">Se connecter</button>
 
-    <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
+<button id="auth-btn">Se connecter</button>
 
-    <a href="https://www.bonk.io" accesskey="w"></a>
+<button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
 
-<div id="countdown-container">
-    <h1>⏰ Prochaine cloche & événements à venir</h1>
+<h1>⏰ Prochaine cloche & événements à venir</h1>
 
-    <div id="main-countdown" style="display: none;">
-        <div id="main-title"><strong>Prochaine cloche</strong></div>
-        <iframe id="main-iframe" src=""></iframe>
-    </div>
-
-    <div id="countdown-list"></div>
-    <div id="message"></div>
+<div id="main-countdown" style="display:none;">
+    <div id="main-title"></div>
+    <iframe id="main-iframe"></iframe>
 </div>
-<script src="/auth.js"></script>
-<!-- Script Netlify Identity -->
+
+<form id="countdown-form">
+    <input type="text" id="event-name" placeholder="Nom de l'événement" required>
+    <input type="date" id="event-date" required>
+    <input type="time" id="event-time" required>
+    <button type="submit">Créer</button>
+</form>
+
+<div id="countdown-list"></div>
+<div id="message"></div>
+
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="/auth.js"></script>
 <script src="/menu.js"></script>
-    <script>
-        loadMenu();
-    </script>
 <script>
-  netlifyIdentity.init();
+    loadMenu();
+</script>
+<script>
+netlifyIdentity.init();
+const authBtn = document.getElementById("auth-btn");
 
-  const authBtn = document.getElementById("auth-btn");
-
-  function updateAuthButton(user) {
+function updateAuthButton(user) {
     if (user) {
-      authBtn.textContent = "Se déconnecter";
-      authBtn.onclick = () => netlifyIdentity.logout();
+        authBtn.textContent = "Se déconnecter";
+        authBtn.onclick = () => netlifyIdentity.logout();
     } else {
-      authBtn.textContent = "Se connecter";
-      authBtn.onclick = () => netlifyIdentity.open();
+        authBtn.textContent = "Se connecter";
+        authBtn.onclick = () => netlifyIdentity.open();
     }
-  }
+}
+netlifyIdentity.on("init", updateAuthButton);
+netlifyIdentity.on("login", () => { updateAuthButton(netlifyIdentity.currentUser()); loadEvents(); });
+netlifyIdentity.on("logout", () => { updateAuthButton(null); loadEvents(); });
 
-  netlifyIdentity.on("init", updateAuthButton);
-  netlifyIdentity.on("login", (user) => {
-    updateAuthButton(user);
-    netlifyIdentity.close();
-  });
-  netlifyIdentity.on("logout", () => updateAuthButton(null));
-</script>
-<script>
-  // Initialisation Netlify Identity
-  netlifyIdentity.init();
+let fixedEvents = [
+    { name: "Avant la fin du mandat de Trump", date: "2029-01-20", time: "00:00", fixed: true }
+];
+let customEvents = [];
 
-  // Événements par défaut (toujours visibles)
-  let extraEvents = [
-    {
-      name: "Avant la fin du mandat de Trump",
-      date: "2029-01-20",
-      time: "00:00"
+function addVictorEventIfAllowed(user) {
+    if (user && user.app_metadata?.roles?.includes("Victor")) {
+        fixedEvents.push({ name: "Avant ma fête", date: "2026-04-01", time: "04:38", fixed: true });
     }
-  ];
+}
 
-  // Fonction pour ajouter "Avant ma fête" si rôle Victor
-  function addVictorEventIfAllowed(user) {
-    if (user && user.app_metadata && Array.isArray(user.app_metadata.roles) && user.app_metadata.roles.includes("Victor")) {
-      extraEvents.push({
-        name: "Avant ma fête",
-        date: "2026-04-01",
-        time: "04:38"
-      });
+function saveCustomEvents() {
+    const user = netlifyIdentity.currentUser();
+    if (user) {
+        user.update({ data: { countdowns: customEvents } }).then(loadEvents);
+    } else {
+        localStorage.setItem("countdowns", JSON.stringify(customEvents));
     }
-  }
+}
 
-  // Quand l'utilisateur est déjà connecté
-  netlifyIdentity.on("init", (user) => {
-    addVictorEventIfAllowed(user);
-    updateCountdowns();
-  });
-
-  // Quand l'utilisateur se connecte
-  netlifyIdentity.on("login", (user) => {
-    addVictorEventIfAllowed(user);
-    updateCountdowns();
-  });
-
-  // Quand l'utilisateur se déconnecte → on retire l'événement Victor
-  netlifyIdentity.on("logout", () => {
-    extraEvents = extraEvents.filter(e => e.name !== "Avant ma fête");
-    updateCountdowns();
-  });
-</script>
-<script>
-    const bellTimes = [
-        "09:10",
-        "09:15",
-        "10:30",
-        "10:40",
-        "10:45",
-        "12:00",
-        "13:15",
-        "13:20",
-        "13:25",
-        "14:40",
-        "14:50",
-        "14:55",
-        "16:10"
+function loadEvents() {
+    const user = netlifyIdentity.currentUser();
+    fixedEvents = [
+        { name: "Avant la fin du mandat de Trump", date: "2029-01-20", time: "00:00", fixed: true }
     ];
-
-    function getNextBellTime() {
-        const now = new Date();
-        const today = now.toISOString().split('T')[0];
-        let nextBell = null;
-
-        bellTimes.forEach(time => {
-            const bellDateTime = new Date(`${today}T${time}`);
-            if (bellDateTime > now && (nextBell === null || bellDateTime < nextBell)) {
-                nextBell = bellDateTime;
-            }
-        });
-
-        return nextBell;
+    addVictorEventIfAllowed(user);
+    if (user && user.user_metadata?.countdowns) {
+        customEvents = user.user_metadata.countdowns;
+    } else {
+        const saved = localStorage.getItem("countdowns");
+        customEvents = saved ? JSON.parse(saved) : [];
     }
-
-    function getValidExtraEvents() {
-        const now = new Date();
-        return extraEvents
-            .filter(event => {
-                const eventDateTime = new Date(`${event.date}T${event.time}`);
-                return eventDateTime > now;
-            })
-            .sort((a, b) => {
-                const dateA = new Date(`${a.date}T${a.time}`);
-                const dateB = new Date(`${b.date}T${b.time}`);
-                return dateA - dateB;
-            });
-    }
-
-
-    function updateCountdowns() {
-        const now = new Date();
-        const dayOfWeek = now.getDay();
-        const countdownList = document.getElementById("countdown-list");
-        const mainCountdown = document.getElementById("main-countdown");
-        const mainIframe = document.getElementById("main-iframe");
-        const mainTitle = document.getElementById("main-title");
-        const message = document.getElementById("message");
-
-        countdownList.innerHTML = "";
-        mainCountdown.style.display = "none";
-
-        let mainEventSet = false;
-
-        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-            const nextBell = getNextBellTime();
-            if (nextBell) {
-                if (!mainEventSet) {
-                    createMainCountdown(
-                        `Avant la cloche`,
-                        nextBell
-                    );
-                    mainEventSet = true;
-                }
-            } else {
-                message.innerHTML = "Toutes les cloches sont terminées pour aujourd'hui ! 🎉";
-            }
-        }
-
-        const validEvents = getValidExtraEvents();
-        if (validEvents.length > 0) {
-            validEvents.forEach(event => {
-
-                validEvents.sort((a, b) => {
-                    const dateA = new Date(`${a.date}T${a.time}`);
-                    const dateB = new Date(`${b.date}T${b.time}`);
-                    return dateA - dateB;
-                });
-
-
-                const eventDateTime = new Date(`${event.date}T${event.time}`);
-                createCountdown(
-                    `${event.name} - Le ${eventDateTime.toLocaleDateString('fr-CA')} à ${eventDateTime.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}`,
-                    eventDateTime
-                );
-            });
-        }
-
-        if (countdownList.innerHTML === "" && !mainEventSet) {
-            message.innerHTML = "Aucun événement à venir. 🎉";
-        } else {
-            message.innerHTML = "Les comptes à rebours sont prêts ! 🕒";
-        }
-    }
-
-    function createMainCountdown(title, dateTime) {
-        const formattedTime = new Date(dateTime.getTime() - (dateTime.getTimezoneOffset() * 60000)).toISOString().replace(/-|:|\.\d+/g, "");
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const countdownUrl = `https://embed-countdown.onlinealarmkur.com/fr/#${formattedTime}@${encodeURIComponent(timezone)}`;
-
-        document.getElementById("main-title").innerHTML = `<strong style="font-family: Times">${title}</strong>`;
-        document.getElementById("main-iframe").src = countdownUrl;
-        document.getElementById("main-countdown").style.display = "block";
-        document.getElementById("main-countdown").onclick = () => openFullscreen(countdownUrl, title);
-    }
-
-    function createCountdown(title, dateTime) {
-        const formattedTime = new Date(dateTime.getTime() - (dateTime.getTimezoneOffset() * 60000)).toISOString().replace(/-|:|\.\d+/g, "");
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const countdownUrl = `https://embed-countdown.onlinealarmkur.com/fr/#${formattedTime}@${encodeURIComponent(timezone)}`;
-
-        const countdownWrapper = document.createElement("div");
-        countdownWrapper.className = "countdown-wrapper";
-
-        const eventTitle = document.createElement("div");
-        eventTitle.innerHTML = `<strong style="font-family: Times">${title}</strong>`;
-        countdownWrapper.onclick = () => openFullscreen(countdownUrl, title);
-
-        const iframe = document.createElement("iframe");
-        iframe.src = countdownUrl;
-
-        countdownWrapper.appendChild(eventTitle);
-        countdownWrapper.appendChild(iframe);
-
-        document.getElementById("countdown-list").appendChild(countdownWrapper);
-    }
-
     updateCountdowns();
-    setInterval(updateCountdowns, 30000);
+}
 
-    function updateBackground() {
-        const now = new Date();
-        const hour = now.getHours();
-        const body = document.body
+document.getElementById("countdown-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const name = document.getElementById("event-name").value;
+    const date = document.getElementById("event-date").value;
+    const time = document.getElementById("event-time").value;
+    customEvents.push({ name, date, time, fixed: false });
+    saveCustomEvents();
+    loadEvents();
+    e.target.reset();
+});
 
-        if (hour >= 6 && hour < 12) {
-            // Matin 🌅
-            body.style.animation = "morningBackgroundAnimation 10s ease-in-out infinite"
-        } else if (hour >= 12 && hour < 18) {
-            // Après-midi ☀️
-            body.style.animation = "afternoonBackgroundAnimation 10s ease-in-out infinite";
-        } else if (hour >= 18 && hour < 21) {
-            // Soir 🌆
-            body.style.animation = "eveningBackgroundAnimation 10s ease-in-out infinite";
-        } else {
-            // Nuit 🌙
-            body.style.animation = "nightBackgroundAnimation 10s ease-in-out infinite";
-        }
+function deleteEvent(index) {
+    customEvents.splice(index, 1);
+    saveCustomEvents();
+    loadEvents();
+}
 
-        document.body.style.backgroundAttachment = "fixed";
-    }
-
-    function openFullscreen(url, title) {
-        const fullscreenDiv = document.createElement("div");
-        fullscreenDiv.style.textAlign = "center";
-        fullscreenDiv.className = "fullscreen";
-        fullscreenDiv.innerHTML = `<iframe src="${url}"></iframe><button class="close-btn" onclick="this.parentElement.remove()">×</button><p class="fullscreenTitle">${title}</p>`;
-        document.body.appendChild(fullscreenDiv);
-    }
-
-    updateBackground();
-    setInterval(updateBackground, 60000); // Met à jour toutes les minutes
-
-    document.getElementById("menu-btn").addEventListener("click", function () {
-        document.getElementById("menu").classList.toggle("open");
+const bellTimes = ["09:10","09:15","10:30","10:40","10:45","12:00","13:15","13:20","13:25","14:40","14:50","14:55","16:10"];
+function getNextBellTime() {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    let nextBell = null;
+    bellTimes.forEach(time => {
+        const bellDateTime = new Date(`${today}T${time}`);
+        if (bellDateTime > now && (!nextBell || bellDateTime < nextBell)) nextBell = bellDateTime;
     });
+    return nextBell;
+}
 
-    function mouseEnter(id) {
-      const newId = document.getElementById(id);
-      newId.classList.add('fa-bounce');
+function updateCountdowns() {
+    const list = document.getElementById("countdown-list");
+    list.innerHTML = "";
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const main = document.getElementById("main-countdown");
+    const mainTitle = document.getElementById("main-title");
+    const mainIframe = document.getElementById("main-iframe");
+    main.style.display = "none";
+
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        const nextBell = getNextBellTime();
+        if (nextBell) {
+            mainTitle.innerHTML = `<strong>Avant la cloche</strong>`;
+            mainIframe.src = buildCountdownUrl(nextBell);
+            main.style.display = "block";
+        }
     }
-    
-    function mouseLeave(id) {
-      const newId = document.getElementById(id);
-      newId.classList.remove('fa-bounce');
+
+    const allEvents = [...fixedEvents, ...customEvents];
+    const validEvents = allEvents.filter(ev => new Date(`${ev.date}T${ev.time}`) > now)
+                                 .sort((a,b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+
+    if (validEvents.length === 0) {
+        document.getElementById("message").textContent = "🎉 Aucun événement à venir";
+        return;
+    } else {
+        document.getElementById("message").textContent = "";
     }
+
+    validEvents.forEach((event, idx) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "countdown-wrapper";
+        if (!event.fixed) {
+            const btn = document.createElement("button");
+            btn.className = "delete-btn";
+            btn.textContent = "❌";
+            btn.onclick = () => deleteEvent(idx - fixedEvents.length >= 0 ? idx - fixedEvents.length : idx);
+            wrapper.appendChild(btn);
+        }
+        const title = document.createElement("div");
+        title.innerHTML = `<strong>${event.name} - Le ${new Date(`${event.date}T${event.time}`).toLocaleDateString('fr-CA')} à ${event.time}</strong>`;
+        const iframe = document.createElement("iframe");
+        iframe.src = buildCountdownUrl(new Date(`${event.date}T${event.time}`));
+        wrapper.appendChild(title);
+        wrapper.appendChild(iframe);
+        list.appendChild(wrapper);
+    });
+}
+
+function buildCountdownUrl(date) {
+    const formattedTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().replace(/-|:|\.\d+/g, "");
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return `https://embed-countdown.onlinealarmkur.com/fr/#${formattedTime}@${encodeURIComponent(timezone)}`;
+}
+
+function updateBackground() {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 12) {
+        document.body.style.animation = "morningBackgroundAnimation 10s ease-in-out infinite";
+    } else if (hour >= 12 && hour < 18) {
+        document.body.style.animation = "afternoonBackgroundAnimation 10s ease-in-out infinite";
+    } else if (hour >= 18 && hour < 21) {
+        document.body.style.animation = "eveningBackgroundAnimation 10s ease-in-out infinite";
+    } else {
+        document.body.style.animation = "nightBackgroundAnimation 10s ease-in-out infinite";
+    }
+}
+
+updateBackground();
+setInterval(updateBackground, 60000);
+loadEvents();
 </script>
-
 </body>
 </html>
