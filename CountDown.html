@@ -20,26 +20,10 @@
     }
 
     /* Animations fond */
-    @keyframes morningBackgroundAnimation {
-        0% { background-color: yellow; }
-        50% { background-color: orange; }
-        100% { background-color: yellow; }
-    }
-    @keyframes afternoonBackgroundAnimation {
-        0% { background-color: blue; }
-        50% { background-color: lightblue; }
-        100% { background-color: blue; }
-    }
-    @keyframes eveningBackgroundAnimation {
-        0% { background-color: darkblue; }
-        50% { background-color: #333333; }
-        100% { background-color: darkblue; }
-    }
-    @keyframes nightBackgroundAnimation {
-        0% { background-color: gray; }
-        50% { background-color: black; }
-        100% { background-color: gray; }
-    }
+    @keyframes morningBackgroundAnimation { 0% { background-color: yellow; } 50% { background-color: orange; } 100% { background-color: yellow; } }
+    @keyframes afternoonBackgroundAnimation { 0% { background-color: blue; } 50% { background-color: lightblue; } 100% { background-color: blue; } }
+    @keyframes eveningBackgroundAnimation { 0% { background-color: darkblue; } 50% { background-color: #333333; } 100% { background-color: darkblue; } }
+    @keyframes nightBackgroundAnimation { 0% { background-color: gray; } 50% { background-color: black; } 100% { background-color: gray; } }
 
     h1 {
         font-size: 36px;
@@ -58,6 +42,7 @@
         max-width: 600px;
         width: 90%;
         text-align: center;
+        cursor: pointer;
     }
     #main-countdown iframe {
         width: 100%;
@@ -110,6 +95,7 @@
         transition: transform 0.2s, box-shadow 0.2s;
         text-align: center;
         position: relative;
+        cursor: pointer;
     }
     .countdown-wrapper:hover {
         transform: translateY(-5px);
@@ -135,6 +121,7 @@
         cursor: pointer;
         font-size: 12px;
         display: none;
+        z-index: 5;
     }
     .countdown-wrapper:hover .delete-btn {
         display: inline-block;
@@ -168,70 +155,67 @@
         color: white;
         text-align: center;
     }
-    #menu-btn {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        padding: 12px 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 1001;
-        transition: background-color 0.3s;
-        }
 
-        #menu-btn:hover {
-        background-color: #1f2e3a;
-        }
-
-        #menu {
+    /* Fullscreen pop-up */
+    .fullscreen {
         position: fixed;
         top: 0;
-        left: -260px;
-        width: 260px;
-        height: 100%;
-        background-color: #2c3e50;
-        color: white;
-        padding-top: 70px;
-        transition: left 0.3s ease;
-        z-index: 1000;
-        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
-        }
-
-        #menu.open {
         left: 0;
-        }
-
-        #menu a {
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(135deg, #000428, #004e92);
         display: flex;
+        justify-content: center;
         align-items: center;
-        padding: 14px 24px;
+        z-index: 2000;
+        flex-direction: column;
+        animation: gradientShift 6s ease-in-out infinite alternate;
+        transform: scale(0.7);
+        opacity: 0;
+        transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+    }
+    .fullscreen.show {
+        transform: scale(1);
+        opacity: 1;
+    }
+    @keyframes gradientShift {
+        0% { background: linear-gradient(135deg, #000428, #004e92); }
+        100% { background: linear-gradient(135deg, #283e51, #485563); }
+    }
+    .fullscreen iframe {
+        width: 80%;
+        height: 200px;
+        border: none;
+    }
+    .fullscreenTitle {
         color: white;
-        text-decoration: none;
-        font-size: 1rem;
-        font-weight: 500;
-        transition: background-color 0.2s;
-        }
-
-        #menu a i {
-        margin-right: 12px;
-        width: 20px;
-        }
-
-        #menu a:hover {
-        background-color: #34495e;
-        }
+        font-size: 24px;
+        margin-bottom: 20px;
+        font-weight: bold;
+        text-align: center;
+    }
+    .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255,255,255,0.8);
+        border: none;
+        padding: 10px 14px;
+        border-radius: 50%;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease;
+    }
+    .close-btn:hover {
+        transform: scale(1.1);
+        background: white;
+    }
 </style>
 </head>
 <body>
 
 <button id="auth-btn">Se connecter</button>
-
-<button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
 
 <h1>⏰ Prochaine cloche & événements à venir</h1>
 
@@ -251,26 +235,7 @@
 <div id="message"></div>
 
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-<script src="/auth.js"></script>
-<script src="/menu.js"></script>
 <script>
-    loadMenu();
-</script>
-<script>
-document.getElementById("menu-btn").addEventListener("click", function () {
-        document.getElementById("menu").classList.toggle("open");    
-    });
-
-    function mouseEnter(id) {
-      const newId = document.getElementById(id);
-      newId.classList.add('fa-bounce');
-    }
-    
-    function mouseLeave(id) {
-      const newId = document.getElementById(id);
-      newId.classList.remove('fa-bounce');
-    }
-
 netlifyIdentity.init();
 const authBtn = document.getElementById("auth-btn");
 
@@ -366,6 +331,7 @@ function updateCountdowns() {
         if (nextBell) {
             mainTitle.innerHTML = `<strong>Avant la cloche</strong>`;
             mainIframe.src = buildCountdownUrl(nextBell);
+            main.onclick = () => openFullscreen(buildCountdownUrl(nextBell), "Avant la cloche");
             main.style.display = "block";
         }
     }
@@ -384,11 +350,12 @@ function updateCountdowns() {
     validEvents.forEach((event, idx) => {
         const wrapper = document.createElement("div");
         wrapper.className = "countdown-wrapper";
+        wrapper.onclick = () => openFullscreen(buildCountdownUrl(new Date(`${event.date}T${event.time}`)), event.name);
         if (!event.fixed) {
             const btn = document.createElement("button");
             btn.className = "delete-btn";
             btn.textContent = "❌";
-            btn.onclick = () => deleteEvent(idx - fixedEvents.length >= 0 ? idx - fixedEvents.length : idx);
+            btn.onclick = (e) => { e.stopPropagation(); deleteEvent(idx - fixedEvents.length); };
             wrapper.appendChild(btn);
         }
         const title = document.createElement("div");
@@ -409,15 +376,30 @@ function buildCountdownUrl(date) {
 
 function updateBackground() {
     const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) {
-        document.body.style.animation = "morningBackgroundAnimation 10s ease-in-out infinite";
-    } else if (hour >= 12 && hour < 18) {
-        document.body.style.animation = "afternoonBackgroundAnimation 10s ease-in-out infinite";
-    } else if (hour >= 18 && hour < 21) {
-        document.body.style.animation = "eveningBackgroundAnimation 10s ease-in-out infinite";
-    } else {
-        document.body.style.animation = "nightBackgroundAnimation 10s ease-in-out infinite";
-    }
+    if (hour >= 6 && hour < 12) document.body.style.animation = "morningBackgroundAnimation 10s ease-in-out infinite";
+    else if (hour >= 12 && hour < 18) document.body.style.animation = "afternoonBackgroundAnimation 10s ease-in-out infinite";
+    else if (hour >= 18 && hour < 21) document.body.style.animation = "eveningBackgroundAnimation 10s ease-in-out infinite";
+    else document.body.style.animation = "nightBackgroundAnimation 10s ease-in-out infinite";
+}
+
+function openFullscreen(url, title) {
+    const fullscreenDiv = document.createElement("div");
+    fullscreenDiv.className = "fullscreen";
+    fullscreenDiv.innerHTML = `
+        <button class="close-btn" onclick="closeFullscreen(this)">×</button>
+        <div class="fullscreenTitle">${title}</div>
+        <iframe src="${url}"></iframe>
+    `;
+    document.body.appendChild(fullscreenDiv);
+    setTimeout(() => fullscreenDiv.classList.add("show"), 10);
+    document.body.style.overflow = "hidden";
+}
+
+function closeFullscreen(btn) {
+    const fs = btn.parentElement;
+    fs.classList.remove("show");
+    setTimeout(() => fs.remove(), 250);
+    document.body.style.overflow = "";
 }
 
 updateBackground();
