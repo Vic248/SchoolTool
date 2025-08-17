@@ -67,3 +67,30 @@ function ifRole(role) {
         }
     });
 }
+
+// ============================
+// Gestion du menu latéral
+// ============================
+document.addEventListener("DOMContentLoaded", () => {
+    const toggleBtn = document.getElementById("menu-btn"); // bouton pour ouvrir/fermer
+    const sidebar = document.getElementById("menu"); // ton menu latéral
+
+    if (toggleBtn && sidebar) {
+        // Ouvrir / fermer via bouton
+        toggleBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle("open");
+        });
+
+        // Fermer si clic en dehors
+        document.addEventListener("click", (e) => {
+            if (
+                sidebar.classList.contains("open") &&
+                !sidebar.contains(e.target) &&
+                e.target !== toggleBtn
+            ) {
+                sidebar.classList.remove("open");
+            }
+        });
+    }
+});
