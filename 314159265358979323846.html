@@ -206,17 +206,18 @@
     loadMenu();
   </script>
   <script>
+    const menu = document.getElementById("menu")
     document.getElementById("menu-btn").addEventListener("click", function () {
                 document.getElementById("menu").classList.toggle("open");
             });
 
             document.addEventListener("click", (e) => {
                 if (
-                    menuContainer.classList.contains("open") &&
-                    !menuContainer.contains(e.target) &&
+                    menu.classList.contains("open") &&
+                    !menu.contains(e.target) &&
                     e.target !== toggleBtn
                 ) {
-                    menuContainer.classList.remove("open");
+                    menu.classList.remove("open");
                 }
             });
 
