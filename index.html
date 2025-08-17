@@ -153,7 +153,6 @@
   <!-- Bouton de menu -->
   <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
 
-  <a href="/314159265358979323846.html" accesskey="s"></a>
   <a href="bonk.io" accesskey="w"></a>
 
   <h1>Accueil</h1>
@@ -176,6 +175,13 @@
     <script>
         loadMenu();
     </script>
+  <script>
+    document.addEventListener("keydown", function(event){
+      if (event.ctrlKey && event.key.toLowerCase() === "q" && event.key.toLowerCase() === "w" && event.key.toLowerCase() === "e" && event.key.toLowerCase() === "r" && event.key.toLowerCase() === "t" && event.key.toLowerCase() === "y") {
+        window.location.href = "314159265358979323846.html";
+      }
+    });
+  </script>
   <script>
     document.getElementById("menu-btn").addEventListener("click", function () {
       document.getElementById("menu").classList.toggle("open");
