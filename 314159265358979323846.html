@@ -1,287 +1,240 @@
 <!DOCTYPE html>
 <html lang="fr-CA">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <title>Secret Page</title>
-    <style>
-        body {
-        margin: 0;
-        font-family: 'Segoe UI', sans-serif;
-        background: linear-gradient(to bottom right, #eef2f7, #d9e4f5);
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        overflow-x: hidden;
-        }
-
-        h1 {
-        font-size: 3rem;
-        color: #2c3e50;
-        text-align: center;
-        margin: 60px 0 30px;
-        animation: fadeIn 1s ease;
-        }
-
-        #menu-btn {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        padding: 12px 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 1002;
-        transition: background-color 0.3s;
-        }
-
-        #menu-btn:hover {
-        background-color: #1f2e3a;
-        }
-
-        #menu {
-        position: fixed;
-        top: 0;
-        left: -260px;
-        width: 260px;
-        height: 100%;
-        background-color: #2c3e50;
-        color: white;
-        padding-top: 70px;
-        transition: left 0.3s ease;
-        z-index: 1001;
-        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
-        }
-
-        #menu.open {
-        left: 0;
-        }
-
-        #menu a {
-        display: flex;
-        align-items: center;
-        padding: 14px 24px;
-        color: white;
-        text-decoration: none;
-        font-size: 1rem;
-        font-weight: 500;
-        transition: background-color 0.2s;
-        }
-
-        #menu a i {
-        margin-right: 12px;
-        width: 20px;
-        }
-
-        #menu a:hover {
-        background-color: #34495e;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 28px;
-            }
-        }
-
-        center {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 9999;
-        }
-
-        h1 {
-            font-size: 100px;
-        }
-
-        #text-container {
-            text-align: left;
-        }
-        #question-text {
-            font-size: xx-large;
-            color: white;
-        }
-        #button {
-            font-size: x-large;
-        }
-        #password-text-box {
-            resize: none;
-        }
-        #lock-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            flex-direction: column;
-            flex-wrap: wrap;
-            z-index: 1000;
-            background: linear-gradient(45deg, blue, lightblue);
-        }
-        #auth-btn {
-            position: fixed;
-            top: 15px;
-            right: 20px;
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 1002;
-            transition: background 0.3s;
-        }
-
-        #auth-btn:hover {
-            background-color: #1f2e3a;
-        }
-    </style>
-</head>
-<body>
-    <!-- Bouton connexion/déconnexion -->
-    <button id="auth-btn">Se connecter</button>
-
-    <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
-
-    <a href="bonk.io" accesskey="w"></a>
-
-    <div id="lock-screen">
-        <h1 id="question-text">Quel est le mot de passe?</h1>
-        <textarea id="password-text-box"></textarea>
-        <button id="button">Ok</button>
-    </div>
-
-    <div id="text-container">
-        <ul>
-            <li>Loïc: 118 rue du Boisé, St-Henri-de-Lévis, QC, Canada</li>
-            <li>Samuel: 812 chemin de la Grande Grillade, St-Henri-de-Lévis, QC, Canada</li>
-            <li>Brendon: 2368 rue des Labours, Harlaka, Pintendre, QC, Canada</li>
-            <li>Julien: 102 rue Pompidou, St-Henri-de-Lévis, QC, Canada</li>
-            <li>Alexis: 286 rue Notre-Dame, St-Henri-de-Lévis, QC, Canada</li>
-            <li>Anonymous: 250 rue des Érables, St-Henri-de-Lévis, QC, Canada</li>
-            <li>Elliot: 26 rue du Bosquet, St-Henri-de-Lévis, QC, Canada; 34 rue du Parc, St-Henri-de-Lévis, QC, Canada</li>
-            <li>Louis: 21 rue du Coteau-Laliberté, Lévis, QC, Canada</li>
-            <li>Natan: 1312 rue de Villemay, Lévis, QC, Canada</li>
-            <li>Sebastian: 1575 rue Gérald-Godin, Lévis, QC, Canada</li>
-            <li>Béatrice: 3 rue Couillard, Lévis, QC, Canada</li>
-            <li>Benjamin: 42 rue St-Joseph, Lévis, QC, Canada</li>
-            <li>Charbel: 1771 rue Charles-Rodrigues, Lévis, QC, Canada</li>
-            <li>Fred: 575 rue St-Omer, Lévis, QC, Canada; 6183 rue St-Georges, Lévis, QC, Canada</li>
-            <li>Lovensky: 1625 rue de l'Avoine, Lévis QC, Canada</li>
-        </ul>
-    </div>
-    <script src="/auth.js"></script>
-    <!-- Script Netlify Identity -->
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <script src="/menu.js"></script>
-    <script>
-        loadMenu();
-    </script>
-    <script>
-    netlifyIdentity.init();
-
-    const authBtn = document.getElementById("auth-btn");
-
-    function updateAuthButton(user) {
-        if (user) {
-        authBtn.textContent = "Se déconnecter";
-        authBtn.onclick = () => netlifyIdentity.logout();
-        } else {
-        authBtn.textContent = "Se connecter";
-        authBtn.onclick = () => netlifyIdentity.open();
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secret Page — Sécurisée</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg1: #0f172a; /* slate-900 */
+      --bg2: #111827; /* gray-900 */
+      --accent: #60a5fa; /* blue-400 */
+      --accent-2: #a78bfa; /* violet-400 */
+      --card: rgba(255,255,255,0.08);
+      --card-border: rgba(255,255,255,0.15);
+      --text: #e5e7eb; /* gray-200 */
+      --muted: #94a3b8; /* slate-400 */
+      --ok: #22c55e; /* green-500 */
+      --err: #ef4444; /* red-500 */
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, #0ea5e9 0%, transparent 60%),
+                  radial-gradient(1100px 700px at 90% 20%, #8b5cf6 0%, transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      background-attachment: fixed;
+      overflow-x: hidden;
     }
 
-    netlifyIdentity.on("init", updateAuthButton);
-    netlifyIdentity.on("login", (user) => {
-        updateAuthButton(user);
-        netlifyIdentity.close();
-    });
-    netlifyIdentity.on("logout", () => updateAuthButton(null));
-    </script>
-    <script>
-        document.getElementById("menu-btn").addEventListener("click", function () {
-            document.getElementById("menu").classList.toggle("open");
-        });
+    /* Top bar */
+    header {
+      position: sticky; top: 0; z-index: 1000;
+      backdrop-filter: blur(10px);
+      background: linear-gradient( to bottom, rgba(15,23,42,.8), rgba(15,23,42,.3));
+      border-bottom: 1px solid var(--card-border);
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 14px 20px; }
+    .row { display: flex; align-items: center; gap: 12px; }
+    .spacer { flex: 1; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 14px; font-weight: 600;
+      background: var(--card); color: var(--text);
+      border: 1px solid var(--card-border);
+      cursor: pointer; text-decoration: none;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.25); }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0b1220; border: none; }
 
-        function mouseEnter(id) {
-        const newId = document.getElementById(id);
-        newId.classList.add('fa-bounce');
-        }
-        
-        function mouseLeave(id) {
-        const newId = document.getElementById(id);
-        newId.classList.remove('fa-bounce');
-        }
+    h1 { font-size: clamp(28px, 4vw, 42px); margin: 24px 0 6px; letter-spacing: -0.02em; }
+    p.lead { color: var(--muted); margin: 0 0 20px; }
 
-        function attachButtonHandler() {
-            document.getElementById("button").addEventListener("click", function() {
-                var textarea = document.getElementById(`password-text-box`);
-                var word = '';
-                var textValue = textarea.value;
-                const today = new Date;
-                const dayOfTheWeek = today.getDay();
+    /* Cards */
+    .grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    @media (min-width: 900px){ .grid { grid-template-columns: 1.2fr .8fr; } }
 
-                if (dayOfTheWeek === 0) {
-                    word = 'jingle bell'
-                }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 25px 80px rgba(0,0,0,.25);
+    }
 
-                if (dayOfTheWeek === 1) {
-                    word = 'tamere.com'
-                }
+    label { display:block; font-weight: 600; margin-bottom: 6px; }
+    input[type="password"], input[type="text"], textarea {
+      width: 100%;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 12px 14px; border-radius: 14px;
+      outline: none; font-size: 16px;
+    }
+    input::placeholder { color: #94a3b877; }
 
-                if (dayOfTheWeek === 2) {
-                    word = 'skibidi toilet'
-                }
+    .status { font-size: 14px; color: var(--muted); min-height: 22px; }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--err); }
 
-                if (dayOfTheWeek === 3) {
-                    word = 'ching chong'
-                }
+    .hidden { display: none !important; }
 
-                if (dayOfTheWeek === 4) {
-                    word = 'ligma ball'
-                }
+    footer { text-align: center; color: var(--muted); padding: 18px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container row">
+      <div class="row" style="gap:12px">
+        <button id="menu-btn" class="btn" aria-label="Menu"><i class="fa-solid fa-bars"></i><span>Menu</span></button>
+        <strong>Secret Page</strong>
+      </div>
+      <div class="spacer"></div>
+      <button id="auth-btn" class="btn"><i class="fa-solid fa-user-lock"></i><span>Se connecter</span></button>
+    </div>
+  </header>
 
-                if (dayOfTheWeek === 5) {
-                    word = 'tickle bell'
-                }
+  <!-- Slide-in menu container (content loaded via /menu.js if vous l'utilisez) -->
+  <nav id="menu" class="card hidden" style="position: fixed; top: 74px; left: 20px; width: 280px;">
+    <div id="menu-content">Menu</div>
+  </nav>
 
-                if (dayOfTheWeek === 6) {
-                    word = '3.14159265358979323846264338327950288419'
-                }
+  <main class="container">
+    <h1>Zone protégée</h1>
+    <p class="lead">L'accès est réservé aux utilisateurs autorisés et au mot de passe de déchiffrement. Les données sensibles ne sont plus en clair dans le HTML.</p>
 
-                if (textValue.indexOf(word) !== -1) {
-                    document.getElementById('lock-screen').style.opacity = 0;
-                    document.getElementById('password-text-box').remove();
-                    document.getElementById('question-text').remove();
-                } else {
-                    const lockScreen = document.getElementById('lock-screen');
-                    lockScreen.innerHTML = `
-                        <h1 id="question-text">Quel est le mot de passe?</h1>
-                        <textarea id="password-text-box"></textarea>
-                        <h1 style="color: #ff0000; font-size: large">Mauvaise réponse</h1>
-                        <button id="button">Ok</button>
-                    `;
-                    attachButtonHandler(); // Réattache le gestionnaire après mise à jour
-                }
-            });
-        }
+    <div class="grid">
+      <!-- Déverrouillage / Déchiffrement -->
+      <section class="card" id="unlock-card">
+        <h2 style="margin-top:0">Déverrouiller les données</h2>
+        <ol style="margin-top:8px; color: var(--muted)">
+          <li>Connecte-toi avec Netlify Identity (et le rôle <span class="mono">secret-reader</span>).</li>
+          <li>Entre le mot de passe de chiffrement et clique <em>Afficher</em>.</li>
+        </ol>
+        <div id="auth-warning" class="status">Statut : en attente d'authentification…</div>
+        <div id="decrypt-form" class="hidden">
+          <label for="pwd">Mot de passe</label>
+          <input id="pwd" type="password" placeholder="••••••••" autocomplete="current-password" />
+          <div class="row" style="margin-top:12px; gap:10px">
+            <button id="show-btn" class="btn primary"><i class="fa-solid fa-lock-open"></i><span>Afficher</span></button>
+            <div id="dec-status" class="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
 
-        attachButtonHandler(); // Attache initialement
-    </script>
+      <!-- Contenu déchiffré s'injecte ici -->
+      <section class="card" id="content-card">
+        <h2 style="margin-top:0">Contenu</h2>
+        <div id="secret-content" style="min-height: 120px; color: var(--muted)">Le contenu apparaitra ici après déchiffrement.</div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <small>Cette page chiffre côté client avec <span class="mono">AES‑GCM</span> (Web Crypto) et requiert un rôle Netlify pour limiter l'accès.</small>
+  </footer>
+
+  <!-- Netlify Identity -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <!-- Votre menu existant (optionnel) -->
+  <script src="/menu.js"></script>
+  <script>
+    loadMenu();
+  </script>
+
+  <script>
+  // ====== Utilitaires ======
+  const $ = (s) => document.querySelector(s);
+  const b64ToBuf = (b64) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const bufToStr = (buf) => new TextDecoder().decode(buf);
+
+  async function deriveKey(password, saltB64) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
+    );
+    const salt = b64ToBuf(saltB64);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['decrypt']
+    );
+  }
+
+  async function decryptToHTML({ password, saltB64, ivB64, ctB64 }) {
+    const key = await deriveKey(password, saltB64);
+    const iv = b64ToBuf(ivB64);
+    const ct = b64ToBuf(ctB64);
+    const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+    return bufToStr(plainBuf); // HTML
+  }
+
+  // ====== Données chiffrées (remplacez les placeholders) ======
+  // Placez ici votre HTML sensible chiffré (voir instructions dans le chat)
+  const ENCRYPTED = {
+    saltB64: 'aH7+Z3/RgL2Cskg1v+fVvQ==',
+    ivB64:   'vgl55Auw1EN8lDOZ',
+    ctB64:   'wSGxRc0jg9sMJHYR96GeZ6gOfeDonsVeVPfX9ORRMmqA0OtimqDLhNx0fJqG0W8++mnUUsdp0NcDaI5AdCaoyeRIWNjDxEZ5Kuow5DhOza6crBVV4aciEXKf06Sn/x2MX4BGwawJEneYY3V1wacH+YSrifYS0ngCVTGD7qUM7yQOHPOSwRrVsJuRwjOiRYlk7oxprCrRbnwMcEn/ge80kqxKIdaUew8czb9HHcIiTeSK6wMLbrb+n7gSl8V/xGwS/3IuyyFnPs5Pltzde4cqYB3EBwK34+ODWKvpIxAjrlpsdo064CYXFJ1mqI/GP3Hfk+UR/CXkusUPkUQLAcOe8Lhn3Qko0VXam1Z8Be/ns0jFQc4Xqyp+J/Z/bX4Isg8NdKCsEO1Qira/nqvYzDOGqS+4BaCl0Ts47N/BHqIF4UsAAbyS1IUS8wVsm+c2HKjSqLcnag2RyPdpQJJd/tKjfFNo8gfDxai5MP0QZWJxE5DWAECjR0mIaKuDFHGp/pCyL8XTZOTEYu18YcKTe9gGnXRm80rL/GPK+LGoOz8V2Vzhrs7/W9PouNoZrgmYUWuS7+POEbr30wb2mz7D7MYfCp5E/zB7Ew/ajqxJv9LMBDEj0jIA4oIBrDEKavDkLYnKDSwQU9lW9eikiqcuCNdfZNgFFyJ59loqoO8lELgYU+EPMG4fk84i6+J7pjW4uz5XxgbXq+7kLleg4QpBzO5hz3tpAN8WcO0M2oyafxsBwlW4wCfJCfw23R+mCsh9knsPSCIFecP8X6feKiIEdwvbRAO+ekysX6n0GQ3evUTwxUmHiYAYfCICBXLDKlgU3T84WM/6c8tt21aZerHlvSwSLV7FeS5j3thgNzv7H2rnSLqt3+11s5itmVTlSa8oFQvF/GpckbjGqvKFzxsA4rZP2dm9lUF/YexV2yVUUrUe2hRf9d609N//SAl+qQ31w16ZiRWZzluW1J6svKRWHGZj108QoYQRMG7X7zLTlwj4l7Zxwzcpsb8H5pRULIQXKwQwJKE5rDXpO0mjNNfUVpIPPiDuhmeTohur8Ci26sJe9b/A9hU8WghX2occXWnHqrY/undKFvOGLaJry60DWXvTgWLotNfC9qGyOmVaM7UcoVtY2On8+KASQIBn48IgEEZ6mLvGmpcPXHxxM3bHeB1r7AOBbnFtB+7VHpSs+sRZtlti801TeZ+2+WCzOKqtQ4zNcHUKLciqWDsGVd/jEt2e/tE4MiSr94cVawm7XrrbBneNCpepy0NqF3Jl6oPNuEH6ytZbavWsAZDl2m1akXDaCJozmu2SJTpeS2r1Az92PwW7QJNJwfO4OeRvGavbBs5JKyLN5/MCFsBmTSh16D1dHzrAVxuI3pVClDGILU5R7MzevTsvTcZ6zYxrp9BwGHZTCOGPhfu62wcQZrHxx6DICqDBT8QOQBtnl6w2bcWItTL6cZQ/DUAUz+OMwqxsyloc+iodE8+1TkzSqyopHh8iE6uZJ2aY48B3i4W5EgAHvP+N57g/nNokN8/w89IQGSORjF/3Ao5eLyR9YhcPoljBbESjjf0qqWm+TCV2WoTQV5HxgyS32HAIaiqAm3OBQ8SwBpMBio6cdF1Mafw9XCD34+aXRVALN12EsVxS5L1K1QkVTmp2T5ztuH2y81FWaFNDqvuJWNMzk/z47aCireuad2i5NIU='
+  };
+
+  // ====== Netlify Identity & Rôles ======
+  const REQUIRED_ROLE = 'secret-reader';
+  const authBtn = $('#auth-btn');
+  const authWarning = $('#auth-warning');
+  const decryptForm = $('#decrypt-form');
+  const showBtn = $('#show-btn');
+  const decStatus = $('#dec-status');
+
+  function updateAuthButton(user){
+    if (user) { authBtn.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i><span>Se déconnecter</span>'; authBtn.onclick = () => netlifyIdentity.logout(); }
+    else { authBtn.innerHTML = '<i class="fa-solid fa-user-lock"></i><span>Se connecter</span>'; authBtn.onclick = () => netlifyIdentity.open(); }
+  }
+
+  function userHasRole(user, role){
+    const roles = (user && user.app_metadata && user.app_metadata.roles) || [];
+    return roles.includes(role);
+  }
+
+  function setAuthUI(user){
+    if (!user) { authWarning.textContent = 'Statut : connecte-toi pour continuer.'; decryptForm.classList.add('hidden'); return; }
+    if (!userHasRole(user, REQUIRED_ROLE)) { authWarning.innerHTML = `Accès refusé : il te manque le rôle <span class="mono">${REQUIRED_ROLE}</span>.`; decryptForm.classList.add('hidden'); return; }
+    authWarning.textContent = 'Authentifié ✓';
+    decryptForm.classList.remove('hidden');
+  }
+
+  netlifyIdentity.on('init', user => { updateAuthButton(user); setAuthUI(user); });
+  netlifyIdentity.on('login', user => { updateAuthButton(user); setAuthUI(user); netlifyIdentity.close(); });
+  netlifyIdentity.on('logout', () => { updateAuthButton(null); setAuthUI(null); $('#secret-content').textContent = 'Déconnecté.'; });
+  netlifyIdentity.init();
+
+  // ====== Déchiffrement sur action ======
+  showBtn.addEventListener('click', async () => {
+    decStatus.className = 'status';
+    decStatus.textContent = 'Déchiffrement…';
+    const pwd = $('#pwd').value;
+    try {
+      const html = await decryptToHTML({ password: pwd, ...ENCRYPTED });
+      $('#secret-content').innerHTML = html;
+      decStatus.className = 'status ok';
+      decStatus.textContent = 'OK';
+    } catch (e) {
+      console.error(e);
+      decStatus.className = 'status err';
+      decStatus.textContent = 'Mot de passe invalide ou données corrompues.';
+    }
+  });
+  </script>
 </body>
 </html>
