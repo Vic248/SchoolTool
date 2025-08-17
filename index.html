@@ -176,9 +176,30 @@
         loadMenu();
     </script>
   <script>
-    document.addEventListener("keydown", function(event){
-      if (event.ctrlKey && event.key.toLowerCase() === "q" && event.key.toLowerCase() === "w" && event.key.toLowerCase() === "e" && event.key.toLowerCase() === "r" && event.key.toLowerCase() === "t" && event.key.toLowerCase() === "y") {
-        window.location.href = "314159265358979323846.html";
+    // Séquence du Konami Code
+    const konamiCode = [
+      "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
+      "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight",
+      "b", "a"
+    ];
+
+    let position = 0; // Position actuelle dans la séquence
+
+    document.addEventListener("keydown", function(event) {
+      const key = event.key.toLowerCase();
+
+      // Vérifie la touche courante
+      if (key === konamiCode[position].toLowerCase()) {
+        position++;
+
+        // Si toute la séquence est réussie
+        if (position === konamiCode.length) {
+          window.location.href = "314159265358979323846.html"; // Redirection
+          position = 0; // reset
+        }
+      } else {
+        // Reset si erreur
+        position = 0;
       }
     });
   </script>
