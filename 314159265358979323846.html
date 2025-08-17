@@ -206,19 +206,8 @@
     loadMenu();
   </script>
   <script>
-    const menu = document.getElementById("menu")
     document.getElementById("menu-btn").addEventListener("click", function () {
                 document.getElementById("menu").classList.toggle("open");
-            });
-
-            document.addEventListener("click", (e) => {
-                if (
-                    menu.classList.contains("open") &&
-                    !menu.contains(e.target) &&
-                    e.target !== toggleBtn
-                ) {
-                    menu.classList.remove("open");
-                }
             });
 
             function mouseEnter(id) {
