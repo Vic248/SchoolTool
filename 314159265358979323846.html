@@ -210,6 +210,16 @@
                 document.getElementById("menu").classList.toggle("open");
             });
 
+            document.addEventListener("click", (e) => {
+                if (
+                    menuContainer.classList.contains("open") &&
+                    !menuContainer.contains(e.target) &&
+                    e.target !== toggleBtn
+                ) {
+                    menuContainer.classList.remove("open");
+                }
+            });
+
             function mouseEnter(id) {
             const newId = document.getElementById(id);
             newId.classList.add('fa-bounce');
