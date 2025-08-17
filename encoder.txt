@@ -1,0 +1,28 @@
+// 1) Mets ici TON HTML sensible (ex: ta <ul>…</ul>)
+const SENSITIVE_HTML = `
+<ul>
+  <!-- Ton contenu sensible ici -->
+</ul>`;
+
+// 2) Mets ici le mot de passe (le même que tu utiliseras pour déverrouiller sur la page)
+const PASSWORD = prompt("Mot de passe de chiffrement à utiliser ?");
+
+// 3) Lance le chiffrement
+(async () => {
+  const enc = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(PASSWORD), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 100_000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt"]
+  );
+  const ctBuf = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(SENSITIVE_HTML));
+  const b64 = u8 => btoa(String.fromCharCode(...u8));
+  console.log("saltB64:", b64(salt));
+  console.log("ivB64:", b64(iv));
+  console.log("ctB64:", b64(new Uint8Array(ctBuf)));
+})();
