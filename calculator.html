@@ -4,174 +4,201 @@
   <meta charset="UTF-8">
   <title>Calculatrices</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="/menu.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
+    /* 🌌 Fond animé */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom right, #eef2f7, #d9e4f5);
+      background: linear-gradient(-45deg, #74ebd5, #ACB6E5, #89f7fe, #66a6ff);
+      background-size: 400% 400%;
+      animation: gradientMove 12s ease infinite;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px;
       overflow-x: hidden;
     }
 
-    #menu-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background-color: #2c3e50;
-      color: white;
-      border: none;
-      padding: 12px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 1001;
-      transition: background-color 0.3s;
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
-    #menu-btn:hover {
-      background-color: #1f2e3a;
-    }
-
-    #menu {
-      position: fixed;
-      top: 0;
-      left: -260px;
-      width: 260px;
-      height: 100%;
-      background-color: #2c3e50;
-      color: white;
-      padding-top: 70px;
-      transition: left 0.3s ease;
-      z-index: 1000;
-      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #menu.open {
-      left: 0;
-    }
-
-    #menu a {
-      display: flex;
-      align-items: center;
-      padding: 14px 24px;
-      color: white;
-      text-decoration: none;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: background-color 0.2s;
-    }
-
-    #menu a i {
-      margin-right: 12px;
-      width: 20px;
-    }
-
-    #menu a:hover {
-      background-color: #34495e;
-    }
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f6fa;
-      color: #333;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-
-    h1, h2 {
+    h1 {
       text-align: center;
-      color: #2b4f81;
+      color: #fff;
+      margin-bottom: 30px;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
+    /* 📦 Box design */
     .box {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
       margin-bottom: 40px;
+      max-width: 500px;
+      width: 90%;
+      transition: transform 0.3s ease;
+      animation: floaty 5s ease-in-out infinite;
     }
 
-    #calculator {
-      display: grid;
-      gap: 10px;
+    .box:hover {
+      transform: translateY(-5px);
     }
 
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    /* 📟 Calculatrice */
     #calc-display {
-      width: 93%;
-      font-size: 1.5rem;
+      width: 100%;
+      font-size: 1.6rem;
       text-align: right;
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 2px solid #d1d5db;
+      border-radius: 12px;
+      background: #f9fafb;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
     }
 
     .calc-buttons {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
+      gap: 10px;
     }
 
     button {
-      padding: 12px;
-      font-size: 1rem;
+      padding: 15px;
+      font-size: 1.1rem;
       border: none;
-      border-radius: 6px;
-      background-color: #e0e7ff;
+      border-radius: 12px;
+      background: #e0e7ff;
       cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     button:hover {
-      background-color: #c7d2fe;
+      background: #c7d2fe;
+      transform: scale(1.05);
     }
 
+    button:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2) inset;
+    }
+
+    .equal {
+      grid-column: span 4;
+      background: linear-gradient(135deg, #34d399, #059669);
+      color: white;
+      font-weight: bold;
+    }
+
+    .equal:hover {
+      background: linear-gradient(135deg, #10b981, #047857);
+    }
+
+    .clear {
+      background: #f87171;
+      color: white;
+      font-weight: bold;
+    }
+
+    .clear:hover {
+      background: #dc2626;
+    }
+
+    /* 📊 Moyenne */
     textarea {
-      width: 95%;
+      width: 100%;
       font-size: 1rem;
-      padding: 10px;
-      border-radius: 6px;
+      padding: 12px;
+      border-radius: 12px;
       border: 1px solid #ccc;
       resize: vertical;
+      margin-bottom: 10px;
+      transition: border 0.3s, box-shadow 0.3s;
+    }
+
+    textarea:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 8px rgba(59,130,246,0.3);
+      outline: none;
     }
 
     #average-result {
-      margin-top: 10px;
+      margin-top: 12px;
       font-weight: bold;
+      color: #1e40af;
+      text-align: center;
     }
-    #auth-btn {
+
+    /* 🔒 Auth & Menu Buttons */
+    #menu-btn, #auth-btn {
       position: fixed;
-      top: 15px;
-      right: 20px;
-      background-color: #2c3e50;
+      top: 20px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: bold;
       color: white;
       border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 14px;
       cursor: pointer;
-      z-index: 1002;
-      transition: background 0.3s;
+      transition: background 0.3s, transform 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1001;
+    }
+
+    #menu-btn {
+      left: 20px;
+      background: linear-gradient(135deg, #2c3e50, #4b6584);
+    }
+
+    #menu-btn:hover {
+      background: #1f2e3a;
+      transform: scale(1.08);
+    }
+
+    #auth-btn {
+      right: 20px;
+      background: linear-gradient(135deg, #2c3e50, #4b6584);
     }
 
     #auth-btn:hover {
-      background-color: #1f2e3a;
+      background: #1f2e3a;
+      transform: scale(1.08);
+    }
+
+    /* 📱 Responsive */
+    @media (max-width: 768px) {
+      .box { padding: 20px; }
+      #calc-display { font-size: 1.3rem; }
+      button { font-size: 1rem; padding: 12px; }
     }
   </style>
 </head>
 <body>
-  <!-- Bouton connexion/déconnexion -->
+  <!-- Auth -->
   <button id="auth-btn">Se connecter</button>
+  <!-- Menu -->
+  <button id="menu-btn"><i class="fas fa-bars"></i> Menu</button>
 
-    <!-- Bouton de menu -->
-  <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
-
-  <a href="https://www.bonk.io" accesskey="w"></a>
-
-  <h1>Calculatrices</h1>
+  <h1>🧮 Calculatrices</h1>
 
   <!-- 📟 Calculatrice normale -->
   <div class="box">
@@ -195,10 +222,10 @@
 
       <button onclick="appendCalc('0')">0</button>
       <button onclick="appendCalc('.')">.</button>
-      <button onclick="clearCalc()" style="background-color: #fca5a5;">C</button>
+      <button class="clear" onclick="clearCalc()">C</button>
       <button onclick="appendCalc('+')">+</button>
 
-      <button onclick="calculateResult()" style="grid-column: span 4; background-color: rgb(0, 255, 0);">=</button>
+      <button class="equal" onclick="calculateResult()">=</button>
     </div>
   </div>
 
@@ -206,21 +233,19 @@
   <div class="box">
     <h2>Calculatrice de moyenne</h2>
     <textarea id="grades-input" rows="4" placeholder="Ex: 80, 92, 75, 65"></textarea>
-    <button onclick="calculateAverage()" style="margin-top: 10px;">Calculer la moyenne</button>
+    <button onclick="calculateAverage()">Calculer la moyenne</button>
     <p id="average-result"></p>
   </div>
+
+  <!-- Tes scripts restent identiques -->
   <script src="/auth.js"></script>
-  <!-- Script Netlify Identity -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="/menu.js"></script>
-    <script>
-        loadMenu();
-    </script>
   <script>
+    loadMenu();
     netlifyIdentity.init();
 
     const authBtn = document.getElementById("auth-btn");
-
     function updateAuthButton(user) {
       if (user) {
         authBtn.textContent = "Se déconnecter";
@@ -230,65 +255,34 @@
         authBtn.onclick = () => netlifyIdentity.open();
       }
     }
-
     netlifyIdentity.on("init", updateAuthButton);
     netlifyIdentity.on("login", (user) => {
       updateAuthButton(user);
       netlifyIdentity.close();
     });
     netlifyIdentity.on("logout", () => updateAuthButton(null));
-  </script>
-  <script>
 
-    document.getElementById("menu-btn").addEventListener("click", function () {
-      document.getElementById("menu").classList.toggle("open");
-    });
-
-    function mouseEnter(id) {
-      const newId = document.getElementById(id);
-      newId.classList.add('fa-bounce');
-    }
-    
-    function mouseLeave(id) {
-      const newId = document.getElementById(id);
-      newId.classList.remove('fa-bounce');
-    }
-
-    // 📟 Fonctions calculatrice normale
+    // 📟 Fonctions calculatrice
     let calcDisplay = document.getElementById("calc-display");
-
-    function appendCalc(value) {
-      calcDisplay.value += value;
-    }
-
-    function clearCalc() {
-      calcDisplay.value = "";
-    }
-
+    function appendCalc(value) { calcDisplay.value += value; }
+    function clearCalc() { calcDisplay.value = ""; }
     function calculateResult() {
-      try {
-        calcDisplay.value = eval(calcDisplay.value);
-      } catch {
-        calcDisplay.value = "Erreur";
-      }
+      try { calcDisplay.value = eval(calcDisplay.value); }
+      catch { calcDisplay.value = "Erreur"; }
     }
 
     // 📊 Moyenne
     function calculateAverage() {
       const input = document.getElementById("grades-input").value;
       const grades = input.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
-
       if (grades.length === 0) {
         document.getElementById("average-result").innerText = "Aucune note valide.";
         return;
       }
-
       const total = grades.reduce((a, b) => a + b, 0);
       const average = total / grades.length;
-
       document.getElementById("average-result").innerText = `Moyenne : ${average.toFixed(0)}%`;
     }
   </script>
-
 </body>
 </html>
