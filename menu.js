@@ -25,17 +25,3 @@ function loadMenu() {
         })
         .catch(error => console.error("Erreur de chargement du menu :", error));
 }
-
-document.getElementById("menu-btn").addEventListener("click", function () {
-    document.getElementById("menu").classList.toggle("open");    
-});
-
-function mouseEnter(id) {
-    const newId = document.getElementById(id);
-    newId.classList.add('fa-bounce');
-}
-    
-function mouseLeave(id) {
-    const newId = document.getElementById(id);
-    newId.classList.remove('fa-bounce');
-}
