@@ -221,6 +221,18 @@
             12:["Français", "", "Libre/Pu d'école/Rien"]
         };
 
+        const locaux = {
+            "Histoire": "Local 201",
+            "Anglais": "Local 305",
+            "Français": "Local 210",
+            "Math": "Local 115",
+            "Sciences": "Local 410",
+            "Lm": "Local 120",
+            "Éduc": "Gymnase",
+            "Musique": "Local 510",
+            "Univers Social": "Local 203"
+        };
+
         (async () => {
             const jour = await getJourCycle();
             const div = document.getElementById("contenuHoraire");
@@ -248,7 +260,12 @@
                 };
 
                 div.innerHTML = affichage
-                    .map(item => `<div class="horaire">${item.label} : ${item.matiere || "Libre"}</div>`)
+                    .map(item => {
+                        const matiere = item.matiere || "Libre";
+                        const local = locaux[matiere] || "Pas de local";
+
+                        return `<div class="horaire">${item.label} : <span title="${local}">${matiere}</span></div>`;
+                    })
                     .join("");
             } else {
                 div.innerHTML = "No School Today";
