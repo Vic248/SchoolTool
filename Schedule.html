@@ -138,6 +138,47 @@
         #auth-btn:hover {
             background-color: #1f2e3a;
         }
+        .tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        }
+
+        .tooltip .tooltip-box {
+        visibility: hidden;
+        opacity: 0;
+        width: max-content;
+        max-width: 250px;
+        background: #2c3e50;
+        color: #fff;
+        text-align: center;
+        padding: 8px 12px;
+        border-radius: 10px;
+        position: absolute;
+        z-index: 1000;
+        bottom: 125%; /* place la bulle au-dessus */
+        left: 50%;
+        transform: translateX(-50%);
+        transition: opacity 0.3s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        font-size: 0.9rem;
+        }
+
+        .tooltip .tooltip-box::after {
+        content: "";
+        position: absolute;
+        top: 100%; /* petite flèche */
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: #2c3e50 transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-box {
+        visibility: visible;
+        opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -262,8 +303,14 @@
                     .map(item => {
                         const matiere = item.matiere || "Libre";
                         const local = locaux[matiere] || "Pas de local";
-
-                        return `<div class="horaire">${item.label} : <span title="${local}">${matiere}</span></div>`;
+                        return `
+                        <div class="horaire">
+                            ${item.label} : 
+                            <span class="tooltip">
+                            ${matiere}
+                            <span class="tooltip-box">${local}</span>
+                            </span>
+                        </div>`;
                     })
                     .join("");
             } else {
