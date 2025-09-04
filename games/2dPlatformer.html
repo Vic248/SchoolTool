@@ -100,6 +100,9 @@
         loadMenu();
     </script>
   <script>
+    requireRole("Tester");
+  </script>
+  <script>
     document.getElementById("menu-btn").addEventListener("click", function () {
       document.getElementById("menu").classList.toggle("open");
     });
