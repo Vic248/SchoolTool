@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Joffre — Multijoueur</title>
+  <style>
+    :root{--bg1:#0b3d91;--bg2:#06327a;--card-bg:#fff;--card-text:#0b1b2b}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#f7f9fc}
+    .container{max-width:1100px;margin:24px auto;padding:18px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    h1{margin:.2rem 0;font-size:1.6rem}
+    .controls{display:flex;gap:8px}
+    button{background:#ffde59;border:0;padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);font-weight:600}
+    .card{display:inline-block;background:var(--card-bg);color:var(--card-text);padding:8px 12px;border-radius:8px;margin:6px;border:2px solid rgba(0,0,0,.08);cursor:pointer;user-select:none}
+    #table{margin-top:18px;background:linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.12));padding:18px;border-radius:12px}
+    .players{display:flex;justify-content:space-between;align-items:center}
+    .player-card{width:22%;background:rgba(255,255,255,0.06);padding:12px;border-radius:10px}
+    .center{margin:18px 0;padding:16px;border-radius:10px;background:rgba(255,255,255,0.03);min-height:110px}
+    .muted{opacity:.85;font-size:0.95rem}
+    .hand{display:flex;flex-wrap:wrap;justify-content:center}
+    .badge{display:inline-block;background:rgba(255,255,255,0.06);padding:6px 8px;border-radius:6px;margin:4px}
+    footer{margin-top:12px;font-size:0.9rem;color:rgba(255,255,255,0.85)}
+    .big{font-size:1.2rem;font-weight:700}
+    .center-cards{display:flex;gap:8px;justify-content:center;align-items:center}
+    .notice{background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;margin:8px 0}
+    .actions{display:flex;gap:8px;justify-content:center;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Joffre — Mode multijoueur</h1>
+      <div class="controls">
+        <input id="gameIdInput" placeholder="Code de partie (ex: partie123)" />
+        <input id="nameInput" placeholder="Ton nom" />
+        <button id="createBtn">Créer</button>
+        <button id="joinBtn">Rejoindre</button>
+      </div>
+    </header>
+
+    <div id="table" style="display:none">
+      <div class="players">
+        <div class="player-card" id="playerList"></div>
+        <div style="width:46%">
+          <div class="center">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div class="muted">État: <span id="state">—</span></div>
+                <div class="muted">Atout: <span id="trump">—</span></div>
+                <div class="muted">Taker (preneur): <span id="taker">—</span></div>
+              </div>
+              <div class="muted">Tour: <span id="turn">—</span></div>
+            </div>
+
+            <div class="center-cards" id="centerCards"></div>
+            <div class="actions" id="actionArea"></div>
+          </div>
+        </div>
+        <div class="player-card">
+          <div class="big">Ta main</div>
+          <div id="hand" class="hand" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="notice" id="notice">Connecte-toi et crée ou rejoins une partie. Règles: l'atout est déterminé par la première carte jouée par le preneur. Le premier à décider de prendre est le joueur à gauche du donneur ; si personne ne prend, le donneur doit prendre.</div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+        <div id="scores" class="muted"></div>
+        <div>
+          <button id="startRoundBtn">Démarrer manche (donneur actuel)</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>Version multijoueur — règles : preneur choisi selon la file; atout = 1ère carte du preneur; le système compte les plis gagnés comme points.</footer>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, arrayRemove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // --- REMPLACE avec ta config ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDW2toW1pucRyxGlpfQS1-ZWz80LfC_ZGU",
+      authDomain: "joffre-f81fc.firebaseapp.com",
+      projectId: "joffre-f81fc"
+    };
+    // ------------------------------
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // UI refs
+    const createBtn = document.getElementById('createBtn');
+    const joinBtn = document.getElementById('joinBtn');
+    const gameIdInput = document.getElementById('gameIdInput');
+    const nameInput = document.getElementById('nameInput');
+    const table = document.getElementById('table');
+    const handDiv = document.getElementById('hand');
+    const playerList = document.getElementById('playerList');
+    const centerCards = document.getElementById('centerCards');
+    const stateEl = document.getElementById('state');
+    const trumpEl = document.getElementById('trump');
+    const takerEl = document.getElementById('taker');
+    const turnEl = document.getElementById('turn');
+    const scoresEl = document.getElementById('scores');
+    const notice = document.getElementById('notice');
+    const startRoundBtn = document.getElementById('startRoundBtn');
+    const actionArea = document.getElementById('actionArea');
+
+    let gameId = '';
+    let playerId = '';
+    let playerName = '';
+    let unsubscribe = null;
+    let localHand = [];
+
+    // Deck utils
+    const SUITS = ['C','D','H','S']; // Clubs, Diamonds, Hearts, Spades
+    const RANKS = ['7','8','9','10','J','Q','K','A'];
+
+    function makeDeck(){
+      const d=[];
+      for(const s of SUITS) for(const r of RANKS) d.push(r+s);
+      return d;
+    }
+
+    function shuffle(arr){
+      for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+      }
+      return arr;
+    }
+
+    // Simple render helpers
+    function renderHand(){
+      handDiv.innerHTML='';
+      localHand.forEach(c=>{
+        const el=document.createElement('div');
+        el.className='card';
+        el.innerText=c;
+        el.onclick=()=>playCardOnline(c);
+        handDiv.appendChild(el);
+      });
+    }
+
+    function renderPlayers(data){
+      const players = data.players || {};
+      playerList.innerHTML = '<div class="big">Joueurs</div>' + Object.entries(players).map(([id,p])=>{
+        const me = id===playerId? ' (toi)':'';
+        return `<div style="margin-top:8px"><strong>${p.name || id}</strong>${me}<div class="muted">Plis: ${p.tricks||0}</div></div>`;
+      }).join('');
+
+      scoresEl.innerHTML = '<strong>Scores (plis gagnés)</strong><br>' + Object.entries(players).map(([id,p])=>`${p.name||id}: ${p.score||0}`).join('<br>');
+    }
+
+    function renderCenter(data){
+      centerCards.innerHTML='';
+      const played = data.playedCards || [];
+      played.forEach(p => {
+        const el = document.createElement('div');
+        el.className='card';
+        el.innerText = `${p.playerName||p.player}: ${p.card}`;
+        centerCards.appendChild(el);
+      });
+    }
+
+    // Create / join
+    createBtn.onclick = async ()=>{
+      if(!gameIdInput.value||!nameInput.value) return alert('Entre un code de partie et ton nom');
+      gameId = gameIdInput.value.trim();
+      playerName = nameInput.value.trim();
+      playerId = 'p_' + Math.random().toString(36).slice(2,9);
+
+      // create empty game
+      await setDoc(doc(db,'games',gameId),{
+        players:{ [playerId]: { name: playerName, hand: [], tricks:0, score:0 } },
+        order: [playerId],
+        dealer: playerId,
+        state: 'lobby',
+        playedCards: [],
+        turn: null,
+        taker: null,
+        trump: null
+      });
+
+      startListening();
+      table.style.display='block';
+    };
+
+    joinBtn.onclick = async ()=>{
+      if(!gameIdInput.value||!nameInput.value) return alert('Entre un code de partie et ton nom');
+      gameId = gameIdInput.value.trim();
+      playerName = nameInput.value.trim();
+      playerId = 'p_' + Math.random().toString(36).slice(2,9);
+
+      const ref = doc(db,'games',gameId);
+      const snap = await getDoc(ref);
+      if(!snap.exists()) return alert('Partie introuvable');
+      const data = snap.data();
+
+      const players = data.players || {};
+      players[playerId] = { name: playerName, hand: [], tricks:0, score:0 };
+      const order = (data.order||[]).concat(playerId);
+
+      await updateDoc(ref,{ players, order });
+
+      startListening();
+      table.style.display='block';
+    };
+
+    // start a round: shuffles/deals, sets state to 'bidding'
+    startRoundBtn.onclick = async ()=>{
+      if(!gameId) return alert('Pas de partie');
+      const ref = doc(db,'games',gameId);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      if(!data) return;
+
+      // Determine dealer (rotate if exists)
+      let dealer = data.dealer || data.order[0];
+      // build deck and deal evenly
+      const deck = shuffle(makeDeck());
+      const playersIds = data.order;
+      const hands = {};
+      for(let i=0;i<playersIds.length;i++) hands[playersIds[i]] = [];
+      let idx=0;
+      while(deck.length){
+        const p = playersIds[idx%playersIds.length];
+        hands[p].push(deck.pop());
+        idx++;
+      }
+
+      // update Firestore: hands, reset playedCards, state bidding
+      const playersObj = {};
+      for(const pid of playersIds){
+        const prev = (data.players && data.players[pid]) || {};
+        playersObj[pid] = { name: prev.name||pid, hand: hands[pid], tricks:0, score: prev.score||0 };
+      }
+
+      await updateDoc(ref,{
+        players: playersObj,
+        dealer,
+        state: 'bidding',
+        biddingIndex: (playersIds.indexOf(dealer)+1)%playersIds.length, // first to decide is left of dealer
+        playedCards: [],
+        turn: null,
+        taker: null,
+        trump: null
+      });
+    };
+
+    // Bidding: prendre/passer
+    async function takeOrPass(take){
+      const ref = doc(db,'games',gameId);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      if(data.state!=='bidding') return;
+
+      const order = data.order || [];
+      let idx = data.biddingIndex || 0;
+
+      // if current player is not the one to act, ignore
+      if(order[idx] !== playerId) return alert("Ce n'est pas ton tour pour l'enchère");
+
+      if(take){
+        // set taker
+        await updateDoc(ref,{ taker: playerId, state: 'playing', turn: playerId });
+      } else {
+        // pass -> advance biddingIndex. if everyone passed, dealer forced to take
+        const nextIdx = (idx+1) % order.length;
+        // check if we completed full circle
+        if(nextIdx === (data.biddingIndex)){
+          // everyone passed -> dealer takes
+          await updateDoc(ref,{ taker: data.dealer, state: 'playing', turn: data.dealer });
+        } else {
+          await updateDoc(ref,{ biddingIndex: nextIdx });
+        }
+      }
+    }
+
+    // Play a card online
+    async function playCardOnline(card){
+      const ref = doc(db,'games',gameId);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      if(!data) return;
+
+      if(data.state !== 'playing') return alert("La manche n'est pas en cours");
+      if(data.turn !== playerId) return alert('Ce n\'est pas ton tour');
+
+      // Remove card from player's hand (we'll update local hand too)
+      const playerObj = data.players[playerId];
+      if(!playerObj) return alert('Profil joueur introuvable');
+      if(!playerObj.hand.includes(card)) return alert('Tu n\'as pas cette carte');
+
+      // If taker hasn't set trump yet and this is the taker's first play => this card sets trump
+      let trump = data.trump;
+      if(!trump && data.taker === playerId && (!data.playedCards || data.playedCards.length===0)){
+        trump = card.slice(-1); // suit letter
+      }
+
+      // update: remove card from hand and append to playedCards
+      const newHand = playerObj.hand.filter(c=>c!==card);
+      const played = (data.playedCards||[]).concat([{ player: playerId, playerName: playerObj.name, card }]);
+
+      // next player
+      const order = data.order || [];
+      const curIdx = order.indexOf(playerId);
+      const next = order[(curIdx+1)%order.length];
+
+      await updateDoc(ref,{
+        [`players.${playerId}.hand`]: newHand,
+        playedCards: played,
+        turn: next,
+        trump: trump
+      });
+
+      // If everyone has played for this trick => resolve
+      const trickSize = played.length % order.length === 0 ? order.length : played.length % order.length;
+      // simpler: check if played.length % order.length === 0
+      if(played.length % order.length === 0){
+        // resolve trick after small delay to ensure clients fetch update
+        setTimeout(()=>resolveTrick(), 500);
+      }
+    }
+
+    // Determine trick winner
+    function cardSuit(card){ return card.slice(-1); }
+    function cardRankIndex(card){ return RANKS.indexOf(card.slice(0,-1)); }
+
+    async function resolveTrick(){
+      const ref = doc(db,'games',gameId);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      const played = data.playedCards || [];
+      const order = data.order || [];
+      if(played.length===0) return;
+      const curTrick = played.slice(-order.length);
+      // leading suit is suit of first card in the trick
+      const leadSuit = cardSuit(curTrick[0].card);
+      const trump = data.trump;
+
+      // find winning card
+      let winner = curTrick[0].player;
+      let bestCard = curTrick[0].card;
+
+      for(const p of curTrick.slice(1)){
+        const c = p.card;
+        // if c is trump and bestCard not trump -> c wins
+        if(cardSuit(c) === trump && cardSuit(bestCard) !== trump){ winner = p.player; bestCard = c; continue; }
+        // if both same suit and rank higher -> wins
+        if(cardSuit(c) === cardSuit(bestCard)){
+          if(cardRankIndex(c) > cardRankIndex(bestCard)){ winner = p.player; bestCard = c; }
+        }
+        // if c follows lead suit and bestCard doesn't -> c wins
+        if(cardSuit(c) === leadSuit && cardSuit(bestCard) !== leadSuit && cardSuit(bestCard) !== trump){ winner = p.player; bestCard = c; }
+      }
+
+      // update winner's tricks and set next turn to winner, push trick to tricks history
+      const winnerObj = (data.players && data.players[winner]) || {};
+      const updatedPlayers = { ...data.players };
+      updatedPlayers[winner] = { ...winnerObj, tricks: (winnerObj.tricks||0)+1 };
+
+      await updateDoc(ref,{
+        players: updatedPlayers,
+        turn: winner,
+        // keep playedCards history, but could also clear
+      });
+
+      // If hands empty -> end of round
+      // check any player's hand length
+      const anyHand = Object.values(updatedPlayers).some(p=> (p.hand||[]).length>0 );
+      if(!anyHand){
+        // round finished: convert tricks to score (add tricks to total score)
+        const finalPlayers = { ...updatedPlayers };
+        for(const pid of Object.keys(finalPlayers)){
+          finalPlayers[pid].score = (finalPlayers[pid].score||0) + (finalPlayers[pid].tricks||0);
+          finalPlayers[pid].tricks = 0; // reset for next round
+        }
+
+        // rotate dealer
+        const idx = order.indexOf(data.dealer);
+        const nextDealer = order[(idx+1)%order.length];
+
+        await updateDoc(ref,{ players: finalPlayers, state:'lobby', playedCards:[], dealer: nextDealer, taker:null, trump:null, turn:null });
+        return;
+      }
+
+      // else trick resolved, continue playing next trick
+    }
+
+    // Start listening to game changes
+    function startListening(){
+      if(unsubscribe) unsubscribe();
+      const ref = doc(db,'games',gameId);
+      unsubscribe = onSnapshot(ref,(snap)=>{
+        const data = snap.data();
+        if(!data) return;
+        stateEl.innerText = data.state || '-';
+        trumpEl.innerText = data.trump || '-';
+        takerEl.innerText = (data.taker && (data.players && data.players[data.taker] && data.players[data.taker].name)) || (data.taker||'-');
+        turnEl.innerText = (data.turn && (data.players && data.players[data.turn] && data.players[data.turn].name)) || (data.turn||'-');
+
+        renderPlayers(data);
+        renderCenter(data);
+
+        // populate local hand if player exists
+        if(data.players && data.players[playerId]){
+          localHand = data.players[playerId].hand || [];
+        } else {
+          localHand = [];
+        }
+        renderHand();
+
+        // Update action area depending on state
+        actionArea.innerHTML='';
+        if(data.state === 'bidding'){
+          const order = data.order || [];
+          const bidIdx = data.biddingIndex || 0;
+          const toAct = order[bidIdx];
+          if(toAct === playerId){
+            const takeBtn = document.createElement('button'); takeBtn.innerText='Prendre'; takeBtn.onclick=()=>takeOrPass(true);
+            const passBtn = document.createElement('button'); passBtn.innerText='Passer'; passBtn.onclick=()=>takeOrPass(false);
+            actionArea.appendChild(takeBtn); actionArea.appendChild(passBtn);
+            notice.innerText = 'C\'est à toi de décider si tu veux prendre (être preneur).';
+          } else {
+            notice.innerText = `Enchères: en attente de ${data.players[toAct] ? data.players[toAct].name : toAct}`;
+          }
+        } else if(data.state === 'playing'){
+          if(data.turn === playerId){
+            notice.innerText = 'C\'est ton tour — joue une carte.';
+          } else {
+            notice.innerText = `En attente du tour de ${data.players && data.players[data.turn] ? data.players[data.turn].name : data.turn}`;
+          }
+        } else {
+          notice.innerText = 'Salle d\'attente — démarre une manche quand prêt.';
+        }
+      });
+    }
+
+    // expose for debug
+    window.playCardOnline = playCardOnline;
+    window.takeOrPass = takeOrPass;
+  </script>
+</body>
+</html>
