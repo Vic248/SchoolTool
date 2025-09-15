@@ -202,7 +202,7 @@ const path = [
 
 /* ====== GAME STATE ====== */
 let state = {
-  money: 100,
+  money: 200,
   lives: 20,
   wave: 0,
   enemies: [],
@@ -222,7 +222,7 @@ const TOWER_TYPES = {
 };
 
 /* ====== ENEMY TYPES ====== */
-const ENEMY_BASE = {hp:50, speed:60, reward:10}; // base stats; scaled per wave
+const ENEMY_BASE = {hp:25, speed:60, reward:10}; // base stats; scaled per wave
 
 /* ====== INPUT ====== */
 canvas.addEventListener('mousemove', e=>{
