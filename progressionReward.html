@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/auth.js"></script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <title>Progression - School Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .level {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+
+    .progress-container {
+      background: rgba(255,255,255,0.2);
+      border-radius: 25px;
+      overflow: hidden;
+      width: 80%;
+      margin: 0 auto 30px;
+      height: 30px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: #4caf50;
+      transition: width 0.6s ease-in-out;
+    }
+
+    .reward-table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 80%;
+    }
+
+    .reward-table th, .reward-table td {
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .reward-table th {
+      background: rgba(0,0,0,0.3);
+    }
+
+    .quest {
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      margin: 20px auto;
+      border-radius: 10px;
+      width: 60%;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .quest:hover {
+      transform: scale(1.05);
+      background: rgba(0,0,0,0.3);
+    }
+
+    /* Animation niveau */
+    .level-up {
+      animation: levelUp 1s ease-in-out;
+      color: gold;
+      font-weight: bold;
+    }
+
+    @keyframes levelUp {
+      0% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.5); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎓 Progression - School Tool</h1>
+  <div class="level" id="levelDisplay">Niveau : 1</div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <h2>⚔️ Quêtes disponibles</h2>
+  <!-- Exemple de quête -->
+  <div class="quest" onclick="completeQuest(50)">
+    ✅ Complète ton horaire (50 XP)
+  </div>
+  <!-- Tu peux copier/coller ce bloc pour ajouter d'autres quêtes -->
+
+  <h2>🎁 Récompenses</h2>
+  <table class="reward-table">
+    <tr>
+      <th>Niveau</th>
+      <th>Récompense</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Accès de base</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Débloque le jeu 1</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Débloque le jeu 2</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Débloque une nouvelle page spéciale</td>
+    </tr>
+  </table>
+
+  <script>
+    requireLogin();
+  </script>
+
+  <script>
+    let level = 1;
+    let xp = 0;
+    let xpToNext = 100;
+
+    const levelDisplay = document.getElementById("levelDisplay");
+    const progressBar = document.getElementById("progressBar");
+
+    netlifyIdentity.init();
+
+    function completeQuest(amount) {
+      xp += amount;
+      updateProgress();
+    }
+
+    function updateProgress() {
+      if (xp >= xpToNext) {
+        xp -= xpToNext;
+        level++;
+        xpToNext = Math.floor(xpToNext * 1.2); // Augmente la difficulté
+        levelDisplay.textContent = "Niveau : " + level;
+        levelDisplay.classList.add("level-up");
+
+        setTimeout(() => {
+          levelDisplay.classList.remove("level-up");
+        }, 1000);
+      }
+
+      let progress = (xp / xpToNext) * 100;
+      progressBar.style.width = progress + "%";
+    }
+
+    async function loadProgress() {
+      const saved = user.user_metadata?.progress || {level: 1, xp: 0, xpToNext: 100};
+      level = saved.level;
+      xp = saved.xp;
+      xpToNext = saved.xpToNext;
+
+      renderProgress();
+    }
+
+    function renderProgress() {
+      levelDisplay.textContent = "Niveau: " + level;
+      let progress = (xp/xpToNext)*100;
+      progressBar.style.width = progress + "%";
+    }
+
+    async function saveProgress() {
+        if (!user) return;
+
+        const data = {progress: {level, xp, xpToNext}};
+
+        await fetch("/.netlify/identity/user", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + user.token.access_token
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(updated => {
+          user = updated;
+          console.log("Progression sauvegardée : ", updated.user_metadata.progress)
+        })
+    }
+  </script>
+</body>
+</html>
