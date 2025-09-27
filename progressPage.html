@@ -146,16 +146,6 @@
 
     <a href="www.bonk.io" accesskey="w"></a>
 
-    <!-- Grille de boutons -->
-  <div class="button-grid">
-    <a href="CountDown.html" class="nav-button"><i class="fas fa-hourglass-half" id="bCd"></i>Compte à rebours</a>
-    <a href="Clock.html" class="nav-button"><i class="fas fa-clock" id="bClock"></i>Horloge</a>
-    <a href="Schedule.html" class="nav-button"><i class="fas fa-calendar-alt" id="bSchedule"></i>Horaire</a>
-    <a href="games/gameHome.html" class="nav-button"><i class="fa-solid fa-gamepad"></i> Menu des jeux</a>
-    <a href="suggestionForm.html" class="nav-button"><i class="fas fa-comment-dots" id="bSugg"></i>Suggestion</a>
-    <a href="https://www.mozaikportail.ca" class="nav-button"><i class="fas fa-link" id="bMozaik"></i>Mozaik</a>
-  </div>
-
   <h1>🎓 Progression - School Tool</h1>
   <div class="level" id="levelDisplay">Niveau : 1</div>
 
@@ -193,10 +183,23 @@
       <td>Débloque une nouvelle page spéciale</td>
     </tr>
   </table>
-  <script src="menu.js"></script>
+  <script src="/menu.js"></script>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script>
     loadMenu();
+  </script>
+  <script>
+    document.getElementById("menu-btn").addEventListener("click", function () {
+      document.getElementById("menu").classList.toggle("open");
+    });
+
+    function mouseEnter(id) {
+      document.getElementById(id).classList.add('fa-bounce');
+    }
+    
+    function mouseLeave(id) {
+      document.getElementById(id).classList.remove('fa-bounce');
+    }
   </script>
   <script>
     let level = 1;
