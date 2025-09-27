@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="menu.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Progression - School Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .level {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+
+    .progress-container {
+      background: rgba(255,255,255,0.2);
+      border-radius: 25px;
+      overflow: hidden;
+      width: 80%;
+      margin: 0 auto 30px;
+      height: 30px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: #4caf50;
+      transition: width 0.6s ease-in-out;
+    }
+
+    .reward-table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 80%;
+    }
+
+    .reward-table th, .reward-table td {
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .reward-table th {
+      background: rgba(0,0,0,0.3);
+    }
+
+    .quest {
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      margin: 20px auto;
+      border-radius: 10px;
+      width: 60%;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .quest:hover {
+      transform: scale(1.05);
+      background: rgba(0,0,0,0.3);
+    }
+
+    /* Animation niveau */
+    .level-up {
+      animation: levelUp 1s ease-in-out;
+      color: gold;
+      font-weight: bold;
+    }
+
+    @keyframes levelUp {
+      0% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.5); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+    <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
+
+    <a href="www.bonk.io" accesskey="w"></a>
+
+    <!-- Grille de boutons -->
+  <div class="button-grid">
+    <a href="CountDown.html" class="nav-button"><i class="fas fa-hourglass-half" id="bCd"></i>Compte à rebours</a>
+    <a href="Clock.html" class="nav-button"><i class="fas fa-clock" id="bClock"></i>Horloge</a>
+    <a href="Schedule.html" class="nav-button"><i class="fas fa-calendar-alt" id="bSchedule"></i>Horaire</a>
+    <a href="games/gameHome.html" class="nav-button"><i class="fa-solid fa-gamepad"></i> Menu des jeux</a>
+    <a href="suggestionForm.html" class="nav-button"><i class="fas fa-comment-dots" id="bSugg"></i>Suggestion</a>
+    <a href="https://www.mozaikportail.ca" class="nav-button"><i class="fas fa-link" id="bMozaik"></i>Mozaik</a>
+  </div>
+
+  <h1>🎓 Progression - School Tool</h1>
+  <div class="level" id="levelDisplay">Niveau : 1</div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <h2>⚔️ Quêtes disponibles</h2>
+  <!-- Exemple de quête -->
+  <div class="quest" onclick="completeQuest(50)">
+    ✅ Complète ton horaire (50 XP)
+  </div>
+  <!-- Tu peux copier/coller ce bloc pour ajouter d'autres quêtes -->
+
+  <h2>🎁 Récompenses</h2>
+  <table class="reward-table">
+    <tr>
+      <th>Niveau</th>
+      <th>Récompense</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Accès de base</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Débloque le jeu 1</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Débloque le jeu 2</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Débloque une nouvelle page spéciale</td>
+    </tr>
+  </table>
+  <script src="menu.js"></script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    loadMenu();
+  </script>
+  <script>
+    let level = 1;
+    let xp = 0;
+    let xpToNext = 100;
+
+    const levelDisplay = document.getElementById("levelDisplay");
+    const progressBar = document.getElementById("progressBar");
+
+    netlifyIdentity.init();
+
+    function completeQuest(amount) {
+      xp += amount;
+      updateProgress();
+      saveProgress();
+    }
+
+    async function loadProgress() {
+      authDiv.innerHTML = `<button onclick="netlifyIdentity.logout()">Se déconnecter</button>`;
+      profileDiv.innerHTML = `Connecté en tant que <b>${user.email}</b>`;
+      progressSection.style.display = "block";
+
+      // Récupérer la progression depuis user_metadata (fallback: nouveau joueur)
+      const saved = user.user_metadata?.progress || { level: 1, xp: 0, xpToNext: 100 };
+      level = saved.level;
+      xp = saved.xp;
+      xpToNext = saved.xpToNext;
+
+      updateProgress();
+    }
+
+    async function saveProgress() {
+      if (!user) return;
+
+      const data = { progress: { level, xp, xpToNext } };
+
+      // Mise à jour user_metadata via Netlify Identity API
+      await fetch("/.netlify/identity/user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + user.token.access_token
+        },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(updated => {
+        user = updated;
+        console.log("Progression sauvegardée :", updated.user_metadata.progress);
+      });
+    }
+
+    function renderProgress() {
+      levelDisplay.textContent = "Niveau : " + level;
+      let progress = (xp / xpToNext) * 100;
+      progressBar.style.width = progress + "%";
+    }
+
+    function updateProgress() {
+      if (xp >= xpToNext) {
+        xp -= xpToNext;
+        level++;
+        xpToNext = Math.floor(xpToNext * 1.2); // Augmente la difficulté
+        levelDisplay.textContent = "Niveau : " + level;
+        levelDisplay.classList.add("level-up");
+
+        setTimeout(() => {
+          levelDisplay.classList.remove("level-up");
+        }, 1000);
+      }
+
+      let progress = (xp / xpToNext) * 100;
+      progressBar.style.width = progress + "%";
+    }
+  </script>
+</body>
+</html>
