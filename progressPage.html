@@ -184,9 +184,13 @@
     </tr>
   </table>
   <script src="/menu.js"></script>
+  <script src="/auth.js"></script>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script>
     loadMenu();
+  </script>
+  <script>
+    requireLogin();
   </script>
   <script>
     document.getElementById("menu-btn").addEventListener("click", function () {
