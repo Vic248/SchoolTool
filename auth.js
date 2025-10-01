@@ -62,8 +62,9 @@ function requireRole(role) {
 
 function ifRole(role) {
     netlifyIdentity.on("init", (user) => {
-        if (!user || !user.app_metadata.roles.includes(role)) {
-            return true;
+        if (user || user.app_metadata.roles.includes(role)) {
+            alert(`Vous devez être normal pour accéder à ce site.`);
+            window.location.href = "google.com";
         }
     });
 }
