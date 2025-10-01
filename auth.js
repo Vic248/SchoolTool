@@ -60,11 +60,19 @@ function requireRole(role) {
     });
 }
 
-function ifRole(role) {
+function forbidRole(role) {
     netlifyIdentity.on("init", (user) => {
-        if (user || user.app_metadata.roles.includes(role)) {
-            alert(`Vous devez être normal pour accéder à ce site.`);
-            window.location.href = "google.com";
+        if (user && user.app_metadata.roles.includes(role)) {
+            alert(`Les utilisateurs avec le rôle ${role} n'ont pas accès à cette page.`);
+            window.location.href = "/";
+        }
+    });
+
+    // S'assure que si netlifyIdentity n'est pas encore prêt, on relance après login
+    netlifyIdentity.on("login", (user) => {
+        if (user && user.app_metadata.roles.includes(role)) {
+            alert(`Les utilisateurs avec le rôle ${role} n'ont pas accès à cette page.`);
+            window.location.href = "/";
         }
     });
 }
