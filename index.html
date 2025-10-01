@@ -194,6 +194,7 @@
 
     document.addEventListener("keydown", function(event) {
       const key = event.key.toLowerCase();
+      const keyCode = event.keyCode.toLowerCase();
 
       // Vérifie la touche courante
       if (key === konamiCode[position].toLowerCase() || key === piCode[position].toLowerCase) {
