@@ -184,30 +184,46 @@
     ];
 
     const piCode = [
-      "Digit3", "Period", "Digit1", "Digit4", "Digit1", "Digit5", "Digit9", "Digit2", "Digit6", "Digit5", "Digit3", "Digit5", "Digit8",
-      "Digit9", "Digit7", "Digit9", "Digit3", "Digit2", "Digit3", "Digit8", "Digit4", "Digit6", "Digit2", "Digit6", "Digit4", "Digit3",
-      "Digit3", "Digit8", "Digit3", "Digit2", "Digit7", "Digit9", "Digit5", "Digit0", "Digit2", "Digit8", "Digit8", "Digit4", "Digit1",
-      "Digit9", "Digit7", "Digit1", "Digit6", "Digit9", "Space"
+      "3", ".", "1", "4", "1", "5", "9", "2", "6", "5", "3", "5", "8", "9", "7", "9", "3", "2", "3", "8", "4", "6", "2", "6", "4", "3", "3",
+      "8", "3", "2", "7", "9", "5", "0", "2", "8", "8", "4", "1", "9", "7", "1", "6", "9", " "
     ];
 
-    let position = 0; // Position actuelle dans la séquence
+    let positionPi = 0; // Position actuelle dans la séquence
+    let positionKonami = 0;
 
     document.addEventListener("keydown", function(event) {
       const key = event.key.toLowerCase();
-      const keyCode = event.keyCode.toLowerCase();
 
       // Vérifie la touche courante
-      if (key === konamiCode[position].toLowerCase() || keyCode === piCode[position].toLowerCase) {
-        position++;
+      if (key === piCode[positionPi].toLowerCase()) {
+        positionPi++;
 
         // Si toute la séquence est réussie
-        if (position === konamiCode.length || position === piCode.lenght) {
+        if (positionPi === piCode.length) {
           window.location.href = "314159265358979323846.html"; // Redirection
-          position = 0; // reset
+          positionPi = 0; // reset
         }
       } else {
         // Reset si erreur
-        position = 0;
+        positionPi = 0;
+      }
+    });
+
+    document.addEventListener("keydown", function(event) {
+      const key = event.key.toLowerCase();
+
+      // Vérifie la touche courante
+      if (key === konamiCode[positionKonami].toLowerCase()) {
+        positionKonami++;
+
+        // Si toute la séquence est réussie
+        if (positionKonami === konamiCode.length) {
+          window.location.href = "314159265358979323846.html"; // Redirection
+          positionKonami = 0; // reset
+        }
+      } else {
+        // Reset si erreur
+        positionKonami = 0;
       }
     });
   </script>
