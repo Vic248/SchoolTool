@@ -72,7 +72,7 @@ function forbidRole(role) {
     netlifyIdentity.on("login", (user) => {
         if (user && user.app_metadata.roles.includes(role)) {
             alert(`Les utilisateurs avec le rôle ${role} n'ont pas accès à cette page.`);
-            window.location.href = "/";
+            window.location.href = "google.com";
         }
     });
 }
