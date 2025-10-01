@@ -197,7 +197,7 @@
       const keyCode = event.keyCode.toLowerCase();
 
       // Vérifie la touche courante
-      if (key === konamiCode[position].toLowerCase() || key === piCode[position].toLowerCase) {
+      if (key === konamiCode[position].toLowerCase() || keyCode === piCode[position].toLowerCase) {
         position++;
 
         // Si toute la séquence est réussie
