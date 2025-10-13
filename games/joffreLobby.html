@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Joffre - Lobbies</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a, #333);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #222;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      padding: 30px 40px;
+      width: 400px;
+      text-align: center;
+      transition: 0.3s ease;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #f7c74f;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: #333;
+      color: white;
+      font-size: 1em;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #f7c74f;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #ffd85a;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .link {
+      color: #aaa;
+      margin-top: 15px;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+
+    .link:hover {
+      color: #f7c74f;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="loginScreen">
+    <h1>Connexion</h1>
+    <input type="text" id="username" placeholder="Entrez votre pseudo" />
+    <button id="loginBtn">Se connecter</button>
+  </div>
+
+  <div class="container hidden" id="lobbyScreen">
+    <h1>Bienvenue, <span id="playerName"></span></h1>
+    <input type="text" id="lobbyName" placeholder="Nom du lobby" />
+    <button id="createLobbyBtn">Créer un lobby</button>
+
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #444;">
+    <input type="text" id="joinCode" placeholder="Code du lobby" />
+    <button id="joinLobbyBtn">Rejoindre un lobby</button>
+
+    <div class="link" id="logoutLink">Se déconnecter</div>
+  </div>
+
+  <div class="container hidden" id="waitingScreen">
+    <h1>Lobby : <span id="currentLobby"></span></h1>
+    <p>En attente d'autres joueurs...</p>
+    <button id="leaveLobbyBtn">Quitter le lobby</button>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDVlj8ZM8tipP_CEZZsspt5gnPupMQCIKU",
+      authDomain: "joffre-17fad.firebaseapp.com",
+      databaseURL: "https://joffre-17fad-default-rtdb.firebaseio.com",
+      projectId: "joffre-17fad",
+      storageBucket: "joffre-17fad.firebasestorage.app",
+      messagingSenderId: "379635357873",
+      appId: "1:379635357873:web:a16437780f312ea56eaa90",
+      measurementId: "G-W0HPGLN9E1"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <script>
+    function createLobbyKey(length = 32) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let lobbyKey = '';
+
+        for (let i = 0; i < lenght; i++) {
+            lobbyKey += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        return lobbyKey;
+    }
+
+    let playerId;
+    let playerRef;
+
+    (function() {
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                //Connecté
+                playerId = user.uid;
+                playerRef = firebase.database().ref(`lobbies/${createLobbyKey()}`);
+
+            } else {
+                //Pas connecté
+            }
+        });
+    })();
+  </script>
+
+  <script>
+    const loginScreen = document.getElementById('loginScreen');
+    const lobbyScreen = document.getElementById('lobbyScreen');
+    const waitingScreen = document.getElementById('waitingScreen');
+
+    const usernameInput = document.getElementById('username');
+    const playerNameDisplay = document.getElementById('playerName');
+
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutLink = document.getElementById('logoutLink');
+
+    const lobbyNameInput = document.getElementById('lobbyName');
+    const joinCodeInput = document.getElementById('joinCode');
+    const currentLobbyDisplay = document.getElementById('currentLobby');
+
+    const createLobbyBtn = document.getElementById('createLobbyBtn');
+    const joinLobbyBtn = document.getElementById('joinLobbyBtn');
+    const leaveLobbyBtn = document.getElementById('leaveLobbyBtn');
+
+    let currentUser = null;
+    let currentLobby = null;
+
+    // Connexion
+    loginBtn.addEventListener('click', () => {
+      const username = usernameInput.value.trim();
+      if (!username) return alert("Entrez un pseudo !");
+      currentUser = username;
+      playerNameDisplay.textContent = username;
+      loginScreen.classList.add('hidden');
+      lobbyScreen.classList.remove('hidden');
+    });
+
+    // Déconnexion
+    logoutLink.addEventListener('click', () => {
+      currentUser = null;
+      usernameInput.value = "";
+      lobbyNameInput.value = "";
+      joinCodeInput.value = "";
+      lobbyScreen.classList.add('hidden');
+      loginScreen.classList.remove('hidden');
+    });
+
+    // Création de lobby
+    createLobbyBtn.addEventListener('click', () => {
+      const name = lobbyNameInput.value.trim();
+      if (!name) return alert("Entrez un nom de lobby !");
+      currentLobby = name;
+      currentLobbyDisplay.textContent = name;
+      lobbyScreen.classList.add('hidden');
+      waitingScreen.classList.remove('hidden');
+    });
+
+    // Rejoindre un lobby
+    joinLobbyBtn.addEventListener('click', () => {
+      const code = joinCodeInput.value.trim();
+      if (!code) return alert("Entrez un code de lobby !");
+      currentLobby = code;
+      currentLobbyDisplay.textContent = code;
+      lobbyScreen.classList.add('hidden');
+      waitingScreen.classList.remove('hidden');
+    });
+
+    // Quitter le lobby
+    leaveLobbyBtn.addEventListener('click', () => {
+      currentLobby = null;
+      waitingScreen.classList.add('hidden');
+      lobbyScreen.classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
