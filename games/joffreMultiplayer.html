@@ -404,6 +404,8 @@
             id: playerId,
           })
 
+          playerRef.onDisconnect().remove();
+
           console.log("You're logged in!");
         } else {
           //You're looged out.
@@ -417,7 +419,7 @@
 
         console.log(errorCode, errorMessage);
       })
-    })
+    })();
 
     function log(text) {
       document.getElementById('log').textContent = text;
