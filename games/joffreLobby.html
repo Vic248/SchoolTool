@@ -21,7 +21,7 @@
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
       padding: 30px 40px;
-      width: 400px;
+      width: 420px;
       text-align: center;
       transition: 0.3s ease;
     }
@@ -55,24 +55,51 @@
       transition: background 0.3s ease;
     }
 
-    button:hover {
-      background: #ffd85a;
+    button:hover { background: #ffd85a; }
+    .hidden { display: none; }
+    .link { color: #aaa; margin-top: 15px; font-size: 0.9em; cursor: pointer; }
+    .link:hover { color: #f7c74f; }
+
+    /* Zone des joueurs */
+    #playersList {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 20px;
     }
 
-    .hidden {
-      display: none;
+    .player-slot {
+      background: #333;
+      border-radius: 10px;
+      padding: 15px;
+      font-weight: bold;
+      border: 2px solid #444;
+      transition: 0.3s;
     }
 
-    .link {
-      color: #aaa;
-      margin-top: 15px;
-      font-size: 0.9em;
-      cursor: pointer;
+    .player-slot.host {
+      border-color: #f7c74f;
+      box-shadow: 0 0 10px #f7c74f88;
     }
 
-    .link:hover {
-      color: #f7c74f;
+    /* Interface de paramètres (host) */
+    #hostSettings {
+      margin-left: 30px;
+      background: #2c2c2c;
+      border-radius: 12px;
+      padding: 20px;
+      width: 250px;
+      text-align: left;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
+
+    #waitingArea {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 20px;
+    }
+
   </style>
 </head>
 <body>
@@ -95,13 +122,42 @@
   </div>
 
   <div class="container hidden" id="waitingScreen">
-    <h1>Lobby : <span id="currentLobby"></span></h1>
-    <p>En attente d'autres joueurs...</p>
-    <button id="leaveLobbyBtn">Quitter le lobby</button>
+    <div id="waitingArea">
+      <div>
+        <h1>Lobby : <span id="currentLobby"></span></h1>
+        <div id="playersList"></div>
+        <button id="leaveLobbyBtn">Quitter le lobby</button>
+      </div>
+
+      <div id="hostSettings" class="hidden">
+        <h2>⚙️ Paramètres</h2>
+        <label>Nombre de manches :</label>
+        <input type="number" id="roundsInput" min="1" max="10" value="3">
+        <br><br>
+        <button id="startGameBtn">Démarrer la partie</button>
+      </div>
+    </div>
   </div>
+
+      <!-- Message d'erreur lobby non trouvé -->
+      <div class="container hidden" id="notFoundScreen">
+        <h1>Lobby non trouvé</h1>
+        <p>Aucun lobby avec ce code n’a été trouvé.</p>
+        <button id="backToLobbyBtn">Retour</button>
+      </div>
+
+  <!-- Message quand le host quitte -->
+  <div class="container hidden" id="hostLeftScreen">
+    <h1>🏠 L'hôte a quitté le lobby</h1>
+    <p>Le lobby n'existe plus. Vous allez être redirigé.</p>
+    <button id="backFromHostLeftBtn">Retour</button>
+  </div>
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDVlj8ZM8tipP_CEZZsspt5gnPupMQCIKU",
@@ -110,38 +166,14 @@
       projectId: "joffre-17fad",
       storageBucket: "joffre-17fad.firebasestorage.app",
       messagingSenderId: "379635357873",
-      appId: "1:379635357873:web:a16437780f312ea56eaa90",
-      measurementId: "G-W0HPGLN9E1"
+      appId: "1:379635357873:web:a16437780f312ea56eaa90"
     };
     firebase.initializeApp(firebaseConfig);
-  </script>
-  <script>
-    function createLobbyKey(length = 32) {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let lobbyKey = '';
 
-        for (let i = 0; i < lenght; i++) {
-            lobbyKey += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-
-        return lobbyKey;
+    function createKey(length) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      return Array.from({length}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
     }
-
-    let playerId;
-    let playerRef;
-
-    (function() {
-        firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                //Connecté
-                playerId = user.uid;
-                playerRef = firebase.database().ref(`lobbies/${createLobbyKey()}`);
-
-            } else {
-                //Pas connecté
-            }
-        });
-    })();
   </script>
 
   <script>
@@ -151,22 +183,23 @@
 
     const usernameInput = document.getElementById('username');
     const playerNameDisplay = document.getElementById('playerName');
+    const currentLobbyDisplay = document.getElementById('currentLobby');
+    const playersList = document.getElementById('playersList');
+    const hostSettings = document.getElementById('hostSettings');
 
     const loginBtn = document.getElementById('loginBtn');
     const logoutLink = document.getElementById('logoutLink');
-
-    const lobbyNameInput = document.getElementById('lobbyName');
-    const joinCodeInput = document.getElementById('joinCode');
-    const currentLobbyDisplay = document.getElementById('currentLobby');
-
     const createLobbyBtn = document.getElementById('createLobbyBtn');
     const joinLobbyBtn = document.getElementById('joinLobbyBtn');
     const leaveLobbyBtn = document.getElementById('leaveLobbyBtn');
 
     let currentUser = null;
-    let currentLobby = null;
+    let currentLobbyRef = null;
+    let currentPlayerRef = null;
+    let userUid = null;
+    let isHost = false;
 
-    // Connexion
+    // Connexion manuelle + Firebase
     loginBtn.addEventListener('click', () => {
       const username = usernameInput.value.trim();
       if (!username) return alert("Entrez un pseudo !");
@@ -176,42 +209,178 @@
       lobbyScreen.classList.remove('hidden');
     });
 
-    // Déconnexion
     logoutLink.addEventListener('click', () => {
-      currentUser = null;
+      firebase.auth().signOut();
       usernameInput.value = "";
-      lobbyNameInput.value = "";
-      joinCodeInput.value = "";
       lobbyScreen.classList.add('hidden');
       loginScreen.classList.remove('hidden');
     });
 
-    // Création de lobby
-    createLobbyBtn.addEventListener('click', () => {
-      const name = lobbyNameInput.value.trim();
-      if (!name) return alert("Entrez un nom de lobby !");
-      currentLobby = name;
-      currentLobbyDisplay.textContent = name;
-      lobbyScreen.classList.add('hidden');
-      waitingScreen.classList.remove('hidden');
+    // Firebase Auth
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        userUid = user.uid;
+        console.log("✅ Connecté :", userUid);
+
+        // Création du lobby (HOST)
+        createLobbyBtn.addEventListener('click', () => {
+          const lobbyName = document.getElementById('lobbyName').value.trim();
+          if (!lobbyName) return alert("Entrez un nom de lobby !");
+          const lobbyKey = createKey(6);
+          isHost = true;
+
+          const lobbyRef = firebase.database().ref('lobbies/' + lobbyKey);
+          const playerName = currentUser || "Inconnu";
+
+          lobbyRef.set({
+            name: lobbyName,
+            host: userUid,
+            players: { [userUid]: { name: playerName, hand: []} }
+          });
+
+          // Supprime le lobby si le host se déconnecte
+          lobbyRef.onDisconnect().remove();
+
+          currentLobbyRef = lobbyRef;
+          currentPlayerRef = lobbyRef.child("players/" + userUid);
+
+          currentLobbyDisplay.textContent = `${lobbyName} (${lobbyKey})`;
+          lobbyScreen.classList.add('hidden');
+          waitingScreen.classList.remove('hidden');
+          hostSettings.classList.remove('hidden');
+
+          listenForPlayers(lobbyKey);
+          listenForLobbyDeletion(lobbyKey);
+        });
+
+        // Rejoindre un lobby
+        joinLobbyBtn.addEventListener('click', () => {
+          const code = document.getElementById('joinCode').value.trim();
+          if (!code) return alert("Entrez un code de lobby !");
+          isHost = false;
+
+          const lobbyRef = firebase.database().ref(`lobbies/${code}`);
+
+          // 🔍 Vérifie si le lobby existe avant de rejoindre
+          lobbyRef.once('value').then(snapshot => {
+            if (!snapshot.exists()) {
+              // 🚫 Affiche un message d'erreur si aucun lobby trouvé
+              console.log("Lobby non trouvé :", code);
+              showLobbyNotFound();
+              return;
+            }
+
+            // ✅ Si le lobby existe → continuer
+            const playerName = currentUser || "Inconnu";
+            const playerRef = firebase.database().ref(`lobbies/${code}/players/${userUid}`);
+
+            playerRef.set({ name: playerName, score: 0 });
+            playerRef.onDisconnect().remove();
+
+            currentLobbyRef = lobbyRef;
+            currentPlayerRef = playerRef;
+
+            currentLobbyDisplay.textContent = code;
+            lobbyScreen.classList.add('hidden');
+            waitingScreen.classList.remove('hidden');
+            hostSettings.classList.add('hidden');
+
+            listenForPlayers(code);
+          });
+          listenForLobbyDeletion(code);
+        });
+
+        // Quitter le lobby
+        leaveLobbyBtn.addEventListener('click', () => {
+          if (currentPlayerRef) currentPlayerRef.remove();
+          if (isHost && currentLobbyRef) currentLobbyRef.remove();
+
+          waitingScreen.classList.add('hidden');
+          lobbyScreen.classList.remove('hidden');
+          playersList.innerHTML = "";
+        });
+      }
     });
 
-    // Rejoindre un lobby
-    joinLobbyBtn.addEventListener('click', () => {
-      const code = joinCodeInput.value.trim();
-      if (!code) return alert("Entrez un code de lobby !");
-      currentLobby = code;
-      currentLobbyDisplay.textContent = code;
-      lobbyScreen.classList.add('hidden');
-      waitingScreen.classList.remove('hidden');
-    });
+    firebase.auth().signInAnonymously();
 
-    // Quitter le lobby
-    leaveLobbyBtn.addEventListener('click', () => {
-      currentLobby = null;
+    // 🔁 Affichage en temps réel des joueurs
+    function listenForPlayers(lobbyKey) {
+      const playersRef = firebase.database().ref(`lobbies/${lobbyKey}/players`);
+      const hostRef = firebase.database().ref(`lobbies/${lobbyKey}/host`);
+
+      hostRef.once('value', snap => {
+        const hostId = snap.val();
+        playersRef.on('value', snapshot => {
+          const players = snapshot.val() || {};
+          updatePlayerSlots(players, hostId);
+        });
+      });
+    }
+
+    // 🧩 Met à jour les cases des joueurs
+    function updatePlayerSlots(players, hostId) {
+      const allPlayers = Object.values(players);
+      playersList.innerHTML = "";
+
+      for (let i = 0; i < 4; i++) {
+        const playerData = allPlayers[i];
+        const slot = document.createElement("div");
+        slot.classList.add("player-slot");
+
+        if (playerData) {
+          slot.textContent = playerData.name + (Object.keys(players)[i] === hostId ? " 👑" : "");
+          if (Object.keys(players)[i] === hostId) slot.classList.add("host");
+        } else {
+          slot.textContent = "En attente...";
+        }
+        playersList.appendChild(slot);
+      }
+    }
+
+    // 🔄 Interface "Lobby non trouvé"
+    const notFoundScreen = document.getElementById('notFoundScreen');
+    const backToLobbyBtn = document.getElementById('backToLobbyBtn');
+
+    function showLobbyNotFound() {
+      lobbyScreen.classList.add('hidden');
       waitingScreen.classList.add('hidden');
+      notFoundScreen.classList.remove('hidden');
+    }
+
+    backToLobbyBtn.addEventListener('click', () => {
+      notFoundScreen.classList.add('hidden');
       lobbyScreen.classList.remove('hidden');
     });
+
+    // 🔄 Interface quand le host quitte
+    const hostLeftScreen = document.getElementById('hostLeftScreen');
+    const backFromHostLeftBtn = document.getElementById('backFromHostLeftBtn');
+
+    backFromHostLeftBtn.addEventListener('click', () => {
+      hostLeftScreen.classList.add('hidden');
+      lobbyScreen.classList.remove('hidden');
+    });
+
+    // 👂 Surveille la suppression du lobby
+    function listenForLobbyDeletion(lobbyKey) {
+      const lobbyRef = firebase.database().ref(`lobbies/${lobbyKey}`);
+
+      lobbyRef.on('value', (snapshot) => {
+        if (!snapshot.exists()) {
+          // Si le lobby a été supprimé → rediriger les joueurs (sauf l'hôte)
+          if (!isHost) {
+            waitingScreen.classList.add('hidden');
+            hostLeftScreen.classList.remove('hidden');
+            setTimeout(() => {
+              hostLeftScreen.classList.add('hidden');
+              lobbyScreen.classList.remove('hidden');
+            }, 3000);
+          }
+          lobbyRef.off(); // stoppe l'écoute
+        }
+      });
+    }
   </script>
 </body>
 </html>
