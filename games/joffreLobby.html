@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../schooltoolicon.png" type="image/x-icon">
   <title>Joffre - Lobbies</title>
   <style>
     body {
@@ -192,12 +193,16 @@
     const createLobbyBtn = document.getElementById('createLobbyBtn');
     const joinLobbyBtn = document.getElementById('joinLobbyBtn');
     const leaveLobbyBtn = document.getElementById('leaveLobbyBtn');
+    const startGameBtn = document.getElementById('startGameBtn');
 
     let currentUser = null;
     let currentLobbyRef = null;
     let currentPlayerRef = null;
     let userUid = null;
     let isHost = false;
+    let lobbyJoined = false; // devient true uniquement après un join/create réussi
+
+    const lobbyKey = createKey(6); // clé aléatoire pour le lobby
 
     // Connexion manuelle + Firebase
     loginBtn.addEventListener('click', () => {
@@ -216,6 +221,46 @@
       loginScreen.classList.remove('hidden');
     });
 
+    startGameBtn.addEventListener('click', () => {
+      // Vérifie la composition des équipes
+      currentLobbyRef.child('players').once('value').then(snapshot => {
+        const players = snapshot.val() || {};
+        let redCount = 0, blueCount = 0;
+        Object.values(players).forEach(player => {
+          if (player.isRedTeam) redCount++;
+          if (player.isBlueTeam) blueCount++;
+        });
+        if (Object.keys(players).length === 4 && (redCount !== 2 || blueCount !== 2)) {
+          alert("Il doit y avoir exactement 2 joueurs dans chaque équipe !");
+          return;
+        }
+
+        if (Object.keys(players).length === 3 && (redCount === 3 || blueCount === 3)) {
+          alert("Avec 3 joueurs, il ne peut pas y avoir 3 joueurs dans la même équipe !");
+          return;
+        }
+
+        currentLobbyRef.update({ gameStarted: true });
+
+        // ...suite du code pour démarrer la partie...
+        const playerData = {
+          username: usernameInput.value.trim(),
+          userId: userUid,
+          isHost: isHost,
+          lobbyId: lobbyKey,
+          players: [
+            player1 = {hand: [], isBot: null},
+            player2 = {hand: [], isBot: null},
+            player3 = {hand: [], isBot: null},
+            player4 = {hand: [], isBot: null}
+          ]
+        }
+
+        sessionStorage.setItem("playerData", JSON.stringify(playerData));
+        window.location.href = "joffreMultiplayer.html";
+      });
+    })
+
     // Firebase Auth
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
@@ -226,7 +271,6 @@
         createLobbyBtn.addEventListener('click', () => {
           const lobbyName = document.getElementById('lobbyName').value.trim();
           if (!lobbyName) return alert("Entrez un nom de lobby !");
-          const lobbyKey = createKey(6);
           isHost = true;
 
           const lobbyRef = firebase.database().ref('lobbies/' + lobbyKey);
@@ -235,7 +279,7 @@
           lobbyRef.set({
             name: lobbyName,
             host: userUid,
-            players: { [userUid]: { name: playerName, hand: []} }
+            players: { [userUid]: { name: playerName, hand: [], isRedTeam: true, isBlueTeam: false} }
           });
 
           // Supprime le lobby si le host se déconnecte
@@ -249,45 +293,50 @@
           waitingScreen.classList.remove('hidden');
           hostSettings.classList.remove('hidden');
 
+          lobbyJoined = true;
           listenForPlayers(lobbyKey);
           listenForLobbyDeletion(lobbyKey);
+          listenForGameStart(lobbyKey);
         });
 
-        // Rejoindre un lobby
         joinLobbyBtn.addEventListener('click', () => {
           const code = document.getElementById('joinCode').value.trim();
           if (!code) return alert("Entrez un code de lobby !");
-          isHost = false;
 
           const lobbyRef = firebase.database().ref(`lobbies/${code}`);
 
-          // 🔍 Vérifie si le lobby existe avant de rejoindre
+          // Vérifie si le lobby existe avant de rejoindre
           lobbyRef.once('value').then(snapshot => {
             if (!snapshot.exists()) {
-              // 🚫 Affiche un message d'erreur si aucun lobby trouvé
-              console.log("Lobby non trouvé :", code);
               showLobbyNotFound();
+              lobbyJoined = false; // on n'a pas rejoint
               return;
             }
 
-            // ✅ Si le lobby existe → continuer
+            // Le lobby existe → on rejoint
+            isHost = false;
             const playerName = currentUser || "Inconnu";
             const playerRef = firebase.database().ref(`lobbies/${code}/players/${userUid}`);
 
-            playerRef.set({ name: playerName, score: 0 });
+            playerRef.set({ name: playerName, hand: [], isRedTeam: false, isBlueTeam: true});
             playerRef.onDisconnect().remove();
 
             currentLobbyRef = lobbyRef;
             currentPlayerRef = playerRef;
+            lobbyJoined = true; // <-- important
 
-            currentLobbyDisplay.textContent = code;
+            currentLobbyDisplay.textContent = `${snapshot.val().name || code} (${code})`;
             lobbyScreen.classList.add('hidden');
             waitingScreen.classList.remove('hidden');
             hostSettings.classList.add('hidden');
 
             listenForPlayers(code);
+            listenForLobbyDeletion(code); // on écoute la suppression **seulement** après avoir rejoint
+            listenForGameStart(code);
+          }).catch(err => {
+            console.error(err);
+            alert("Erreur réseau — réessaye.");
           });
-          listenForLobbyDeletion(code);
         });
 
         // Quitter le lobby
@@ -295,6 +344,7 @@
           if (currentPlayerRef) currentPlayerRef.remove();
           if (isHost && currentLobbyRef) currentLobbyRef.remove();
 
+          lobbyJoined = false;
           waitingScreen.classList.add('hidden');
           lobbyScreen.classList.remove('hidden');
           playersList.innerHTML = "";
@@ -318,6 +368,16 @@
       });
     }
 
+    function listenForGameStart(lobbyKey) {
+      const gameStartedRef = firebase.database().ref(`lobbies/${lobbyKey}/gameStarted`);
+      gameStartedRef.on('value', snapshot => {
+        if (snapshot.val() === true) {
+          // Optional: Save any needed data to sessionStorage here
+          window.location.href = "joffreMultiplayer.html";
+        }
+      });
+    }
+
     // 🧩 Met à jour les cases des joueurs
     function updatePlayerSlots(players, hostId) {
       const allPlayers = Object.values(players);
@@ -325,16 +385,40 @@
 
       for (let i = 0; i < 4; i++) {
         const playerData = allPlayers[i];
-        const slot = document.createElement("div");
+        const slot = document.createElement("button");
         slot.classList.add("player-slot");
 
         if (playerData) {
           slot.textContent = playerData.name + (Object.keys(players)[i] === hostId ? " 👑" : "");
           if (Object.keys(players)[i] === hostId) slot.classList.add("host");
+
+          if (playerData.isRedTeam === true) {
+            slot.style.background = "#ff0000";
+          } else if (playerData.isBlueTeam === true) {
+            slot.style.background = "#0000ff";
+          } else {
+            slot.style.background = "#333";
+          }
         } else {
           slot.textContent = "En attente...";
+          slot.style.background = "#333";
         }
         playersList.appendChild(slot);
+
+        // Only host can change team color
+        slot.addEventListener('click', () => {
+          if (!isHost) return; // Only host can change
+
+          // Host changes the team of the clicked player
+          const playerKey = Object.keys(players)[i];
+          const playerRef = firebase.database().ref(`lobbies/${lobbyKey}/players/${playerKey}`);
+
+          if (playerData.isRedTeam === true) {
+            playerRef.update({ isRedTeam: false, isBlueTeam: true });
+          } else if (playerData.isBlueTeam === true) {
+            playerRef.update({ isRedTeam: true, isBlueTeam: false });
+          }
+        });
       }
     }
 
@@ -343,6 +427,7 @@
     const backToLobbyBtn = document.getElementById('backToLobbyBtn');
 
     function showLobbyNotFound() {
+      lobbyJoined = false;
       lobbyScreen.classList.add('hidden');
       waitingScreen.classList.add('hidden');
       notFoundScreen.classList.remove('hidden');
@@ -362,22 +447,32 @@
       lobbyScreen.classList.remove('hidden');
     });
 
-    // 👂 Surveille la suppression du lobby
     function listenForLobbyDeletion(lobbyKey) {
       const lobbyRef = firebase.database().ref(`lobbies/${lobbyKey}`);
 
+      // on react seulement si on avait bien rejoint le lobby
       lobbyRef.on('value', (snapshot) => {
         if (!snapshot.exists()) {
-          // Si le lobby a été supprimé → rediriger les joueurs (sauf l'hôte)
-          if (!isHost) {
-            waitingScreen.classList.add('hidden');
-            hostLeftScreen.classList.remove('hidden');
-            setTimeout(() => {
-              hostLeftScreen.classList.add('hidden');
+          // si on avait réellement rejoint le lobby, afficher le message
+          if (lobbyJoined) {
+            lobbyJoined = false; // évite de ré-afficher
+            if (!isHost) {
+              waitingScreen.classList.add('hidden');
+              hostLeftScreen.classList.remove('hidden');
+              // Optionnel : revenir automatiquement après 3s
+              // setTimeout(() => {
+              //   hostLeftScreen.classList.add('hidden');
+              //   lobbyScreen.classList.remove('hidden');
+              // }, 3000);
+            } else {
+              // Si on est host, le lobby a été supprimé par nous-mêmes (ou déjà nettoyé)
+              waitingScreen.classList.add('hidden');
               lobbyScreen.classList.remove('hidden');
-            }, 3000);
+            }
+          } else {
+            // On avait jamais rejoint : ignorer (cela évite "host a quitté" sur code invalide)
           }
-          lobbyRef.off(); // stoppe l'écoute
+          lobbyRef.off(); // arrête l'écoute
         }
       });
     }

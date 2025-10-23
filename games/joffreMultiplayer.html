@@ -385,6 +385,9 @@
     let currentAskingIndex = 0;
     let isTakingPhase = false;
 
+    const playerDataJSON = sessionStorage.getItem('playerData');
+    const playerData = JSON.parse(playerDataJSON);
+
     (function() {
 
       let playerId;
