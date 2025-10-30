@@ -1,188 +1,392 @@
 <!DOCTYPE html>
-<html lang="fr-CA">
-<head>
-  <title>Horloges</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
-      font-family: 'Poppins', sans-serif;
-    }
+<html lang="en">
 
-    .container {
-      text-align: center;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-      width: 90%;
-      max-width: 700px;
-      animation: fadeIn 0.8s ease;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      font-size: 26px;
-      color: #333;
-    }
-
-    iframe {
-      border: none;
-      width: 100%;
-      height: 500px;
-      border-radius: 10px;
-    }
-
-    /* 🎨 Fancy button selector */
-    .clock-style-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 25px;
-      flex-wrap: wrap;
-    }
-
-    .clock-style-buttons button {
-      background: #2c3e50;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .clock-style-buttons button:hover {
-      background: #1f2e3a;
-      transform: scale(1.05);
-    }
-
-    .clock-style-buttons button.active {
-      background: #00bcd4;
-      color: white;
-      box-shadow: 0 0 10px rgba(0,188,212,0.5);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    #menu-btn, #auth-btn {
-      position: fixed;
-      top: 15px;
-      background-color: #2c3e50;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-      z-index: 1002;
-      transition: background 0.3s;
-    }
-
-    #menu-btn { left: 20px; padding: 12px 18px; }
-    #auth-btn { right: 20px; padding: 8px 16px; }
-
-    #menu-btn:hover, #auth-btn:hover { background-color: #1f2e3a; }
-  </style>
-</head>
-<body>
-  <button id="auth-btn">Se connecter</button>
-  <button id="menu-btn" onmouseenter="mouseEnter('bars')" onmouseleave="mouseLeave('bars')">
-    <i class="fas fa-bars" id="bars"></i> Menu
-  </button>
-
-  <div class="container">
-    <h1>🕒 Choisissez votre style d’horloge</h1>
-
-    <!-- Option 1: stylish buttons -->
-    <div class="clock-style-buttons">
-      <button data-style="classic" class="active">
-        <i class="fa-regular fa-clock"></i> Classique
-      </button>
-      <button data-style="madeofclocks">
-        <i class="fa-solid fa-border-all"></i> Fait d’horloges
-      </button>
-    </div>
-
-    <div id="clock-display">
-      <iframe src="https://embed-clock.onlinealarmkur.com/fr/#America%2FToronto"></iframe>
-    </div>
-  </div>
-
-  <!-- Auth & menu scripts -->
-  <script src="/auth.js"></script>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script src="/menu.js"></script>
-
-  <script>
-    window.addEventListener("DOMContentLoaded", () => {
-      loadMenu();
-      netlifyIdentity.init();
-
-      const authBtn = document.getElementById("auth-btn");
-      function updateAuthButton(user) {
-        if (user) {
-          authBtn.textContent = "Se déconnecter";
-          authBtn.onclick = () => netlifyIdentity.logout();
-        } else {
-          authBtn.textContent = "Se connecter";
-          authBtn.onclick = () => netlifyIdentity.open();
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Clock made of clocks</title>
+    <style>
+    #menu-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 1001;
+        transition: background-color 0.3s;
         }
-      }
-      netlifyIdentity.on("init", updateAuthButton);
-      netlifyIdentity.on("login", (user) => {
-        updateAuthButton(user);
-        netlifyIdentity.close();
-      });
-      netlifyIdentity.on("logout", () => updateAuthButton(null));
 
-      document.getElementById("menu-btn").addEventListener("click", () => {
-        document.getElementById("menu").classList.toggle("open");
+        #menu-btn:hover {
+        background-color: #1f2e3a;
+        }
+
+        #menu {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 260px;
+        height: 100%;
+        background-color: #2c3e50;
+        color: white;
+        padding-top: 70px;
+        transition: left 0.3s ease;
+        z-index: 1000;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #menu.open {
+        left: 0;
+        }
+
+        #menu a {
+        display: flex;
+        align-items: center;
+        padding: 14px 24px;
+        color: white;
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        }
+
+        #menu a i {
+        margin-right: 12px;
+        width: 20px;
+        }
+
+        #menu a:hover {
+        background-color: #34495e;
+        }
+        /* Bouton connexion */
+    #auth-btn {
+        position: fixed;
+        top: 15px;
+        right: 20px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        z-index: 1002;
+    }
+    #auth-btn:hover {
+        background-color: #1f2e3a;
+    }
+body {
+  padding: 0;
+  margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.app {
+  --clock-size: 3vw;
+  --gap: calc(var(--clock-size) * 0.05);
+  --clock-segment-w: calc(var(--clock-size) * 4 + var(--gap) * 5);
+  --clock-segment-h: calc(var(--clock-size) * 6 + var(--gap) * 5);
+  font-family: sans-serif;
+  text-align: center;
+  display: flex;
+  gap: var(--gap);
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding-left: calc(var(--clock-size) + var(--gap) * 2);
+}
+
+.app > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  width: var(--clock-segment-w);
+  height: var(--clock-segment-h);
+}
+
+.app > div:nth-of-type(even) {
+  margin-right: var(--clock-size);
+}
+
+.clock {
+  --w: 47%;
+  --h: 3px;
+  --dur: 0.4s;
+  position: relative;
+  width: var(--clock-size);
+  height: var(--clock-size);
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid white;
+  background: linear-gradient(225deg, #d0d0d0 10%, white);
+  box-shadow: -2px 2px 6px #d0d0d0,
+               2px -2px 6px #ffffff;
+}
+
+.clock::before,
+.clock::after {
+  position: absolute;
+  content: '';
+  top: calc(50% - var(--h) * 0.5);
+  left: 50%;
+  transform-origin: 0% 50%;
+  width: var(--w);
+  height: var(--h);
+  background: black;
+  border-radius: 9999px;
+  transition: calc(var(--dur) * 1s) ease-in-out;
+  transform: rotate(calc(var(--angle) * 1deg));
+}
+
+.clock::before {
+  --angle: var(--hour-angle);
+}
+
+.clock::after {
+  --angle: var(--minute-angle);
+}
+
+@media (max-width: 700px) {
+  .clock {
+    --h: 2px;
+    border: 1px solid white;
+  }
+}
+
+@media (max-width: 500px) {
+  .clock {
+    --h: 1px;
+    --w: 50%;
+  }
+}
+</style>
+
+  </head>
+    
+  <body>
+    <button id="auth-btn">Se connecter</button>
+    <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
+    <a href="bonk.io" accesskey="w"></a>
+  <div id="root"></div>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="/menu.js"></script>
+<script src="/auth.js"></script>
+    <script>
+        loadMenu();
+    </script>
+    <script>
+      document.getElementById("menu-btn").addEventListener("click", function () {
+        document.getElementById("menu").classList.toggle("open");    
       });
 
       function mouseEnter(id) {
-        document.getElementById(id).classList.add('fa-bounce');
+        const newId = document.getElementById(id);
+        newId.classList.add('fa-bounce');
       }
+      
       function mouseLeave(id) {
-        document.getElementById(id).classList.remove('fa-bounce');
+        const newId = document.getElementById(id);
+        newId.classList.remove('fa-bounce');
       }
 
-      // 🕹️ Clock style switcher via buttons
-      const buttons = document.querySelectorAll(".clock-style-buttons button");
-      const clockDisplay = document.getElementById("clock-display");
+      netlifyIdentity.init();
 
-      buttons.forEach(btn => {
-        btn.addEventListener("click", () => {
-          buttons.forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
+    const authBtn = document.getElementById("auth-btn");
 
-          const style = btn.dataset.style;
-          console.log("🔄 Style:", style);
+    function updateAuthButton(user) {
+        if (user) {
+        authBtn.textContent = "Se déconnecter";
+        authBtn.onclick = () => netlifyIdentity.logout();
+        } else {
+        authBtn.textContent = "Se connecter";
+        authBtn.onclick = () => netlifyIdentity.open();
+        }
+    }
 
-          if (style === "classic") {
-            clockDisplay.innerHTML = `
-              <iframe src="https://embed-clock.onlinealarmkur.com/fr/#America%2FToronto"></iframe>`;
-          } else if (style === "madeofclocks") {
-            clockDisplay.innerHTML = `
-              <iframe src="clock-made-of-clocks-merged-fixed.html"
-                style="width:100%;height:500px;border:none;border-radius:10px;"></iframe>`;
-          }
-        });
-      });
+    netlifyIdentity.on("init", updateAuthButton);
+    netlifyIdentity.on("login", (user) => {
+        updateAuthButton(user);
+        netlifyIdentity.close();
     });
-  </script>
-</body>
+    netlifyIdentity.on("logout", () => updateAuthButton(null));
+    </script>
+    <script type="module">
+import React, { useState, useEffect, useRef } from "https://esm.sh/react@19";
+import { createRoot } from "https://esm.sh/react-dom@19/client";
+
+const H = { h: 0, m: 180 },
+V = { h: 270, m: 90 },
+TL = { h: 180, m: 270 },
+TR = { h: 0, m: 270 },
+BL = { h: 180, m: 90 },
+BR = { h: 0, m: 90 },
+E = { h: 135, m: 135 };
+
+const digits = [
+[
+BR, H, H, BL,
+V, BR, BL, V,
+V, V, V, V,
+V, V, V, V,
+V, TR, TL, V,
+TR, H, H, TL],
+
+[
+BR, H, BL, E,
+TR, BL, V, E,
+E, V, V, E,
+E, V, V, E,
+BR, TL, TR, BL,
+TR, H, H, TL],
+
+[
+BR, H, H, BL,
+TR, H, BL, V,
+BR, H, TL, V,
+V, BR, H, TL,
+V, TR, H, BL,
+TR, H, H, TL],
+
+[
+BR, H, H, BL,
+TR, H, BL, V,
+E, BR, TL, V,
+E, TR, BL, V,
+BR, H, TL, V,
+TR, H, H, TL],
+
+[
+BR, BL, BR, BL,
+V, V, V, V,
+V, TR, TL, V,
+TR, H, BL, V,
+E, E, V, V,
+E, E, TR, TL],
+
+[
+BR, H, H, BL,
+V, BR, H, TL,
+V, TR, H, BL,
+TR, H, BL, V,
+BR, H, TL, V,
+TR, H, H, TL],
+
+[
+BR, H, H, BL,
+V, BR, H, TL,
+V, TR, H, BL,
+V, BR, BL, V,
+V, TR, TL, V,
+TR, H, H, TL],
+
+[
+BR, H, H, BL,
+TR, H, BL, V,
+E, E, V, V,
+E, E, V, V,
+E, E, V, V,
+E, E, TR, TL],
+
+[
+BR, H, H, BL,
+V, BR, BL, V,
+V, TR, TL, V,
+V, BR, BL, V,
+V, TR, TL, V,
+TR, H, H, TL],
+
+[
+BR, H, H, BL,
+V, BR, BL, V,
+V, TR, TL, V,
+TR, H, BL, V,
+BR, H, TL, V,
+TR, H, H, TL]];
+
+
+
+const normalizeAngle = (next, prev) => {
+  const delta = ((next - prev) % 360 + 360) % 360;
+  return prev + delta;
+};
+
+const getTimeDigits = () => {
+  const now = new Date();
+  return [
+  now.getHours(),
+  now.getMinutes(),
+  now.getSeconds()].
+  flatMap(val => String(val).padStart(2, "0").split("").map(Number));
+};
+
+const randomAngle = () => Math.floor(Math.random() * 360);
+
+const Clock = ({ h, m, initial }) => {
+  const prev = useRef({ h: 0, m: 0 });
+  const hourAngle = normalizeAngle(h, prev.current.h);
+  const minuteAngle = normalizeAngle(m, prev.current.m);
+  prev.current = { h: hourAngle, m: minuteAngle };
+
+  return /*#__PURE__*/(
+    React.createElement("div", {
+      className: "clock",
+      style: {
+        "--hour-angle": initial ? randomAngle() : hourAngle,
+        "--minute-angle": initial ? randomAngle() : minuteAngle,
+        "--dur": initial ? 1 : 0.4 } }));
+
+
+
+};
+
+const App = () => {
+  const [time, setTime] = useState(Array(6).fill(0));
+  const [initial, setInitial] = useState(true);
+
+  useEffect(() => {
+    let updateTimerId;
+    const updateTime = () => {
+      setTime(getTimeDigits());
+      const now = Date.now();
+      const delay = 1000 - now % 1000;
+      updateTimerId = setTimeout(updateTime, delay);
+    };
+
+    const initialTimerId = setTimeout(() => {
+      setInitial(false);
+      updateTime();
+    }, 600);
+
+    return () => {
+      clearTimeout(updateTimerId);
+      clearTimeout(initialTimerId);
+    };
+  }, []);
+
+  return /*#__PURE__*/(
+    React.createElement("div", { className: "app" },
+    time.map((t, i) => /*#__PURE__*/
+    React.createElement("div", { key: i },
+    digits[t].map(({ h, m }, j) => /*#__PURE__*/React.createElement(Clock, { key: j, h: h, m: m, initial: initial }))))));
+
+
+
+
+};
+
+createRoot(document.getElementById('root')).render( /*#__PURE__*/React.createElement(App, null));
+</script>
+
+  </body>
+  
 </html>
