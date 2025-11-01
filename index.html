@@ -137,8 +137,6 @@
     }
 
     #user-info {
-      position: relative;
-      top: 20px;
       margin-top: 10px;
       font-weight: bold;
       color: white;
@@ -171,6 +169,16 @@
     #user-info span:nth-child(13) { animation-delay: 1.2s; }
     #user-info span:nth-child(14) { animation-delay: 1.3s; }
     @keyframes bounce {
+      0% {
+        top: 20px;
+        text-shadow: 
+          0 1px 0 #b7b7b7, 0 2px 0 #b7b7b7,
+          0 3px 0 #b7b7b7, 0 4px 0 #b7b7b7,
+          0 5px 0 #b7b7b7, 6px 0 transparent,
+          0 6px 0 transparent, 0 7px 0 transparent,
+          0 8px 0 transparent, 0 9px 0 transparent,
+          0 10px 10px rgba(0, 0, 0.5);
+      }
       100% {
         top: -20px;
         text-shadow: 
