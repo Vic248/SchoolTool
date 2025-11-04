@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" href="../schooltoolicon.png" type="image/x-icon">
-  <title>Joffre - Mode Solo</title>
+  <title>Joffre - Multijoueur</title>
   <style>
 
         h1 {
@@ -75,36 +75,37 @@
             }
         }
     .card {
-      width: 60px;
-      margin: 5px;
+      width: 70px;
+      margin: 8px;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
-      border-radius: 8px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 1.5px 4px rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.18);
+      transition: transform 0.18s, box-shadow 0.18s;
+      border: 2px solid rgba(255,255,255,0.18);
     }
 
     .card:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 10px #fff;
-      transform: translate("");
+      transform: scale(1.12) translateY(-6px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      z-index: 2;
     }
 
     .card.special-red {
-      box-shadow: 0 0 15px 5px red;
-      animation: pulseRed 1s ease infinite alternate;
+      box-shadow: 0 0 18px 6px #ff1744, 0 4px 16px rgba(0,0,0,0.18);
     }
 
     .card.special-brown {
-      box-shadow: 0 0 15px 5px brown;
-      animation: pulseBrown 1s ease infinite alternate;
+      box-shadow: 0 0 18px 6px #a0522d, 0 4px 16px rgba(0,0,0,0.18);
     }
 
     .card.teamate-card {
-      box-shadow: 0 0 15px 5px black;
-      animation: pulseTeamateCard 1s ease infinite alternate;
+      box-shadow: 0 0 18px 6px #222, 0 4px 16px rgba(0,0,0,0.18);
     }
 
     .card.winner {
-      border: 3px solid gold;
+      border: 3px solid #ffd700;
+      box-shadow: 0 0 24px 8px #ffd700, 0 4px 16px rgba(0,0,0,0.18);
     }
 
     @keyframes pulseTeamateCard {
@@ -132,80 +133,116 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      font-family: Arial, sans-serif;
-      background-color: #2c3e50;
-      color: white;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      color: #f8f8f8;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    #loading-screen {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      background-color: #2c3e50;
-      z-index: 10;
+    #game-content, #scoreDisplay, #log, #take-interface {
+      background: rgba(255,255,255,0.10);
+      box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.18);
     }
 
-    #progress-bar {
-      width: 80%;
-      max-width: 400px;
-      background-color: #34495e;
-      border-radius: 25px;
-      overflow: hidden;
-      margin-top: 20px;
-    }
+    /* Make the score bar fixed and prominent */
+#scoreDisplay {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: #ffd700;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+  padding: 18px 50px 12px 50px;
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  z-index: 2000;
+  text-align: center;
+  min-width: 340px;
+}
 
-    #progress-fill {
-      height: 25px;
-      width: 0%;
-      background-color: #1abc9c;
-      transition: width 0.3s;
-    }
+/* Table grid layout */
+#table {
+  display: grid;
+  grid-template-areas:
+    "top top top"
+    "left center right"
+    "bottom bottom bottom";
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: 120px 220px 160px; /* Increased bottom row height */
+  gap: 0;
+  background: rgba(255,255,255,0.07);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
+  padding: 18px;
+  margin: 70px auto 0 auto;
+  max-width: 1200px;
+  min-height: 600px;
+  position: relative;
+}
 
-    #tip {
-      margin-top: 20px;
-      font-style: italic;
-      font-size: 0.9em;
-      text-align: center;
-    }
+.player.hand {
+  margin: 0;
+  padding: 8px 0;
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
+  width: 100%;
+  box-sizing: border-box;
+}
 
-    #game-content {
-      display: none;
-      padding: 20px;
-    }
-    body { margin: 0; font-family: sans-serif; background: green; color: white; }
-    #table { display: grid; grid-template-areas: 
-      "bot2 top bot4"
-      "left center right"
-      "bot3 bottom bot1"; 
-      grid-template-columns: 1fr 2fr 1fr;
-      grid-template-rows: 1fr 2fr 1fr;
-      height: 100vh;
-      gap: 10px;
-      padding: 10px;
-    }
-    .hand { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
-    .card { width: 60px; margin: 5px; cursor: pointer; }
-    .hidden { filter: brightness(0.3); }
-    .player { text-align: center; }
-    #center-play { display: flex; justify-content: center; align-items: center; gap: 20px; }
-    #log { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); padding: 5px; font-size: 0.9em; }
-    #scoreDisplay {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.7);
-      padding: 5px 15px;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
-      z-index: 1000;
-    }
+/* Top and bottom hands: horizontal */
+#bot2, #player {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
 
-  </style>
+#player {
+  margin-top: 130px
+}
+
+/* Left hand: vertical, rotated cards */
+#bot3 {
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 80px;
+  min-height: 350px;
+  justify-content: center;
+}
+#bot3 .card {
+  transform: rotate(-90deg);
+  margin-bottom: -30px;
+}
+
+/* Right hand: vertical, rotated cards */
+#bot1 {
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 80px;
+  min-height: 350px;
+  justify-content: center;
+}
+#bot1 .card {
+  transform: rotate(90deg);
+  margin-bottom: -30px;
+}
+
+/* Prevent first card from overlapping */
+#bot1 .card:first-child,
+#bot3 .card:first-child {
+  margin-bottom: 0;
+}
+    </style>
 </head>
 <body>
     <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
@@ -252,7 +289,7 @@
   <script src="/auth.js"></script>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script>
-    requireLogin();
+    requireRole('Tester')
   </script>
   <script src="/menu.js"></script>
     <script>
@@ -405,7 +442,7 @@
             name: "Victor",
             hand: hands[0],
             id: playerId,
-            lobby: "",
+            lobby: playerData.lobbyId,
           })
 
           playerRef.onDisconnect().remove();
@@ -503,7 +540,7 @@
             const valueA = getValue(a);
             const valueB = getValue(b);
 
-            if (colorA === colorB) return valueA - valueB;
+            if (colorA === colorB) return valueA - valueA;
             return order.indexOf(colorA) - order.indexOf(colorB);
           });
         }
@@ -582,75 +619,66 @@
       const hand = hands[botIndex];
       const cardsPlayed = playedCards.map(p => p.card);
 
-      // Si premier à jouer
+      // If first to play, lead with a medium card (avoid leading 0_Rouge or 0_Brun)
       if (cardsPlayed.length === 0) {
+        const safe = hand.filter(c => c !== "0_Rouge" && c !== "0_Brun");
+        if (safe.length > 0) {
+          // Play a mid-value card
+          safe.sort((a, b) => getValue(a) - getValue(b));
+          return safe[Math.floor(safe.length / 2)];
+        }
+        // Otherwise, play any card
         return hand[Math.floor(Math.random() * hand.length)];
       }
 
       const demandedColor = getColor(cardsPlayed[0]);
       const hasColor = hand.filter(card => getColor(card) === demandedColor);
-      const playedValues = cardsPlayed
-        .filter(c => getColor(c) === demandedColor)
-        .map(c => getValue(c));
 
-      const highestPlayed = Math.max(...playedValues, -1);
-      const myValues = hasColor.map(c => getValue(c));
-      const highestMine = Math.max(...myValues, -1);
+      // If 0_Rouge is in the trick, try to win it
+      if (cardsPlayed.includes("0_Rouge")) {
+        if (hasColor.length > 0) {
+          // Play the highest card of the demanded color to try to win
+          return hasColor.reduce((a, b) => getValue(a) > getValue(b) ? a : b);
+        } else {
+          // Can't follow suit, play highest card to try to win
+          return hand.reduce((a, b) => getValue(a) > getValue(b) ? a : b);
+        }
+      }
 
-      const containsCard = (cards, cardName) => cards.includes(cardName);
-
-      // 🎯 CAS 1 : Peut suivre
-      if (hasColor.length > 0) {
-        if (highestPlayed > highestMine) {
-          // Je ne peux pas battre → jouer la plus petite
+      // If 0_Brun is in the trick, try to lose it
+      if (cardsPlayed.includes("0_Brun")) {
+        if (hasColor.length > 0) {
+          // Play the lowest card of the demanded color to try to lose
           return hasColor.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
         } else {
-          // Je peux battre → jouer la plus haute
-          return hasColor.reduce((a, b) => getValue(a) > getValue(b) ? a : b);
+          // Can't follow suit, play lowest card to try to lose
+          return hand.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
         }
       }
 
-      // 🎯 CAS 2 : Bonhomme rouge dans le pli
-      if (containsCard(cardsPlayed, "0_Rouge")) {
-        const rouge = hand.filter(c => getColor(c) === "Rouge");
-        if (rouge.length > 0) {
-          // Jouer la plus haute rouge
-          return rouge.reduce((a, b) => getValue(a) > getValue(b) ? a : b);
+      // Otherwise, play normally
+      if (hasColor.length > 0) {
+        // If can win, play highest; else, play lowest
+        const playedValues = cardsPlayed
+          .filter(c => getColor(c) === demandedColor)
+          .map(c => getValue(c));
+        const highestPlayed = Math.max(...playedValues, -1);
+        const myValues = hasColor.map(c => getValue(c));
+        const canWin = myValues.some(v => v > highestPlayed);
+        if (canWin) {
+          // Play the smallest card that can win
+          const winningCards = hasColor.filter(c => getValue(c) > highestPlayed);
+          return winningCards.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
+        } else {
+          // Play the lowest card
+          return hasColor.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
         }
-
-        // Pas de rouge → jouer un atout
-        const brun = hand.filter(c => getColor(c) === trumpColor && getColor(c) !== "Rouge");
-        if (brun.length > 0) {
-          return brun.reduce((a, b) => getValue(a) > getValue(b) ? a : b);
-        }
-
-        // Pas de brun → jouer la moins forte (sauf 0_Brun)
-        const safe = hand.filter(c => c !== "0_Brun");
-        return safe.length > 0
-          ? safe.reduce((a, b) => getValue(a) < getValue(b) ? a : b)
-          : hand[Math.floor(Math.random() * hand.length)];
       }
 
-      // 🎯 CAS 3 : Bonhomme brun dans le pli
-      if (containsCard(cardsPlayed, "0_Brun")) {
-        const brun = hand.filter(c => getColor(c) === "Brun");
-        if (brun.length > 0) {
-          // Jouer la plus basse en brun
-          return brun.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
-        }
-
-        // Sinon, jouer la moins forte (sauf 0_Brun et atout)
-        const safe = hand.filter(c => c !== "0_Brun" && getColor(c) !== trumpColor);
-        return safe.length > 0
-          ? safe.reduce((a, b) => getValue(a) < getValue(b) ? a : b)
-          : hand[Math.floor(Math.random() * hand.length)];
-      }
-
-      // 🎯 CAS 4 : Sinon, jouer une carte faible (sauf 0_Brun)
-      const options = hand.filter(c => c !== "0_Brun");
-      return options.length > 0
-        ? options.reduce((a, b) => getValue(a) < getValue(b) ? a : b)
-        : hand[Math.floor(Math.random() * hand.length)];
+      // Can't follow suit: discard 0_Brun if possible, else lowest card
+      if (hand.includes("0_Brun")) return "0_Brun";
+      if (hand.includes("0_Rouge")) return "0_Rouge"; // If can't follow, get rid of it
+      return hand.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
     }
 
     function chooseBotCard(botIndex) {
@@ -880,9 +908,11 @@
 
 
     function updateScore() {
-      const scoreTitle = document.getElementById('scoreTitle')
-
-      scoreTitle.innerHTML = `Team 1: ${teamOneScore} | Team 2: ${teamTwoScore}`
+      const scoreTitle = document.getElementById('scoreTitle');
+      scoreTitle.innerHTML = `Team 1: ${teamOneScore} | Team 2: ${teamTwoScore}`;
+      scoreTitle.classList.remove('animated');
+      void scoreTitle.offsetWidth; // trigger reflow
+      scoreTitle.classList.add('animated');
     }
 
     document.getElementById("btnTake").onclick = () => {
