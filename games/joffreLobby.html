@@ -284,6 +284,7 @@
     let userUid = null;
     let isHost = false;
     let lobbyJoined = false; // devient true uniquement après un join/create réussi
+    let playerNumber
 
     const lobbyKey = createKey(6); // clé aléatoire pour le lobby
 
@@ -324,25 +325,32 @@
         }
 
         currentLobbyRef.update({ gameStarted: true });
+        
+        const lobbyName = document.getElementById('lobbyName').value.trim();
 
         // ...suite du code pour démarrer la partie...
-        const playerData = {
+        /*const playerData = {
           username: usernameInput.value.trim(),
+          lobbyName: lobbyName,
           userId: userUid,
           isHost: isHost,
           lobbyId: lobbyKey,
-          players: [
-            player1 = {hand: [], isBot: null},
-            player2 = {hand: [], isBot: null},
-            player3 = {hand: [], isBot: null},
-            player4 = {hand: [], isBot: null}
-          ]
+          playerNumber: playerNumber
         }
 
-        sessionStorage.setItem("playerData", JSON.stringify(playerData));
-        window.location.href = "joffreMultiplayer.html";
+        sessionStorage.setItem("playerData", JSON.stringify(playerData));*/
+        window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}`;
       });
     })
+
+    function assignPlayerNumber(players) {
+      // Find the first available number (1-4)
+      const usedNumbers = Object.values(players).map(p => p.playerNumber).filter(Boolean);
+      for (let i = 1; i <= 4; i++) {
+        if (!usedNumbers.includes(i)) return i;
+      }
+      return null; // Should not happen if <4 players
+    }
 
     // Firebase Auth
     firebase.auth().onAuthStateChanged(user => {
@@ -362,8 +370,10 @@
           lobbyRef.set({
             name: lobbyName,
             host: userUid,
-            players: { [userUid]: { name: playerName, hand: [], isRedTeam: true, isBlueTeam: false} }
+            players: { [userUid]: { name: playerName, hand: [], isRedTeam: true, isBlueTeam: false, playerNumber: 1} }
           });
+
+          playerNumber = 1;
 
           // Supprime le lobby si le host se déconnecte
           lobbyRef.onDisconnect().remove();
@@ -399,9 +409,12 @@
             // Le lobby existe → on rejoint
             isHost = false;
             const playerName = currentUser || "Inconnu";
+            const players = snapshot.val().players || {};
+            playerNumber = assignPlayerNumber(players);
+
             const playerRef = firebase.database().ref(`lobbies/${code}/players/${userUid}`);
 
-            playerRef.set({ name: playerName, hand: [], isRedTeam: false, isBlueTeam: true});
+            playerRef.set({ name: playerName, hand: [], isRedTeam: false, isBlueTeam: true, playerNumber});
             playerRef.onDisconnect().remove();
 
             currentLobbyRef = lobbyRef;
@@ -456,7 +469,7 @@
       gameStartedRef.on('value', snapshot => {
         if (snapshot.val() === true) {
           // Optional: Save any needed data to sessionStorage here
-          window.location.href = "joffreMultiplayer.html";
+          window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}`;
         }
       });
     }

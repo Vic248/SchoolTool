@@ -176,14 +176,14 @@
     "bottom bottom bottom";
   grid-template-columns: 1fr 2fr 1fr;
   grid-template-rows: 120px 220px 160px; /* Increased bottom row height */
-  gap: 0;
+  gap: 10px;
   background: rgba(255,255,255,0.07);
   border-radius: 24px;
   box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
   padding: 18px;
   margin: 70px auto 0 auto;
   max-width: 1200px;
-  min-height: 600px;
+  height: 100%;
   position: relative;
 }
 
@@ -199,6 +199,7 @@
   min-height: 80px;
   width: 100%;
   box-sizing: border-box;
+  height: fit-content;
 }
 
 /* Top and bottom hands: horizontal */
@@ -217,6 +218,7 @@
   align-items: flex-start;
   min-width: 80px;
   min-height: 350px;
+  max-height: 350px;
   justify-content: center;
 }
 #bot3 .card {
@@ -230,11 +232,17 @@
   align-items: flex-end;
   min-width: 80px;
   min-height: 350px;
+  max-height: 350px;
   justify-content: center;
 }
 #bot1 .card {
   transform: rotate(90deg);
   margin-bottom: -30px;
+}
+
+#center {
+  justify-items: center;
+  align-content: center;
 }
 
 /* Prevent first card from overlapping */
@@ -424,6 +432,7 @@
 
     const playerDataJSON = sessionStorage.getItem('playerData');
     const playerData = JSON.parse(playerDataJSON);
+    const urlParams = new URLSearchParams(window.location.search);
 
     (function() {
 
@@ -436,13 +445,15 @@
           //You're logged in!
 
           playerId = user.uid;
-          playerRef = firebase.database().ref(`players/${playerId}`);
+
+          playerRef = firebase.database().ref('lobbies/' + urlParams.get(`lobbyId`) + '/players/' + urlParams.get(`userId`));
 
           playerRef.set({
-            name: "Victor",
-            hand: hands[0],
+            name: urlParams.get(`username`),
+            hand: hands[urlParams.get(`playerNumber`)],
+            isHost: urlParams.get(`isHost`),
             id: playerId,
-            lobby: playerData.lobbyId,
+            lobby: urlParams.get(`lobbyId`),
           })
 
           playerRef.onDisconnect().remove();
