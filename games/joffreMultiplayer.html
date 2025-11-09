@@ -518,6 +518,7 @@
     const userId = urlParams.get('userId');
     const username = urlParams.get('username');
     const isHost = urlParams.get('isHost') === 'true';
+    const isBot = urlParams.get('isBot') === 'true';
 
     // Game state
     let gameStateRef;
@@ -533,19 +534,47 @@
         gameStateRef = firebase.database().ref(`lobbies/${lobbyId}/gameState`);
         playersRef = firebase.database().ref(`lobbies/${lobbyId}/players`);
 
+        console.log("Loading players from:", `lobbies/${lobbyId}/players`);
+
         // Load player names
         playersRef.once('value').then(snapshot => {
           const players = snapshot.val() || {};
+          console.log("Players loaded:", players);
+          
           Object.keys(players).forEach(uid => {
             const playerNum = players[uid].playerNumber - 1;
             playerNames[playerNum] = players[uid].name;
+            console.log(`Player ${playerNum} (${uid}): ${players[uid].name}`);
           });
           updatePlayerLabels();
         });
 
+        // Mark myself as not a bot in Firebase
+        if (!isBot) {
+          // Wait for game state to exist, then update my position
+          const checkAndUpdate = () => {
+            gameStateRef.once('value').then(snapshot => {
+              if (snapshot.exists()) {
+                const state = snapshot.val();
+                const botPlayers = state.botPlayers || {};
+                botPlayers[myPlayerNumber] = false;
+                gameStateRef.update({ botPlayers: botPlayers });
+                console.log(`Marked position ${myPlayerNumber} as NOT a bot`);
+              } else {
+                // Game state doesn't exist yet, try again
+                setTimeout(checkAndUpdate, 200);
+              }
+            });
+          };
+          checkAndUpdate();
+        }
+
         // Initialize game if host
         if (isHost) {
-          initializeGame();
+          console.log("I am the host, initializing game...");
+          setTimeout(() => {
+            initializeGame();
+          }, 500);
         }
 
         // Listen to game state
@@ -575,63 +604,47 @@
         hands[i % 4].push(deck[i]);
       }
 
-      // Check how many real players and mark who is a bot
-      playersRef.once('value').then(snapshot => {
-        const players = snapshot.val() || {};
-        
-        const botPlayers = {};
-        
-        // Mark all positions 0-3 as bots first (using string keys)
-        for (let i = 0; i < 4; i++) {
-          botPlayers[i] = true;
-        }
-        
-        // Now mark real players as NOT bots
-        if (urlParams.get('isBot') !== 'true') {
-          botPlayers[myPlayerNumber] = false;
-        }
+      // Mark all positions as bots by default
+      const botPlayers = {0: true, 1: true, 2: true, 3: true};
 
-        gameStateRef.update({ botPlayers: botPlayers });
+      console.log("Initializing with all bots, players will update their positions");
 
-        console.log("Final botPlayers object:", botPlayers);
-
-        // Initialize game state
-        gameStateRef.set({
-          hands: hands,
-          currentTurn: 0,
-          playedCards: [],
-          trumpColor: "",
-          demandedColor: "",
-          currentLeader: 0,
-          teamOneScore: 0,
-          teamTwoScore: 0,
-          dealerIndex: Math.floor(Math.random() * 4),
-          roundNumber: 0,
-          biddingPhase: true,
-          currentBidder: -1,
-          highestBid: 0,
-          highestBidder: -1,
-          passedPlayers: [],
-          bidsPlaced: [],
-          takerTeam: -1,
-          botPlayers: botPlayers,
-          waitingForNextRound: false
-        }).then(() => {
-          console.log("Game state initialized, botPlayers set to:", botPlayers);
-          
-          // Start bidding after state is set
-          setTimeout(() => {
-            gameStateRef.once('value').then(snap => {
-              const state = snap.val();
-              const firstBidder = (state.dealerIndex + 1) % 4;
-              console.log("Starting bidding with first bidder:", firstBidder);
-              console.log("botPlayers in state:", state.botPlayers);
-              gameStateRef.update({
-                currentBidder: firstBidder
-              });
+      // Initialize game state
+      gameStateRef.set({
+        hands: hands,
+        currentTurn: 0,
+        playedCards: [],
+        trumpColor: "",
+        demandedColor: "",
+        currentLeader: 0,
+        teamOneScore: 0,
+        teamTwoScore: 0,
+        dealerIndex: Math.floor(Math.random() * 4),
+        roundNumber: 0,
+        biddingPhase: true,
+        currentBidder: -1,
+        highestBid: 0,
+        highestBidder: -1,
+        passedPlayers: [],
+        bidsPlaced: [],
+        takerTeam: -1,
+        botPlayers: botPlayers,
+        waitingForNextRound: false
+      }).then(() => {
+        console.log("Game state initialized");
+        
+        // Start bidding after a delay to let all players mark themselves
+        setTimeout(() => {
+          gameStateRef.once('value').then(snap => {
+            const state = snap.val();
+            const firstBidder = (state.dealerIndex + 1) % 4;
+            console.log("Starting bidding with first bidder:", firstBidder);
+            console.log("botPlayers at start:", state.botPlayers);
+            gameStateRef.update({
+              currentBidder: firstBidder
             });
-          }, 500);
-        });
+          });
+        }, 1000);
       });
     }
 
@@ -656,7 +669,7 @@
           hideBiddingInterface();
           
           // If it's a bot's turn to bid and I'm the host
-          if (isHost && state.botPlayers && state.botPlayers[`p${state.currentBidder}`] === true) {
+          if (isHost && state.botPlayers && state.botPlayers[state.currentBidder] === true) {
             console.log("Bot's turn to bid, I'm host, triggering bot");
             setTimeout(() => {
               botBid();
@@ -773,6 +786,15 @@
       });
     });
 
+    gameStateRef.on('value').then(snapshot => {
+      const state = snapshot.val();
+      const bidsPlaced = state.bidsPlaced || [];
+
+      bidsPlaced.on('value', () => {
+        checkBiddingEnd();
+      });
+    })
+
     function checkBiddingEnd() {
       if (!isHost) return;
 
@@ -781,26 +803,17 @@
           const state = snapshot.val();
           const bidsPlaced = state.bidsPlaced || [];
           
-          // Case 1: Someone bid, and 3 others have passed after them
-          if (state.highestBidder >= 0) {
-            const passedCount = state.passedPlayers.length;
-            // If 3 people passed after someone bid, that bidder wins
-            if (passedCount === 3) {
+          console.log("Checking bidding end. bidsPlaced:", bidsPlaced.length, "highestBidder:", state.highestBidder);
+          
+          // Case 1: All 4 players have acted - bidding is over
+          if (bidsPlaced.length >= 4) {
+            if (state.highestBidder >= 0) {
+              // Someone bid, they win
               endBidding(state.highestBidder, state.highestBid);
-              return;
+            } else {
+              // Nobody bid, dealer must take at 7
+              endBidding(state.dealerIndex, 7);
             }
-          }
-          
-          // Case 2: All 4 players have acted (bid or passed) and nobody bid
-          if (bidsPlaced.length === 4 && state.highestBidder === -1) {
-            // Dealer must take at 7
-            endBidding(state.dealerIndex, 7);
-            return;
-          }
-          
-          // Case 3: We're back to the highest bidder and 3 have passed
-          if (state.highestBidder >= 0 && state.currentBidder === state.highestBidder && state.passedPlayers.length === 3) {
-            endBidding(state.highestBidder, state.highestBid);
             return;
           }
         });
@@ -814,10 +827,13 @@
         const state = snapshot.val();
         const currentBidder = state.currentBidder;
         
-        // Check if it's really a bot
-        if (!state.botPlayers || state.botPlayers[`p${currentBidder}`] !== true) {
+        // Check if it's really a bot (using numeric keys now)
+        if (!state.botPlayers || state.botPlayers[currentBidder] !== true) {
+          console.log(`Position ${currentBidder} is not a bot, skipping`);
           return; // Not a bot, don't do anything
         }
+
+        console.log(`Bot at position ${currentBidder} is bidding`);
 
         const hand = state.hands[currentBidder] || [];
         const bidsPlaced = state.bidsPlaced || [];
@@ -1026,8 +1042,8 @@
         const state = snapshot.val();
         const currentPlayer = state.currentTurn;
         
-        // Check if it's a bot using botPlayers
-        if (!state.botPlayers || state.botPlayers[`p${currentPlayer}`] !== true) {
+        // Check if it's a bot using botPlayers (numeric keys)
+        if (!state.botPlayers || state.botPlayers[currentPlayer] !== true) {
           return; // Wait for real player
         }
 
