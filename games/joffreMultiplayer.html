@@ -7,73 +7,72 @@
     <link rel="icon" href="../schooltoolicon.png" type="image/x-icon">
   <title>Joffre - Multijoueur</title>
   <style>
+    h1 {
+      font-size: 2rem;
+    }
+    #menu-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1001;
+      transition: background-color 0.3s;
+    }
 
+    #menu-btn:hover {
+      background-color: #1f2e3a;
+    }
+
+    #menu {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 260px;
+      height: 100%;
+      background-color: #2c3e50;
+      color: white;
+      padding-top: 70px;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #menu.open {
+      left: 0;
+    }
+
+    #menu a {
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    #menu a i {
+      margin-right: 12px;
+      width: 20px;
+    }
+
+    #menu a:hover {
+      background-color: #34495e;
+    }
+
+    @media (max-width: 768px) {
         h1 {
-          font-size: 2rem;
+            font-size: 28px;
         }
-        #menu-btn {
-          position: fixed;
-          top: 20px;
-          left: 20px;
-          background-color: #2c3e50;
-          color: white;
-          border: none;
-          padding: 12px 18px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: bold;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-          z-index: 1001;
-          transition: background-color 0.3s;
-        }
-
-        #menu-btn:hover {
-          background-color: #1f2e3a;
-        }
-
-        #menu {
-          position: fixed;
-          top: 0;
-          left: -260px;
-          width: 260px;
-          height: 100%;
-          background-color: #2c3e50;
-          color: white;
-          padding-top: 70px;
-          transition: left 0.3s ease;
-          z-index: 1000;
-          box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
-        }
-
-        #menu.open {
-          left: 0;
-        }
-
-        #menu a {
-          display: flex;
-          align-items: center;
-          padding: 14px 24px;
-          color: white;
-          text-decoration: none;
-          font-size: 1rem;
-          font-weight: 500;
-          transition: background-color 0.2s;
-        }
-
-        #menu a i {
-          margin-right: 12px;
-          width: 20px;
-        }
-
-        #menu a:hover {
-          background-color: #34495e;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 28px;
-            }
-        }
+    }
     .card {
       width: 70px;
       margin: 8px;
@@ -108,20 +107,6 @@
       box-shadow: 0 0 24px 8px #ffd700, 0 4px 16px rgba(0,0,0,0.18);
     }
 
-    @keyframes pulseTeamateCard {
-      0% { box-shadow: 0 0 5px 2px #000000; }
-      100% { box-shadow: 0 0 20px 8px #000000; }
-    }
-
-    @keyframes pulseRed {
-      0% { box-shadow: 0 0 5px 2px red; }
-      100% { box-shadow: 0 0 20px 8px red; }
-    }
-
-    @keyframes pulseBrown {
-      0% { box-shadow: 0 0 5px 2px brown; }
-      100% { box-shadow: 0 0 20px 8px brown; }
-    }
     .player.hand {
       transform-origin: center;
       display: flex;
@@ -140,7 +125,7 @@
       overflow-x: hidden;
     }
 
-    #game-content, #scoreDisplay, #log, #take-interface {
+    #game-content, #scoreDisplay, #log, #bid-interface {
       background: rgba(255,255,255,0.10);
       box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
       backdrop-filter: blur(8px);
@@ -149,113 +134,261 @@
       border: 1px solid rgba(255,255,255,0.18);
     }
 
-    /* Make the score bar fixed and prominent */
-#scoreDisplay {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.7);
-  color: #ffd700;
-  font-size: 1.5rem;
-  letter-spacing: 1px;
-  padding: 18px 50px 12px 50px;
-  border-radius: 0 0 22px 22px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
-  z-index: 2000;
-  text-align: center;
-  min-width: 340px;
-}
+    #scoreDisplay {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #ffd700;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+      padding: 18px 50px 12px 50px;
+      border-radius: 0 0 22px 22px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+      z-index: 2000;
+      text-align: center;
+      min-width: 340px;
+    }
 
-/* Table grid layout */
-#table {
-  display: grid;
-  grid-template-areas:
-    "top top top"
-    "left center right"
-    "bottom bottom bottom";
-  grid-template-columns: 1fr 2fr 1fr;
-  grid-template-rows: 120px 220px 160px; /* Increased bottom row height */
-  gap: 10px;
-  background: rgba(255,255,255,0.07);
-  border-radius: 24px;
-  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
-  padding: 18px;
-  margin: 70px auto 0 auto;
-  max-width: 1200px;
-  height: 100%;
-  position: relative;
-}
+    #table {
+      display: grid;
+      grid-template-areas:
+        "top top top"
+        "left center right"
+        "bottom bottom bottom";
+      grid-template-columns: 1fr 2fr 1fr;
+      grid-template-rows: 120px 220px 160px;
+      gap: 10px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
+      padding: 18px;
+      margin: 70px auto 0 auto;
+      max-width: 1200px;
+      height: 100%;
+      position: relative;
+    }
 
-.player.hand {
-  margin: 0;
-  padding: 8px 0;
-  background: rgba(255,255,255,0.06);
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 80px;
-  width: 100%;
-  box-sizing: border-box;
-  height: fit-content;
-}
+    .player.hand {
+      margin: 0;
+      padding: 8px 0;
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80px;
+      width: 100%;
+      box-sizing: border-box;
+      height: fit-content;
+    }
 
-/* Top and bottom hands: horizontal */
-#bot2, #player {
-  flex-direction: row;
-  flex-wrap: wrap;
-}
+    #player-bottom, #player-top {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
 
-#player {
-  margin-top: 130px
-}
+    #player-bottom {
+      margin-top: 130px;
+    }
 
-/* Left hand: vertical, rotated cards */
-#bot3 {
-  flex-direction: column;
-  align-items: flex-start;
-  min-width: 80px;
-  min-height: 350px;
-  max-height: 350px;
-  justify-content: center;
-}
-#bot3 .card {
-  transform: rotate(-90deg);
-  margin-bottom: -30px;
-}
+    #player-left {
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 80px;
+      min-height: 350px;
+      max-height: 350px;
+      justify-content: center;
+    }
+    #player-left .card {
+      transform: rotate(-90deg);
+      margin-bottom: -30px;
+    }
 
-/* Right hand: vertical, rotated cards */
-#bot1 {
-  flex-direction: column;
-  align-items: flex-end;
-  min-width: 80px;
-  min-height: 350px;
-  max-height: 350px;
-  justify-content: center;
-}
-#bot1 .card {
-  transform: rotate(90deg);
-  margin-bottom: -30px;
-}
+    #player-right {
+      flex-direction: column;
+      align-items: flex-end;
+      min-width: 80px;
+      min-height: 350px;
+      max-height: 350px;
+      justify-content: center;
+    }
+    #player-right .card {
+      transform: rotate(90deg);
+      margin-bottom: -30px;
+    }
 
-#center {
-  justify-items: center;
-  align-content: center;
-}
+    #center {
+      justify-items: center;
+      align-content: center;
+    }
 
-/* Prevent first card from overlapping */
-#bot1 .card:first-child,
-#bot3 .card:first-child {
-  margin-bottom: 0;
-}
-    </style>
+    #player-left .card:first-child,
+    #player-right .card:first-child {
+      margin-bottom: 0;
+    }
+
+    #bid-interface {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(51, 51, 51, 0.95);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      z-index: 999;
+      text-align: center;
+      min-width: 350px;
+    }
+
+    #bid-interface h2 {
+      margin-top: 0;
+      color: #f7c74f;
+    }
+
+    #bid-interface label {
+      font-size: 1.1rem;
+      margin-right: 10px;
+    }
+
+    #bid-interface input {
+      width: 80px;
+      padding: 8px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: 2px solid #555;
+      background: #222;
+      color: white;
+      text-align: center;
+    }
+
+    #bid-interface button {
+      margin: 15px 10px 5px 10px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    #btnBid {
+      background: #f7c74f;
+      color: #222;
+    }
+
+    #btnBid:hover {
+      background: #ffd85a;
+    }
+
+    #btnPass {
+      background: #e74c3c;
+      color: white;
+    }
+
+    #btnPass:hover {
+      background: #c0392b;
+    }
+
+    #trump-interface {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(51, 51, 51, 0.95);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      z-index: 999;
+      text-align: center;
+      min-width: 400px;
+    }
+
+    #trump-interface h2 {
+      margin-top: 0;
+      color: #f7c74f;
+    }
+
+    .trump-option {
+      display: inline-block;
+      margin: 10px;
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 3px solid transparent;
+    }
+
+    .trump-option:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+
+    .trump-rouge { background: #e74c3c; color: white; }
+    .trump-bleu { background: #3498db; color: white; }
+    .trump-vert { background: #2ecc71; color: white; }
+    .trump-brun { background: #8b4513; color: white; }
+
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #progress-bar {
+      width: 300px;
+      height: 20px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    #progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #f7c74f;
+      transition: width 0.3s;
+    }
+
+    #tip {
+      margin-top: 20px;
+      color: #aaa;
+      font-style: italic;
+    }
+
+    .player-label {
+      position: absolute;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    #label-bottom { bottom: 5px; left: 50%; transform: translateX(-50%); }
+    #label-top { top: 5px; left: 50%; transform: translateX(-50%); }
+    #label-left { left: 5px; top: 50%; transform: translateY(-50%); }
+    #label-right { right: 5px; top: 50%; transform: translateY(-50%); }
+  </style>
 </head>
 <body>
-    <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
-
-    <a href="https://www.bonk.io" accesskey="w"></a>
+    <button id="menu-btn" onmouseenter="mouseEnter('bars')" onmouseleave="mouseLeave('bars')"><i class="fas fa-bars" id="bars"></i> Menu</button>
 
     <div id="scoreDisplay">
       <h1 id="scoreTitle">Team 1: 0 | Team 2: 0</h1>
@@ -269,27 +402,38 @@
     <div id="tip">Astuce : Toujours prendre en brun</div>
   </div>
 
-  <!-- Contenu principal du jeu -->
-  <div id="game-content"></div>
+  <div id="game-content" style="display: none;"></div>
 
   <div id="table">
-    <div id="bot2" class="player hand" style="grid-area: top;"></div>
-    <div id="bot1" class="player hand" style="grid-area: right;"></div>
-    <div id="bot3" class="player hand" style="grid-area: left;"></div>
-    <div id="player" class="player hand" style="grid-area: bottom;"></div>
+    <div style="grid-area: top; position: relative;">
+      <div id="player-top" class="player hand"></div>
+      <div id="label-top" class="player-label">Joueur</div>
+    </div>
+    <div style="grid-area: right; position: relative;">
+      <div id="player-right" class="player hand"></div>
+      <div id="label-right" class="player-label">Joueur</div>
+    </div>
+    <div style="grid-area: left; position: relative;">
+      <div id="player-left" class="player hand"></div>
+      <div id="label-left" class="player-label">Joueur</div>
+    </div>
+    <div style="grid-area: bottom; position: relative;">
+      <div id="player-bottom" class="player hand"></div>
+      <div id="label-bottom" class="player-label">Vous</div>
+    </div>
     <div id="center" style="grid-area: center;">
       <div id="center-play"></div>
     </div>
   </div>
   <div id="log"></div>
 
-  <div id="take-interface" style="display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-  background-color: #333; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px black; z-index: 999;">
+  <div id="bid-interface">
     <h2>Souhaitez-vous prendre ?</h2>
-    <label>Points (≥7) : </label>
-    <input id="bidInput" type="number" min="7" value="7" style="width: 60px;" />
-    <div style="margin-top: 10px;">
-      <button id="btnTake">Prendre</button>
+    <p id="bid-status">Enchère actuelle : Aucune</p>
+    <label>Points : </label>
+    <input id="bidInput" type="number" min="7" max="12" value="7" />
+    <div>
+      <button id="btnBid">Prendre</button>
       <button id="btnPass">Passer</button>
     </div>
   </div>
@@ -300,9 +444,9 @@
     requireRole('Tester')
   </script>
   <script src="/menu.js"></script>
-    <script>
-        loadMenu();
-    </script>
+  <script>
+    loadMenu();
+  </script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -325,13 +469,11 @@
     });
 
     function mouseEnter(id) {
-      const newId = document.getElementById(id);
-      newId.classList.add('fa-bounce');
+      document.getElementById(id).classList.add('fa-bounce');
     }
     
     function mouseLeave(id) {
-      const newId = document.getElementById(id);
-      newId.classList.remove('fa-bounce');
+      document.getElementById(id).classList.remove('fa-bounce');
     }
 
     const imagePaths = [
@@ -357,7 +499,6 @@
       const percent = Math.floor((loadedCount / totalImages) * 100);
       document.getElementById("progress-fill").style.width = percent + "%";
       if (loadedCount === totalImages) {
-        // Toutes les images sont chargées
         document.getElementById("loading-screen").style.display = "none";
         document.getElementById("game-content").style.display = "block";
       }
@@ -366,473 +507,810 @@
     imagePaths.forEach(src => {
       const img = new Image();
       img.onload = updateProgress;
-      img.onerror = updateProgress; // Pour éviter blocage en cas d’erreur
+      img.onerror = updateProgress;
       img.src = src;
     });
 
-    const cartes = [
-      {name: "0_Rouge", color: "Red"},
-      {name: "1_Rouge", color: "Red"},
-      {name: "2_Rouge", color: "Red"},
-      {name: "3_Rouge", color: "Red"},
-      {name: "4_Rouge", color: "Red"},
-      {name: "5_Rouge", color: "Red"},
-      {name: "6_Rouge", color: "Red"},
-      {name: "7_Rouge", color: "Red"},
-      {name: "0_Bleu", color: "Blue"},
-      {name: "1_Bleu", color: "Blue"},
-      {name: "2_Bleu", color: "Blue"},
-      {name: "3_Bleu", color: "Blue"},
-      {name: "4_Bleu", color: "Blue"},
-      {name: "5_Bleu", color: "Blue"},
-      {name: "6_Bleu", color: "Blue"},
-      {name: "7_Bleu", color: "Blue"},
-      {name: "0_Vert", color: "Green"},
-      {name: "1_Vert", color: "Green"},
-      {name: "2_Vert", color: "Green"},
-      {name: "3_Vert", color: "Green"},
-      {name: "4_Vert", color: "Green"},
-      {name: "5_Vert", color: "Green"},
-      {name: "6_Vert", color: "Green"},
-      {name: "7_Vert", color: "Green"},
-      {name: "0_Brun", color: "Brown"},
-      {name: "1_Brun", color: "Brown"},
-      {name: "2_Brun", color: "Brown"},
-      {name: "3_Brun", color: "Brown"},
-      {name: "4_Brun", color: "Brown"},
-      {name: "5_Brun", color: "Brown"},
-      {name: "6_Brun", color: "Brown"},
-      {name: "7_Brun", color: "Brown"},
-      {name: "back", color: "Other"}
-    ];
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const myPlayerNumber = parseInt(urlParams.get('playerNumber')) - 1; // Convert to 0-based
+    const lobbyId = urlParams.get('lobbyId');
+    const userId = urlParams.get('userId');
+    const username = urlParams.get('username');
+    const isHost = urlParams.get('isHost') === 'true';
 
-    cartes.forEach(name => {
-      const img = new Image();
-      img.src = `${name}.png`;
+    // Game state
+    let gameStateRef;
+    let playersRef;
+    let myPlayerId;
+    let playerNames = {};
+    let isMyTurn = false;
+
+    // Firebase Auth
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        myPlayerId = user.uid;
+        gameStateRef = firebase.database().ref(`lobbies/${lobbyId}/gameState`);
+        playersRef = firebase.database().ref(`lobbies/${lobbyId}/players`);
+
+        // Load player names
+        playersRef.once('value').then(snapshot => {
+          const players = snapshot.val() || {};
+          Object.keys(players).forEach(uid => {
+            const playerNum = players[uid].playerNumber - 1;
+            playerNames[playerNum] = players[uid].name;
+          });
+          updatePlayerLabels();
+        });
+
+        // Initialize game if host
+        if (isHost) {
+          initializeGame();
+        }
+
+        // Listen to game state
+        gameStateRef.on('value', handleGameStateUpdate);
+      }
     });
 
-    const suits = ['Bleu', 'Brun', 'Rouge', 'Vert'];
-    const values = [...Array(8).keys()];
+    firebase.auth().signInAnonymously();
 
-    let deck = [];
-    let hands = [[], [], [], []]; // joueur est 0, bots 1-3
-    let currentTurn = 0;
-    let playedCards = [];
-    let trumpColor = "Rouge";
-    let demandedColor = "";
-    let teamOneScore = 0;
-    let teamTwoScore = 0;
-    let waitingForSpace = false;
-    let currentLeader = 0;
-    let dealerIndex = Math.floor(Math.random() * 4);
-    let takerIndex = -1;
-    let takerPoints = 0;
-    let currentAskingIndex = 0;
-    let isTakingPhase = false;
-
-    const playerDataJSON = sessionStorage.getItem('playerData');
-    const playerData = JSON.parse(playerDataJSON);
-    const urlParams = new URLSearchParams(window.location.search);
-
-    (function() {
-
-      let playerId;
-      let playerRef;
-
-      firebase.auth().onAuthStateChanged((user) => {
-        console.log(user);
-        if (user) {
-          //You're logged in!
-
-          playerId = user.uid;
-
-          playerRef = firebase.database().ref('lobbies/' + urlParams.get(`lobbyId`) + '/players/' + urlParams.get(`userId`));
-
-          playerRef.set({
-            name: urlParams.get(`username`),
-            hand: hands[urlParams.get(`playerNumber`)],
-            isHost: urlParams.get(`isHost`),
-            id: playerId,
-            lobby: urlParams.get(`lobbyId`),
-          })
-
-          playerRef.onDisconnect().remove();
-
-          console.log("You're logged in!");
-        } else {
-          //You're looged out.
-          console.log("You're logged out.");
-        }
-      })
-
-      firebase.auth().signInAnonymously().catch((error) => {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-
-        console.log(errorCode, errorMessage);
-      })
-    })();
-
-    function log(text) {
-      document.getElementById('log').textContent = text;
-    }
-
-    function getColor(cardName) {
-      // Ex: "5_Rouge" → "Rouge"
-      return cardName.split('_')[1];
-    }
-
-    function getValue(cardName) {
-      // Ex: "5_Rouge" → 5
-      return parseInt(cardName.split('_')[0]);
-    }
-
-    function compareCardValues(valA, valB) {
-      // 7 > 6 > 5 ...
-      return valA > valB;
-    }
-
-    function getCurrentTurnPlayer() {
-      return (currentLeader + playedCards.length) % 4;
-    }
-
-    function hasColor(playerIndex, color) {
-      return hands[playerIndex].some(card => getColor(card) === color);
-    }
-
-    function playerHasCard(playerIndex, cardName) {
-      return hands[playerIndex].includes(cardName);
-    }
-
-    function whoPlayedCard(cardName) {
-      const played = playedCards.find(entry => entry.card === cardName);
-      return played ? played.player : null;
-    }
-
-    function bestColor(card, trumpColor, leadColor) {
-      const color = getColor(card);
-      if (color === trumpColor) return trumpColor;
-      if (color === leadColor) return leadColor;
-      return null;
-    }
-
-
-    function shuffleDeck() {
-      deck = [];
+    function initializeGame() {
+      const suits = ['Bleu', 'Brun', 'Rouge', 'Vert'];
+      const values = [0, 1, 2, 3, 4, 5, 6, 7];
+      let deck = [];
+      
       for (let suit of suits) {
         for (let val of values) {
-          let name = `${val}_${suit}`;
-          deck.push(name);
+          deck.push(`${val}_${suit}`);
         }
       }
+      
+      // Shuffle deck
       deck.sort(() => Math.random() - 0.5);
-    }
-
-    function deal() {
-      for (let i = 0; i < 4; i++) hands[i] = [];
+      
+      // Deal cards
+      const hands = {0: [], 1: [], 2: [], 3: []};
       for (let i = 0; i < deck.length; i++) {
         hands[i % 4].push(deck[i]);
       }
+
+      // Check how many real players and mark who is a bot
+      playersRef.once('value').then(snapshot => {
+        const players = snapshot.val() || {};
+        
+        const botPlayers = {};
+        
+        // Mark all positions 0-3 as bots first (using string keys)
+        for (let i = 0; i < 4; i++) {
+          botPlayers[i] = true;
+        }
+        
+        // Now mark real players as NOT bots
+        if (urlParams.get('isBot') !== 'true') {
+          botPlayers[myPlayerNumber] = false;
+        }
+
+        gameStateRef.update({ botPlayers: botPlayers });
+
+        console.log("Final botPlayers object:", botPlayers);
+
+        // Initialize game state
+        gameStateRef.set({
+          hands: hands,
+          currentTurn: 0,
+          playedCards: [],
+          trumpColor: "",
+          demandedColor: "",
+          currentLeader: 0,
+          teamOneScore: 0,
+          teamTwoScore: 0,
+          dealerIndex: Math.floor(Math.random() * 4),
+          roundNumber: 0,
+          biddingPhase: true,
+          currentBidder: -1,
+          highestBid: 0,
+          highestBidder: -1,
+          passedPlayers: [],
+          bidsPlaced: [],
+          takerTeam: -1,
+          botPlayers: botPlayers,
+          waitingForNextRound: false
+        }).then(() => {
+          console.log("Game state initialized, botPlayers set to:", botPlayers);
+          
+          // Start bidding after state is set
+          setTimeout(() => {
+            gameStateRef.once('value').then(snap => {
+              const state = snap.val();
+              const firstBidder = (state.dealerIndex + 1) % 4;
+              console.log("Starting bidding with first bidder:", firstBidder);
+              console.log("botPlayers in state:", state.botPlayers);
+              gameStateRef.update({
+                currentBidder: firstBidder
+              });
+            });
+          }, 500);
+        });
+      });
     }
 
-    function renderHands() {
-      for (let i = 0; i < 4; i++) {
-        const el = document.getElementById(i === 0 ? 'player' : `bot${i}`);
+    function handleGameStateUpdate(snapshot) {
+      const state = snapshot.val();
+      if (!state) return;
+
+      console.log("Game state updated:", state.currentBidder, "My number:", myPlayerNumber);
+      console.log("Bot players:", state.botPlayers);
+
+      // Update UI
+      renderHands(state);
+      updateCenter(state);
+      updateScore(state);
+      
+      // Handle bidding phase
+      if (state.biddingPhase) {
+        if (state.currentBidder === myPlayerNumber) {
+          console.log("My turn to bid!");
+          showBiddingInterface(state);
+        } else {
+          hideBiddingInterface();
+          
+          // If it's a bot's turn to bid and I'm the host
+          if (isHost && state.botPlayers && state.botPlayers[`p${state.currentBidder}`] === true) {
+            console.log("Bot's turn to bid, I'm host, triggering bot");
+            setTimeout(() => {
+              botBid();
+            }, 1000);
+          } else {
+            console.log("Not my turn, not a bot's turn, or I'm not host");
+          }
+        }
+      } else {
+        hideBiddingInterface();
+      }
+
+      // Update log
+      updateLog(state);
+
+      // Check for round end
+      if (state.waitingForNextRound && isHost) {
+        setTimeout(() => {
+          startNextRound();
+        }, 3000);
+      }
+
+      // Check for game end
+      if (state.teamOneScore >= 41) {
+        log("🏆 L'équipe 1 gagne la partie!");
+      } else if (state.teamTwoScore >= 41) {
+        log("🏆 L'équipe 2 gagne la partie!");
+      }
+    }
+
+    function showBiddingInterface(state) {
+      const bidInterface = document.getElementById('bid-interface');
+      const bidInput = document.getElementById('bidInput');
+      const bidStatus = document.getElementById('bid-status');
+      
+      if (state.highestBid > 0) {
+        bidStatus.textContent = `Enchère actuelle : ${state.highestBid}`;
+        bidInput.min = state.highestBid + 1;
+        bidInput.value = Math.min(state.highestBid + 1, 12);
+      } else {
+        bidStatus.textContent = "Enchère actuelle : Aucune";
+        bidInput.min = 7;
+        bidInput.value = 7;
+      }
+
+      // If dealer and everyone passed, must take
+      if (state.currentBidder === state.dealerIndex && state.passedPlayers.length === 3) {
+        document.getElementById('btnPass').style.display = 'none';
+        bidStatus.textContent = "Vous devez prendre (tous ont passé)";
+      } else {
+        document.getElementById('btnPass').style.display = 'inline-block';
+      }
+
+      bidInterface.style.display = 'block';
+    }
+
+    function hideBiddingInterface() {
+      document.getElementById('bid-interface').style.display = 'none';
+    }
+
+    document.getElementById('btnBid').addEventListener('click', () => {
+      const bidValue = parseInt(document.getElementById('bidInput').value);
+      
+      gameStateRef.once('value').then(snapshot => {
+        const state = snapshot.val();
+        
+        if (bidValue < 7 || bidValue > 12) {
+          alert("L'enchère doit être entre 7 et 12");
+          return;
+        }
+        
+        if (bidValue <= state.highestBid && state.highestBid > 0) {
+          alert("Vous devez enchérir plus haut");
+          return;
+        }
+
+        // Place bid
+        const bidsPlaced = state.bidsPlaced || [];
+        bidsPlaced.push(state.currentBidder);
+        
+        const nextBidder = (state.currentBidder + 1) % 4;
+        
+        gameStateRef.update({
+          highestBid: bidValue,
+          highestBidder: state.currentBidder,
+          currentBidder: nextBidder,
+          bidsPlaced: bidsPlaced,
+          lastBidderPosition: state.currentBidder
+        });
+
+        // Check if bidding is over
+        checkBiddingEnd();
+      });
+    });
+
+    document.getElementById('btnPass').addEventListener('click', () => {
+      gameStateRef.once('value').then(snapshot => {
+        const state = snapshot.val();
+        const passedPlayers = state.passedPlayers || [];
+        passedPlayers.push(state.currentBidder);
+        
+        const bidsPlaced = state.bidsPlaced || [];
+        bidsPlaced.push(state.currentBidder);
+        
+        const nextBidder = (state.currentBidder + 1) % 4;
+        
+        gameStateRef.update({
+          passedPlayers: passedPlayers,
+          currentBidder: nextBidder,
+          bidsPlaced: bidsPlaced
+        });
+
+        checkBiddingEnd();
+      });
+    });
+
+    function checkBiddingEnd() {
+      if (!isHost) return;
+
+      setTimeout(() => {
+        gameStateRef.once('value').then(snapshot => {
+          const state = snapshot.val();
+          const bidsPlaced = state.bidsPlaced || [];
+          
+          // Case 1: Someone bid, and 3 others have passed after them
+          if (state.highestBidder >= 0) {
+            const passedCount = state.passedPlayers.length;
+            // If 3 people passed after someone bid, that bidder wins
+            if (passedCount === 3) {
+              endBidding(state.highestBidder, state.highestBid);
+              return;
+            }
+          }
+          
+          // Case 2: All 4 players have acted (bid or passed) and nobody bid
+          if (bidsPlaced.length === 4 && state.highestBidder === -1) {
+            // Dealer must take at 7
+            endBidding(state.dealerIndex, 7);
+            return;
+          }
+          
+          // Case 3: We're back to the highest bidder and 3 have passed
+          if (state.highestBidder >= 0 && state.currentBidder === state.highestBidder && state.passedPlayers.length === 3) {
+            endBidding(state.highestBidder, state.highestBid);
+            return;
+          }
+        });
+      }, 100);
+    }
+
+    function botBid() {
+      if (!isHost) return;
+
+      gameStateRef.once('value').then(snapshot => {
+        const state = snapshot.val();
+        const currentBidder = state.currentBidder;
+        
+        // Check if it's really a bot
+        if (!state.botPlayers || state.botPlayers[`p${currentBidder}`] !== true) {
+          return; // Not a bot, don't do anything
+        }
+
+        const hand = state.hands[currentBidder] || [];
+        const bidsPlaced = state.bidsPlaced || [];
+        const passedPlayers = state.passedPlayers || [];
+        
+        // Simple bot logic: pass most of the time, bid if good hand
+        const shouldBid = Math.random() < 0.3; // 30% chance to bid
+        
+        if (shouldBid && state.highestBid < 10) {
+          // Bot decides to bid
+          const bidValue = state.highestBid > 0 ? state.highestBid + 1 : 7;
+          
+          bidsPlaced.push(currentBidder);
+          const nextBidder = (currentBidder + 1) % 4;
+          
+          gameStateRef.update({
+            highestBid: bidValue,
+            highestBidder: currentBidder,
+            currentBidder: nextBidder,
+            bidsPlaced: bidsPlaced,
+            lastBidderPosition: currentBidder
+          });
+          
+          log(`${playerNames[currentBidder] || 'Bot'} prend à ${bidValue}!`);
+        } else {
+          // Bot passes
+          passedPlayers.push(currentBidder);
+          bidsPlaced.push(currentBidder);
+          const nextBidder = (currentBidder + 1) % 4;
+          
+          gameStateRef.update({
+            passedPlayers: passedPlayers,
+            currentBidder: nextBidder,
+            bidsPlaced: bidsPlaced
+          });
+          
+          log(`${playerNames[currentBidder] || 'Bot'} passe.`);
+        }
+        
+        checkBiddingEnd();
+      });
+    }
+
+    function endBidding(winner, bid) {
+      if (!isHost) return;
+
+      const takerTeam = (winner === 0 || winner === 2) ? 1 : 2;
+      
+      gameStateRef.update({
+        biddingPhase: false,
+        highestBidder: winner,
+        highestBid: bid,
+        takerTeam: takerTeam,
+        currentTurn: winner,
+        currentLeader: winner
+      });
+
+      log(`${playerNames[winner]} prend avec ${bid} points!`);
+    }
+
+    function getPositionForPlayer(playerNum) {
+      // Calculate relative position from myPlayerNumber
+      // Bottom(me) -> Right(+1) -> Top(+2) -> Left(+3)
+      const relativePos = (playerNum - myPlayerNumber + 4) % 4;
+      
+      switch(relativePos) {
+        case 0: return 'bottom';
+        case 1: return 'right';
+        case 2: return 'top';
+        case 3: return 'left';
+      }
+    }
+
+    function renderHands(state) {
+      const positions = ['bottom', 'right', 'top', 'left'];
+      
+      positions.forEach(pos => {
+        const el = document.getElementById(`player-${pos}`);
         el.innerHTML = '';
+      });
 
-        let playerHand = hands[i];
-
-        // Trier les cartes du joueur
-        if (i === 0) {
+      // Render each player's hand in the correct position
+      for (let playerNum = 0; playerNum < 4; playerNum++) {
+        const position = getPositionForPlayer(playerNum);
+        const el = document.getElementById(`player-${position}`);
+        const hand = state.hands[playerNum] || [];
+        
+        let displayHand = hand;
+        
+        // Sort my hand
+        if (playerNum === myPlayerNumber) {
           const order = ['Bleu', 'Brun', 'Rouge', 'Vert'];
-          playerHand = [...playerHand].sort((a, b) => {
+          displayHand = [...hand].sort((a, b) => {
             const colorA = getColor(a);
             const colorB = getColor(b);
             const valueA = getValue(a);
             const valueB = getValue(b);
-
-            if (colorA === colorB) return valueA - valueA;
+            
+            if (colorA === colorB) return valueA - valueB;
             return order.indexOf(colorA) - order.indexOf(colorB);
           });
         }
 
-        for (let card of playerHand) {
+        for (let card of displayHand) {
           const img = document.createElement('img');
-          img.src = i === 0 ? `${card}.png` : `back.png`;
-          img.className = 'card';
-
-          // Rotation pour bots
-          if (i === 1) img.classList.add('bot-right');
-          if (i === 2) img.classList.add('bot-top');
-          if (i === 3) img.classList.add('bot-left');
-          if (i !== 0) img.classList.add('hidden');
-
-          if (i === 0) {
-            img.onclick = () => playCard(0, card);
+          
+          // Show card face only for my hand
+          if (playerNum === myPlayerNumber) {
+            img.src = `${card}.png`;
+            img.onclick = () => playCard(card);
+          } else {
+            img.src = `back.png`;
           }
-
+          
+          img.className = 'card';
           el.appendChild(img);
         }
       }
     }
 
-    function playCard(player, card) {
-      // Empêche le joueur humain de jouer si ce n’est pas son tour
-      if (player !== getCurrentTurnPlayer()) { 
-        return;
-      }
+    function playCard(card) {
+      gameStateRef.once('value').then(snapshot => {
+        const state = snapshot.val();
+        
+        // Check if it's my turn
+        if (state.currentTurn !== myPlayerNumber) {
+          log("Ce n'est pas votre tour!");
+          return;
+        }
 
-      if (playedCards.length === 4) {
-        return;
-      }
+        // Check if bidding is still active
+        if (state.biddingPhase) {
+          log("La phase d'enchères est en cours");
+          return;
+        }
 
-      if (player === 0) {
-        if (currentLeader === 0) {
-          let index = hands[0].indexOf(card);
-          if (index > -1) {
-            hands[0].splice(index, 1);
-            playedCards.push({ player, card });
-            updateCenter();
-            renderHands();
-            setTimeout(() => botPlayStep((1) % 4), 500);
-          }
-          log("Tu peux jouer!")
+        const hand = state.hands[myPlayerNumber];
+        if (!hand.includes(card)) return;
+
+        // Validate card play
+        const playedCards = state.playedCards || [];
+        
+        if (playedCards.length === 0) {
+          // First card sets trump color
+          const trumpColor = getColor(card);
+          playCardToFirebase(card, state, trumpColor);
         } else {
-          if (getColor(card) === demandedColor) {
-            let index = hands[0].indexOf(card);
-            if (index > -1) {
-              hands[0].splice(index, 1);
-              playedCards.push({ player, card });
-              updateCenter();
-              renderHands();
-              setTimeout(() => botPlayStep((1) % 4), 500);
-            }
-            log("Tu peux jouer!")
+          // Must follow suit if possible
+          const demandedColor = state.demandedColor || getColor(playedCards[0].card);
+          const cardColor = getColor(card);
+          
+          if (cardColor === demandedColor) {
+            playCardToFirebase(card, state);
+          } else if (hasColor(hand, demandedColor)) {
+            log("Vous devez suivre la couleur!");
+            return;
           } else {
-            if (hasColor(0, demandedColor)) {
-              return;
-            } else {
-              let index = hands[0].indexOf(card);
-              if (index > -1) {
-                hands[0].splice(index, 1);
-                playedCards.push({ player, card });
-                updateCenter();
-                renderHands();
-                setTimeout(() => botPlayStep((1) % 4), 500);
-              }
-            }
+            playCardToFirebase(card, state);
           }
+        }
+      });
+    }
+
+    function playCardToFirebase(card, state, trumpColor = null) {
+      const newHand = state.hands[myPlayerNumber].filter(c => c !== card);
+      const newPlayedCards = state.playedCards || [];
+      
+      newPlayedCards.push({
+        player: myPlayerNumber,
+        card: card
+      });
+
+      const updates = {
+        [`hands/${myPlayerNumber}`]: newHand,
+        playedCards: newPlayedCards,
+        currentTurn: (state.currentTurn + 1) % 4
+      };
+
+      // Set trump color if first card
+      if (trumpColor) {
+        updates.trumpColor = trumpColor;
+        updates.demandedColor = trumpColor;
+      } else if (newPlayedCards.length === 1) {
+        updates.demandedColor = getColor(card);
+      }
+
+      gameStateRef.update(updates);
+
+      // Check if trick is complete
+      if (newPlayedCards.length === 4) {
+        setTimeout(() => {
+          if (isHost) processTrickEnd();
+        }, 1500);
+      } else {
+        // Bot turn
+        if (isHost) {
+          setTimeout(() => {
+            botPlay();
+          }, 800);
         }
       }
     }
 
-    function chooseAdvancedCard(botIndex) {
-      const hand = hands[botIndex];
-      const cardsPlayed = playedCards.map(p => p.card);
-
-      // If first to play, lead with a medium card (avoid leading 0_Rouge or 0_Brun)
-      if (cardsPlayed.length === 0) {
-        const safe = hand.filter(c => c !== "0_Rouge" && c !== "0_Brun");
-        if (safe.length > 0) {
-          // Play a mid-value card
-          safe.sort((a, b) => getValue(a) - getValue(b));
-          return safe[Math.floor(safe.length / 2)];
+    function botPlay() {
+      gameStateRef.once('value').then(snapshot => {
+        const state = snapshot.val();
+        const currentPlayer = state.currentTurn;
+        
+        // Check if it's a bot using botPlayers
+        if (!state.botPlayers || state.botPlayers[`p${currentPlayer}`] !== true) {
+          return; // Wait for real player
         }
-        // Otherwise, play any card
-        return hand[Math.floor(Math.random() * hand.length)];
+
+        // Bot logic
+        const hand = state.hands[currentPlayer];
+        if (!hand || hand.length === 0) return;
+
+        const playedCards = state.playedCards || [];
+        let cardToPlay;
+
+        if (playedCards.length === 0) {
+          // First to play
+          const safe = hand.filter(c => c !== "0_Rouge" && c !== "0_Brun");
+          if (safe.length > 0) {
+            safe.sort((a, b) => getValue(a) - getValue(b));
+            cardToPlay = safe[Math.floor(safe.length / 2)];
+          } else {
+            cardToPlay = hand[Math.floor(Math.random() * hand.length)];
+          }
+          
+          // Set trump color
+          const trumpColor = getColor(cardToPlay);
+          playBotCard(currentPlayer, cardToPlay, state, trumpColor);
+        } else {
+          cardToPlay = chooseAdvancedCard(currentPlayer, hand, playedCards, state);
+          playBotCard(currentPlayer, cardToPlay, state);
+        }
+      });
+    }
+
+    function playBotCard(playerNum, card, state, trumpColor = null) {
+      const newHand = state.hands[playerNum].filter(c => c !== card);
+      const newPlayedCards = state.playedCards || [];
+      
+      newPlayedCards.push({
+        player: playerNum,
+        card: card
+      });
+
+      const updates = {
+        [`hands/${playerNum}`]: newHand,
+        playedCards: newPlayedCards,
+        currentTurn: (state.currentTurn + 1) % 4
+      };
+
+      if (trumpColor) {
+        updates.trumpColor = trumpColor;
+        updates.demandedColor = trumpColor;
+      } else if (newPlayedCards.length === 1) {
+        updates.demandedColor = getColor(card);
       }
 
-      const demandedColor = getColor(cardsPlayed[0]);
+      gameStateRef.update(updates);
+
+      if (newPlayedCards.length === 4) {
+        setTimeout(() => {
+          processTrickEnd();
+        }, 1500);
+      } else {
+        setTimeout(() => {
+          botPlay();
+        }, 800);
+      }
+    }
+
+    function chooseAdvancedCard(botIndex, hand, cardsPlayed, state) {
+      const demandedColor = state.demandedColor || getColor(cardsPlayed[0].card);
       const hasColor = hand.filter(card => getColor(card) === demandedColor);
 
       // If 0_Rouge is in the trick, try to win it
-      if (cardsPlayed.includes("0_Rouge")) {
+      if (cardsPlayed.some(pc => pc.card === "0_Rouge")) {
         if (hasColor.length > 0) {
-          // Play the highest card of the demanded color to try to win
           return hasColor.reduce((a, b) => getValue(a) > getValue(b) ? a : b);
         } else {
-          // Can't follow suit, play highest card to try to win
           return hand.reduce((a, b) => getValue(a) > getValue(b) ? a : b);
         }
       }
 
       // If 0_Brun is in the trick, try to lose it
-      if (cardsPlayed.includes("0_Brun")) {
+      if (cardsPlayed.some(pc => pc.card === "0_Brun")) {
         if (hasColor.length > 0) {
-          // Play the lowest card of the demanded color to try to lose
           return hasColor.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
         } else {
-          // Can't follow suit, play lowest card to try to lose
           return hand.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
         }
       }
 
       // Otherwise, play normally
       if (hasColor.length > 0) {
-        // If can win, play highest; else, play lowest
         const playedValues = cardsPlayed
-          .filter(c => getColor(c) === demandedColor)
-          .map(c => getValue(c));
+          .filter(c => getColor(c.card) === demandedColor)
+          .map(c => getValue(c.card));
         const highestPlayed = Math.max(...playedValues, -1);
         const myValues = hasColor.map(c => getValue(c));
         const canWin = myValues.some(v => v > highestPlayed);
+        
         if (canWin) {
-          // Play the smallest card that can win
           const winningCards = hasColor.filter(c => getValue(c) > highestPlayed);
           return winningCards.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
         } else {
-          // Play the lowest card
           return hasColor.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
         }
       }
 
-      // Can't follow suit: discard 0_Brun if possible, else lowest card
+      // Can't follow suit
       if (hand.includes("0_Brun")) return "0_Brun";
-      if (hand.includes("0_Rouge")) return "0_Rouge"; // If can't follow, get rid of it
+      if (hand.includes("0_Rouge")) return "0_Rouge";
       return hand.reduce((a, b) => getValue(a) < getValue(b) ? a : b);
     }
 
-    function chooseBotCard(botIndex) {
-      //IA du bot 1
-      if (botIndex === 1) {
+    function processTrickEnd() {
+      gameStateRef.once('value').then(snapshot => {
+        const state = snapshot.val();
+        const playedCards = state.playedCards || [];
         
-      }
-      //IA du bot 2 (player teamate)
-      if (botIndex === 2) {
+        if (playedCards.length !== 4) return;
+
+        const winner = getWinner(playedCards, state.trumpColor);
         
-      }
-      //IA du bot 3
-      if (botIndex === 3) {
-
-      }
-
-      const hand = hands[botIndex];
-
-      // Si le bot est premier à jouer, il joue une carte au hasard
-      if (playedCards.length === 0) {
-        return hand[Math.floor(Math.random() * hand.length)];
-      }
-
-      const leadColor = getColor(playedCards[0].card);
-      const matchingColorCards = hand.filter(card => getColor(card) === leadColor);
-
-      if (matchingColorCards.length > 0) {
-        // Le bot peut suivre la couleur demandée
-        const sorted = matchingColorCards.sort((a, b) => getValue(a) - getValue(b));
-
-        // Trouver la plus haute carte déjà jouée de cette couleur
-        const highestPlayed = playedCards
-          .filter(pc => getColor(pc.card) === leadColor)
-          .reduce((max, pc) => (getValue(pc.card) > getValue(max.card) ? pc : max), playedCards[0]);
-
-        const highestValue = getValue(highestPlayed.card);
-
-        // Cherche les cartes qui peuvent battre la meilleure carte déjà jouée
-        const candidates = sorted.filter(card => getValue(card) > highestValue);
-
-        if (candidates.length > 0) {
-          // Jouer la plus petite qui gagne
-          return candidates[0];
+        let team1Points = 0;
+        let team2Points = 0;
+        
+        // Winner gets 1 point
+        if (winner === 0 || winner === 2) {
+          team1Points = 1;
         } else {
-          // Sinon, jouer la plus petite carte
-          return sorted[0];
+          team2Points = 1;
         }
-      }
 
-      // Le bot ne peut pas suivre → il se débarrasse d'une carte inutile
-      let discard = hand.filter(card => card !== "0_Rouge" && getColor(card) !== "Brun");
-      if (discard.length === 0) discard = hand;
+        // Check for special cards
+        playedCards.forEach(pc => {
+          if (pc.card === '0_Rouge') {
+            if (winner === 0 || winner === 2) {
+              team1Points += 5;
+            } else {
+              team2Points += 5;
+            }
+          }
+          if (pc.card === '0_Brun') {
+            if (winner === 0 || winner === 2) {
+              team1Points -= 3;
+            } else {
+              team2Points -= 3;
+            }
+          }
+        });
 
-      discard.sort((a, b) => getValue(a) - getValue(b));
-      return discard[0];
+        const newTeam1Score = state.teamOneScore + team1Points;
+        const newTeam2Score = state.teamTwoScore + team2Points;
+
+        // Check if round is over
+        const allHandsEmpty = Object.values(state.hands).every(h => h.length === 0);
+        
+        if (allHandsEmpty) {
+          // Check if taker made their bid
+          const takerTeam = state.takerTeam;
+          const takerBid = state.highestBid;
+          
+          let finalTeam1Score = newTeam1Score;
+          let finalTeam2Score = newTeam2Score;
+          
+          if (takerTeam === 1) {
+            if (newTeam1Score < takerBid) {
+              finalTeam1Score = state.teamOneScore - takerBid;
+              finalTeam2Score = newTeam2Score; // Keep their points
+              log(`L'équipe 1 n'a pas fait son contrat! -${takerBid} points`);
+            } else {
+              log(`L'équipe 1 a réussi son contrat!`);
+            }
+          } else if (takerTeam === 2) {
+            if (newTeam2Score < takerBid) {
+              finalTeam2Score = state.teamTwoScore - takerBid;
+              finalTeam1Score = newTeam1Score; // Keep their points
+              log(`L'équipe 2 n'a pas fait son contrat! -${takerBid} points`);
+            } else {
+              log(`L'équipe 2 a réussi son contrat!`);
+            }
+          }
+
+          gameStateRef.update({
+            playedCards: [],
+            currentLeader: winner,
+            currentTurn: winner,
+            demandedColor: "",
+            teamOneScore: finalTeam1Score,
+            teamTwoScore: finalTeam2Score,
+            waitingForNextRound: true
+          });
+        } else {
+          gameStateRef.update({
+            playedCards: [],
+            currentLeader: winner,
+            currentTurn: winner,
+            demandedColor: "",
+            teamOneScore: newTeam1Score,
+            teamTwoScore: newTeam2Score
+          });
+
+          // Continue play
+          setTimeout(() => {
+            botPlay();
+          }, 1000);
+        }
+      });
     }
 
-    function botPlayStep(index) {
-      if (playedCards.length === 4) {
-        // Fin du pli
-        setTimeout(() => {
-          updateCenter();
-          renderHands();
+    function startNextRound() {
+      if (!isHost) return;
 
-          const winner = getWinner(playedCards, trumpColor);
-          currentLeader = winner;
+      gameStateRef.once('value').then(snapshot => {
+        const state = snapshot.val();
+        
+        // Check for game end
+        if (state.teamOneScore >= 41 || state.teamTwoScore >= 41) {
+          return; // Game is over
+        }
 
-          if (winner === 0 || winner === 2) {
-            teamOneScore += 1;
-            playedCards.forEach(cardData => {
-              if (cardData.card === '0_Rouge') teamOneScore += 5;
-              if (cardData.card === '0_Brun') teamOneScore -= 3;
-            });
-          } else {
-            teamTwoScore += 1;
-            playedCards.forEach(cardData => {
-              if (cardData.card === '0_Rouge') teamTwoScore += 5;
-              if (cardData.card === '0_Brun') teamTwoScore -= 3;
-            });
+        // Shuffle and deal new cards
+        const suits = ['Bleu', 'Brun', 'Rouge', 'Vert'];
+        const values = [0, 1, 2, 3, 4, 5, 6, 7];
+        let deck = [];
+        
+        for (let suit of suits) {
+          for (let val of values) {
+            deck.push(`${val}_${suit}`);
           }
+        }
+        
+        deck.sort(() => Math.random() - 0.5);
+        
+        const hands = {0: [], 1: [], 2: [], 3: []};
+        for (let i = 0; i < deck.length; i++) {
+          hands[i % 4].push(deck[i]);
+        }
 
-          log("Nouvelle levée");
-          updateScore();
-          if (hands[0].length === 0 && hands[1].length === 0 && hands[2].length === 0 && hands[3].length === 0) {
-            shuffleDeck();
-            deal();
-            log("Appuie sur Enter pour recommencer");
-            currentLeader = 0;
-          } else {
-            log("Appuie sur Enter pour continuer");
-          }
-          waitingForSpace = true;
-        }, 0);
-        return;
-      }
+        const newDealer = (state.dealerIndex + 1) % 4;
+        const firstBidder = (newDealer + 1) % 4;
 
-      // Si c’est au joueur humain de jouer
-      if (index === 0) {
-        log("À vous de jouer");
-        return
-      }
+        // Preserve botPlayers info
+        const botPlayers = state.botPlayers || {0: true, 1: true, 2: true, 3: true};
 
-      if (playedCards.length === 4) {
-        return
-      }
-
-      demandedColor = playedCards.length > 0 ? getColor(playedCards[0].card) : "";
-
-      if (hands[1].length === 8) {
-        trumpColor = getColor(playedCards[0].card);
-      }
-
-      const cardToPlay = chooseAdvancedCard(index);
-      hands[index] = hands[index].filter(c => c !== cardToPlay);
-      playedCards.push({ player: index, card: cardToPlay });
-
-      updateCenter();
-      renderHands();
-
-      setTimeout(() => botPlayStep((index + 1) % 4), 500); // ✅ boucler vers 0
+        gameStateRef.update({
+          hands: hands,
+          currentTurn: firstBidder,
+          playedCards: [],
+          trumpColor: "",
+          demandedColor: "",
+          currentLeader: firstBidder,
+          dealerIndex: newDealer,
+          roundNumber: state.roundNumber + 1,
+          biddingPhase: true,
+          currentBidder: firstBidder,
+          highestBid: 0,
+          highestBidder: -1,
+          passedPlayers: [],
+          bidsPlaced: [],
+          takerTeam: -1,
+          botPlayers: botPlayers,
+          waitingForNextRound: false
+        });
+      });
     }
 
     function getWinner(playedCards, trumpColor) {
-      const order = [0,1,2,3,4,5,6,7];
       const leadColor = getColor(playedCards[0].card);
       let best = playedCards[0];
 
       for (let i = 1; i < playedCards.length; i++) {
         const current = playedCards[i];
         const currentColor = getColor(current.card);
-        const bestColorVal = getColor(best.card);
+        const bestColor = getColor(best.card);
 
         const currentIsTrump = currentColor === trumpColor;
-        const bestIsTrump = bestColorVal === trumpColor;
+        const bestIsTrump = bestColor === trumpColor;
 
         if (currentIsTrump && !bestIsTrump) {
           best = current;
         } else if (
-          currentColor === bestColorVal &&
+          currentColor === bestColor &&
           getValue(current.card) > getValue(best.card)
         ) {
           best = current;
-        } else if (!bestIsTrump && currentColor === leadColor && bestColorVal !== leadColor) {
+        } else if (!bestIsTrump && currentColor === leadColor && bestColor !== leadColor) {
           best = current;
         }
       }
@@ -840,42 +1318,8 @@
       return best.player;
     }
 
-    function animateCardToCenter(playerIndex, cardName, callback) {
-      const handElement = document.getElementById(playerIndex === 0 ? 'player' : `bot${playerIndex}`);
-      const cardImgs = handElement.querySelectorAll('img');
-
-      const cardImg = [...cardImgs].find(img => img.src.includes(cardName));
-      if (!cardImg) {
-        callback(); // Si la carte n'est pas trouvée, continuer quand même
-        return;
-      }
-
-      const startRect = cardImg.getBoundingClientRect();
-      const center = document.getElementById('center-play');
-      const endRect = center.getBoundingClientRect();
-
-      const animatedImg = cardImg.cloneNode(true);
-      animatedImg.style.position = 'fixed';
-      animatedImg.style.left = startRect.left + 'px';
-      animatedImg.style.top = startRect.top + 'px';
-      animatedImg.style.width = cardImg.offsetWidth + 'px';
-      animatedImg.style.zIndex = '1000';
-      animatedImg.style.transition = 'all 0.5s ease-out';
-
-      document.body.appendChild(animatedImg);
-
-      // Force reflow
-      getComputedStyle(animatedImg).left;
-
-      // Destination
-      animatedImg.style.left = endRect.left + endRect.width / 2 - animatedImg.offsetWidth / 2 + 'px';
-      animatedImg.style.top = endRect.top + endRect.height / 2 - animatedImg.offsetHeight / 2 + 'px';
-
-      // Après l’animation
-      animatedImg.addEventListener('transitionend', () => {
-        animatedImg.remove();
-        callback();
-      });
+    function hasColor(hand, color) {
+      return hand.some(card => getColor(card) === color);
     }
 
     function getColor(cardName) {
@@ -886,11 +1330,12 @@
       return parseInt(cardName.split('_')[0]);
     }
 
-    function updateCenter() {
+    function updateCenter(state) {
       const div = document.getElementById('center-play');
       div.innerHTML = '';
 
-      const winner = playedCards.length === 4 ? getWinner(playedCards, trumpColor) : null;
+      const playedCards = state.playedCards || [];
+      const winner = playedCards.length === 4 ? getWinner(playedCards, state.trumpColor) : null;
 
       for (let pc of playedCards) {
         const img = document.createElement('img');
@@ -899,13 +1344,14 @@
 
         if (pc.card === '0_Rouge') {
           img.classList.add('special-red');
-          log("💀 Le bonhomme rouge est sur la table !");
         } else if (pc.card === '0_Brun') {
           img.classList.add('special-brown');
-          log("🏆 Le bonhomme brun est sur la table !");
         }
 
-        if (whoPlayedCard(pc.card) === 2) {
+        // Highlight teammate's card
+        const myTeam = (myPlayerNumber === 0 || myPlayerNumber === 2) ? 1 : 2;
+        const cardTeam = (pc.player === 0 || pc.player === 2) ? 1 : 2;
+        if (cardTeam === myTeam && pc.player !== myPlayerNumber) {
           img.classList.add('teamate-card');
         }
 
@@ -917,62 +1363,49 @@
       }
     }
 
-
-    function updateScore() {
+    function updateScore(state) {
       const scoreTitle = document.getElementById('scoreTitle');
-      scoreTitle.innerHTML = `Team 1: ${teamOneScore} | Team 2: ${teamTwoScore}`;
-      scoreTitle.classList.remove('animated');
-      void scoreTitle.offsetWidth; // trigger reflow
-      scoreTitle.classList.add('animated');
+      scoreTitle.textContent = `Team 1: ${state.teamOneScore} | Team 2: ${state.teamTwoScore}`;
     }
 
-    document.getElementById("btnTake").onclick = () => {
-      const bid = parseInt(document.getElementById("bidInput").value);
-      if (isNaN(bid) || bid < 7) {
-        alert("Tu dois prendre au moins 7 points.");
-        return;
-      }
-
-      takerIndex = 0;
-      takerPoints = bid;
-      isTakingPhase = false;
-      document.getElementById('take-interface').style.display = 'none';
-      log(`🧍 Tu prends ${bid} points.`);
-      botPlayStep(0);
-    };
-
-    document.getElementById("btnPass").onclick = () => {
-      document.getElementById('take-interface').style.display = 'none';
-      log("🧍 Tu passes.");
-      currentAskingIndex = (currentAskingIndex + 1) % 4;
-      askNextPlayerToTake();
-    };
-
-    document.addEventListener("keydown", function(event) {
-      if (event.code === "Enter" && waitingForSpace) {
-        waitingForSpace = false;
-        playedCards = [];
-        if (hands[0].length === 0 && hands[1].length === 0 && hands[2].length === 0 && hands[3].length === 0) {
-          shuffleDeck();
-          deal();
-        }
-        updateCenter();
-        renderHands();
-        log("À vous de jouer");
-
-        if (currentLeader === 0) {
-          // Humain commence
+    function updatePlayerLabels() {
+      for (let i = 0; i < 4; i++) {
+        const position = getPositionForPlayer(i);
+        const label = document.getElementById(`label-${position}`);
+        
+        if (i === myPlayerNumber) {
+          label.textContent = "Vous";
         } else {
-          // Le bot commence le tour
-          setTimeout(() => botPlayStep(currentLeader), 500);
+          label.textContent = playerNames[i] || `Joueur ${i + 1}`;
         }
       }
-    });
+    }
 
-    shuffleDeck();
-    deal();
-    renderHands();
-    log("À vous de jouer");
+    function updateLog(state) {
+      // Update game log based on state
+      if (state.biddingPhase) {
+        if (state.currentBidder === myPlayerNumber) {
+          log("À vous d'enchérir!");
+        } else {
+          const bidderName = playerNames[state.currentBidder] || `Joueur ${state.currentBidder + 1}`;
+          log(`${bidderName} réfléchit...`);
+        }
+      } else if (state.currentTurn === myPlayerNumber) {
+        log("À vous de jouer!");
+      } else {
+        const playerName = playerNames[state.currentTurn] || `Joueur ${state.currentTurn + 1}`;
+        log(`${playerName} joue...`);
+      }
+
+      if (state.trumpColor) {
+        log(`Atout: ${state.trumpColor}`);
+      }
+    }
+
+    function log(text) {
+      const logEl = document.getElementById('log');
+      logEl.textContent = text;
+    }
   </script>
 </body>
 </html>

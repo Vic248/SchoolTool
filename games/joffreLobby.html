@@ -284,7 +284,8 @@
     let userUid = null;
     let isHost = false;
     let lobbyJoined = false; // devient true uniquement après un join/create réussi
-    let playerNumber
+    let playerNumber;
+    let isBot;
 
     const lobbyKey = createKey(6); // clé aléatoire pour le lobby
 
@@ -325,7 +326,7 @@
         }
 
         currentLobbyRef.update({ gameStarted: true });
-        
+
         const lobbyName = document.getElementById('lobbyName').value.trim();
 
         // ...suite du code pour démarrer la partie...
@@ -339,7 +340,7 @@
         }
 
         sessionStorage.setItem("playerData", JSON.stringify(playerData));*/
-        window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}`;
+        window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false`;
       });
     })
 
@@ -469,7 +470,7 @@
       gameStartedRef.on('value', snapshot => {
         if (snapshot.val() === true) {
           // Optional: Save any needed data to sessionStorage here
-          window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}`;
+          window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false`;
         }
       });
     }
