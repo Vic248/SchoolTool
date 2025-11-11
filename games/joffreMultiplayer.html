@@ -523,6 +523,7 @@
     // Game state
     let gameStateRef;
     let playersRef;
+    let lobbyRef;
     let myPlayerId;
     let playerNames = {};
     let isMyTurn = false;
@@ -533,11 +534,12 @@
         myPlayerId = user.uid;
         gameStateRef = firebase.database().ref(`lobbies/${lobbyId}/gameState`);
         playersRef = firebase.database().ref(`lobbies/${lobbyId}/players`);
+        lobbyRef = firebase.database().ref(`lobbies/${lobbyId}`);
 
         console.log("Loading players from:", `lobbies/${lobbyId}/players`);
 
-        // Load player names
-        playersRef.once('value').then(snapshot => {
+        // Load player names and listen for changes
+        playersRef.on('value', snapshot => {
           const players = snapshot.val() || {};
           console.log("Players loaded:", players);
           
@@ -583,6 +585,17 @@
     });
 
     firebase.auth().signInAnonymously();
+
+    function listenForLobbyDeletion() {
+      lobbyRef.on('value', (snapshot) => {
+        if (!snapshot.exists()) {
+          // Lobby has been deleted (host quit)
+          console.log("Lobby deleted, redirecting to lobby screen");
+          alert("L'hôte a quitté la partie. Vous allez être redirigé.");
+          window.location.href = 'joffreLobby.html';
+        }
+      });
+    }
 
     function initializeGame() {
       const suits = ['Bleu', 'Brun', 'Rouge', 'Vert'];
@@ -786,15 +799,6 @@
       });
     });
 
-    gameStateRef.on('value').then(snapshot => {
-      const state = snapshot.val();
-      const bidsPlaced = state.bidsPlaced || [];
-
-      bidsPlaced.on('value', () => {
-        checkBiddingEnd();
-      });
-    })
-
     function checkBiddingEnd() {
       if (!isHost) return;
 
@@ -889,9 +893,19 @@
         takerTeam: takerTeam,
         currentTurn: winner,
         currentLeader: winner
+      }).then(() => {
+        log(`${playerNames[winner] || 'Joueur ' + (winner + 1)} prend avec ${bid} points!`);
+        
+        // If winner is a bot, trigger bot play
+        setTimeout(() => {
+          gameStateRef.once('value').then(snap => {
+            const state = snap.val();
+            if (state.botPlayers && state.botPlayers[winner] === true) {
+              botPlay();
+            }
+          });
+        }, 1000);
       });
-
-      log(`${playerNames[winner]} prend avec ${bid} points!`);
     }
 
     function getPositionForPlayer(playerNum) {
