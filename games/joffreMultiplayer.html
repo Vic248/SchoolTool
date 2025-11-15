@@ -440,9 +440,6 @@
 
   <script src="/auth.js"></script>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script>
-    requireRole('Tester')
-  </script>
   <script src="/menu.js"></script>
   <script>
     loadMenu();
@@ -519,6 +516,17 @@
     const username = urlParams.get('username');
     const isHost = urlParams.get('isHost') === 'true';
     const isBot = urlParams.get('isBot') === 'true';
+    
+    // Get botPlayers from URL (only host sends this)
+    let botPlayersFromURL = null;
+    if (urlParams.get('botPlayers')) {
+      try {
+        botPlayersFromURL = JSON.parse(urlParams.get('botPlayers'));
+        console.log("Received botPlayers from URL:", botPlayersFromURL);
+      } catch (e) {
+        console.error("Failed to parse botPlayers:", e);
+      }
+    }
 
     // Game state
     let gameStateRef;
@@ -527,6 +535,9 @@
     let myPlayerId;
     let playerNames = {};
     let isMyTurn = false;
+    let lobbyJoined = false; // Track if we've successfully joined
+    let originalTeamOneScore;
+    let originalTeamTwoScore;
 
     // Firebase Auth
     firebase.auth().onAuthStateChanged((user) => {
@@ -538,38 +549,16 @@
 
         console.log("Loading players from:", `lobbies/${lobbyId}/players`);
 
-        // Load player names and listen for changes
-        playersRef.on('value', snapshot => {
-          const players = snapshot.val() || {};
-          console.log("Players loaded:", players);
-          
-          Object.keys(players).forEach(uid => {
-            const playerNum = players[uid].playerNumber - 1;
-            playerNames[playerNum] = players[uid].name;
-            console.log(`Player ${playerNum} (${uid}): ${players[uid].name}`);
-          });
-          updatePlayerLabels();
-        });
-
-        // Mark myself as not a bot in Firebase
-        if (!isBot) {
-          // Wait for game state to exist, then update my position
-          const checkAndUpdate = () => {
-            gameStateRef.once('value').then(snapshot => {
-              if (snapshot.exists()) {
-                const state = snapshot.val();
-                const botPlayers = state.botPlayers || {};
-                botPlayers[myPlayerNumber] = false;
-                gameStateRef.update({ botPlayers: botPlayers });
-                console.log(`Marked position ${myPlayerNumber} as NOT a bot`);
-              } else {
-                // Game state doesn't exist yet, try again
-                setTimeout(checkAndUpdate, 200);
-              }
-            });
-          };
-          checkAndUpdate();
+        // If host, set up disconnect handler to delete lobby
+        if (isHost) {
+          lobbyRef.onDisconnect().remove();
         }
+
+        // Wait a bit before starting lobby deletion listener
+        setTimeout(() => {
+          lobbyJoined = true;
+          listenForLobbyDeletion();
+        }, 2000);
 
         // Initialize game if host
         if (isHost) {
@@ -588,11 +577,15 @@
 
     function listenForLobbyDeletion() {
       lobbyRef.on('value', (snapshot) => {
-        if (!snapshot.exists()) {
-          // Lobby has been deleted (host quit)
+        // Only react if we've successfully joined and lobby no longer exists
+        if (lobbyJoined && !snapshot.exists()) {
           console.log("Lobby deleted, redirecting to lobby screen");
+          lobbyRef.off(); // Stop listening
           alert("L'hôte a quitté la partie. Vous allez être redirigé.");
           window.location.href = 'joffreLobby.html';
+        } else if (snapshot.exists()) {
+          // Lobby exists, everything is fine
+          lobbyJoined = true;
         }
       });
     }
@@ -617,47 +610,86 @@
         hands[i % 4].push(deck[i]);
       }
 
-      // Mark all positions as bots by default
-      const botPlayers = {0: true, 1: true, 2: true, 3: true};
-
-      console.log("Initializing with all bots, players will update their positions");
-
-      // Initialize game state
-      gameStateRef.set({
-        hands: hands,
-        currentTurn: 0,
-        playedCards: [],
-        trumpColor: "",
-        demandedColor: "",
-        currentLeader: 0,
-        teamOneScore: 0,
-        teamTwoScore: 0,
-        dealerIndex: Math.floor(Math.random() * 4),
-        roundNumber: 0,
-        biddingPhase: true,
-        currentBidder: -1,
-        highestBid: 0,
-        highestBidder: -1,
-        passedPlayers: [],
-        bidsPlaced: [],
-        takerTeam: -1,
-        botPlayers: botPlayers,
-        waitingForNextRound: false
-      }).then(() => {
-        console.log("Game state initialized");
-        
-        // Start bidding after a delay to let all players mark themselves
-        setTimeout(() => {
-          gameStateRef.once('value').then(snap => {
-            const state = snap.val();
-            const firstBidder = (state.dealerIndex + 1) % 4;
-            console.log("Starting bidding with first bidder:", firstBidder);
-            console.log("botPlayers at start:", state.botPlayers);
-            gameStateRef.update({
-              currentBidder: firstBidder
-            });
+      // Use botPlayers from URL if provided, otherwise read from lobby
+      if (botPlayersFromURL) {
+        console.log("Using botPlayers from URL:", botPlayersFromURL);
+        initializeWithBotPlayers(hands, botPlayersFromURL);
+      } else {
+        console.log("No botPlayers in URL, reading from lobby");
+        // Fallback: Read the lobby players to determine who is a bot
+        playersRef.once('value').then(snapshot => {
+          const players = snapshot.val() || {};
+          console.log("Host initializing - players from lobby:", players);
+          
+          // Mark all positions as bots by default
+          const botPlayers = {0: true, 1: true, 2: true, 3: true};
+          
+          // Mark real players as NOT bots
+          Object.values(players).forEach(player => {
+            const playerNum = player.playerNumber - 1; // Convert 1-4 to 0-3
+            botPlayers[playerNum] = false;
+            console.log(`Position ${playerNum} is a REAL player: ${player.name}`);
           });
-        }, 1000);
+
+          console.log("Host set botPlayers:", botPlayers);
+          initializeWithBotPlayers(hands, botPlayers);
+        });
+      }
+    }
+
+    function initializeWithBotPlayers(hands, botPlayers) {
+      // Read player names from lobby
+      playersRef.once('value').then(snapshot => {
+        const players = snapshot.val() || {};
+        const playerNamesForGame = {};
+        
+        // Map player names to their positions (0-3)
+        Object.values(players).forEach(player => {
+          const playerNum = player.playerNumber - 1;
+          playerNamesForGame[playerNum] = player.name;
+          console.log(`Storing player name: position ${playerNum} = ${player.name}`);
+        });
+        
+        console.log("Player names for game:", playerNamesForGame);
+        
+        // Initialize game state
+        gameStateRef.set({
+          hands: hands,
+          currentTurn: 0,
+          playedCards: [],
+          trumpColor: "",
+          demandedColor: "",
+          currentLeader: 0,
+          teamOneScore: 0,
+          teamTwoScore: 0,
+          dealerIndex: Math.floor(Math.random() * 4),
+          roundNumber: 0,
+          biddingPhase: true,
+          currentBidder: -1,
+          highestBid: 0,
+          highestBidder: -1,
+          passedPlayers: [],
+          bidsPlaced: [],
+          takerTeam: -1,
+          botPlayers: botPlayers,
+          playerNames: playerNamesForGame,
+          waitingForNextRound: false
+        }).then(() => {
+          console.log("Game state initialized by host with botPlayers:", botPlayers);
+          
+          // Start bidding after a short delay
+          setTimeout(() => {
+            gameStateRef.once('value').then(snap => {
+              const state = snap.val();
+              const firstBidder = (state.dealerIndex + 1) % 4;
+              console.log("Starting bidding with first bidder:", firstBidder);
+              console.log("botPlayers at start:", state.botPlayers);
+              gameStateRef.update({
+                currentBidder: firstBidder
+              });
+            });
+          }, 1000);
+        });
       });
     }
 
@@ -668,6 +700,13 @@
       console.log("Game state updated:", state.currentBidder, "My number:", myPlayerNumber);
       console.log("Bot players:", state.botPlayers);
 
+      // Update playerNames from gameState
+      if (state.playerNames) {
+        playerNames = state.playerNames;
+        console.log("Updated playerNames from gameState:", playerNames);
+        updatePlayerLabels();
+      }
+
       // Update UI
       renderHands(state);
       updateCenter(state);
@@ -675,6 +714,15 @@
       
       // Handle bidding phase
       if (state.biddingPhase) {
+        // Host should always check if bidding should end
+        if (isHost) {
+          const bidsPlaced = state.bidsPlaced || [];
+          if (bidsPlaced.length >= 4) {
+            console.log("Host detected bidding should end with bidsPlaced:", bidsPlaced);
+            checkBiddingEnd();
+          }
+        }
+        
         if (state.currentBidder === myPlayerNumber) {
           console.log("My turn to bid!");
           showBiddingInterface(state);
@@ -765,16 +813,17 @@
         
         const nextBidder = (state.currentBidder + 1) % 4;
         
+        console.log(`Player ${state.currentBidder} bid ${bidValue}. bidsPlaced now:`, bidsPlaced);
+        
         gameStateRef.update({
           highestBid: bidValue,
           highestBidder: state.currentBidder,
           currentBidder: nextBidder,
           bidsPlaced: bidsPlaced,
           lastBidderPosition: state.currentBidder
+        }).then(() => {
+          checkBiddingEnd();
         });
-
-        // Check if bidding is over
-        checkBiddingEnd();
       });
     });
 
@@ -799,18 +848,27 @@
       });
     });
 
+    let isCheckingBiddingEnd = false;
+
     function checkBiddingEnd() {
       if (!isHost) return;
+      if (isCheckingBiddingEnd) {
+        console.log("Already checking bidding end, skipping");
+        return;
+      }
+
+      isCheckingBiddingEnd = true;
 
       setTimeout(() => {
         gameStateRef.once('value').then(snapshot => {
           const state = snapshot.val();
           const bidsPlaced = state.bidsPlaced || [];
           
-          console.log("Checking bidding end. bidsPlaced:", bidsPlaced.length, "highestBidder:", state.highestBidder);
+          console.log("Checking bidding end. bidsPlaced:", bidsPlaced, "length:", bidsPlaced.length, "highestBidder:", state.highestBidder);
           
           // Case 1: All 4 players have acted - bidding is over
           if (bidsPlaced.length >= 4) {
+            console.log("✅ Bidding complete! Ending bidding phase.");
             if (state.highestBidder >= 0) {
               // Someone bid, they win
               endBidding(state.highestBidder, state.highestBid);
@@ -818,8 +876,11 @@
               // Nobody bid, dealer must take at 7
               endBidding(state.dealerIndex, 7);
             }
+            isCheckingBiddingEnd = false;
             return;
           }
+          
+          isCheckingBiddingEnd = false;
         });
       }, 100);
     }
@@ -929,11 +990,23 @@
         el.innerHTML = '';
       });
 
+      // Safety check: make sure hands exist and are complete
+      if (!state.hands || typeof state.hands !== 'object') {
+        console.warn("Hands not ready yet, skipping render");
+        return;
+      }
+
       // Render each player's hand in the correct position
       for (let playerNum = 0; playerNum < 4; playerNum++) {
         const position = getPositionForPlayer(playerNum);
         const el = document.getElementById(`player-${position}`);
-        const hand = state.hands[playerNum] || [];
+        const hand = state.hands[playerNum];
+        
+        // Safety check: make sure this player's hand exists
+        if (!hand || !Array.isArray(hand)) {
+          console.warn(`Hand for player ${playerNum} not ready yet`);
+          continue;
+        }
         
         let displayHand = hand;
         
@@ -984,6 +1057,11 @@
           return;
         }
 
+        if (state.playedCards.length >= 4) {
+          log("Attendez la prochaine manche!");
+          return;
+        }
+
         const hand = state.hands[myPlayerNumber];
         if (!hand.includes(card)) return;
 
@@ -1026,11 +1104,13 @@
         currentTurn: (state.currentTurn + 1) % 4
       };
 
-      // Set trump color if first card
-      if (trumpColor) {
+      // Set trump color ONLY if this is the very first card of the round
+      if (trumpColor && !state.trumpColor) {
         updates.trumpColor = trumpColor;
         updates.demandedColor = trumpColor;
+        console.log(`🎴 Trump color set to: ${trumpColor}`);
       } else if (newPlayedCards.length === 1) {
+        // First card of a trick (not the round), set demanded color
         updates.demandedColor = getColor(card);
       }
 
@@ -1039,7 +1119,7 @@
       // Check if trick is complete
       if (newPlayedCards.length === 4) {
         setTimeout(() => {
-          if (isHost) processTrickEnd();
+          processTrickEnd();
         }, 1500);
       } else {
         // Bot turn
@@ -1103,10 +1183,13 @@
         currentTurn: (state.currentTurn + 1) % 4
       };
 
-      if (trumpColor) {
+      // Set trump color ONLY if this is the very first card of the round
+      if (trumpColor && !state.trumpColor) {
         updates.trumpColor = trumpColor;
         updates.demandedColor = trumpColor;
+        console.log(`🎴 Bot set trump color to: ${trumpColor}`);
       } else if (newPlayedCards.length === 1) {
+        // First card of a trick (not the round), set demanded color
         updates.demandedColor = getColor(card);
       }
 
@@ -1209,9 +1292,10 @@
         const newTeam2Score = state.teamTwoScore + team2Points;
 
         // Check if round is over
-        const allHandsEmpty = Object.values(state.hands).every(h => h.length === 0);
         
-        if (allHandsEmpty) {
+        if (!state.hands) {
+          console.log("Round is over! Checking if taker made their bid...");
+          
           // Check if taker made their bid
           const takerTeam = state.takerTeam;
           const takerBid = state.highestBid;
@@ -1221,7 +1305,7 @@
           
           if (takerTeam === 1) {
             if (newTeam1Score < takerBid) {
-              finalTeam1Score = state.teamOneScore - takerBid;
+              finalTeam1Score = originalTeamOneScore - takerBid;
               finalTeam2Score = newTeam2Score; // Keep their points
               log(`L'équipe 1 n'a pas fait son contrat! -${takerBid} points`);
             } else {
@@ -1229,7 +1313,7 @@
             }
           } else if (takerTeam === 2) {
             if (newTeam2Score < takerBid) {
-              finalTeam2Score = state.teamTwoScore - takerBid;
+              finalTeam2Score = originalTeamTwoScore - takerBid;
               finalTeam1Score = newTeam1Score; // Keep their points
               log(`L'équipe 2 n'a pas fait son contrat! -${takerBid} points`);
             } else {
@@ -1237,29 +1321,39 @@
             }
           }
 
-          gameStateRef.update({
-            playedCards: [],
-            currentLeader: winner,
-            currentTurn: winner,
-            demandedColor: "",
-            teamOneScore: finalTeam1Score,
-            teamTwoScore: finalTeam2Score,
-            waitingForNextRound: true
-          });
-        } else {
-          gameStateRef.update({
-            playedCards: [],
-            currentLeader: winner,
-            currentTurn: winner,
-            demandedColor: "",
-            teamOneScore: newTeam1Score,
-            teamTwoScore: newTeam2Score
-          });
-
-          // Continue play
+          // Wait 3 seconds before clearing cards and starting next round
           setTimeout(() => {
-            botPlay();
-          }, 1000);
+            gameStateRef.update({
+              playedCards: [],
+              currentLeader: winner,
+              currentTurn: winner,
+              demandedColor: "",
+              teamOneScore: finalTeam1Score,
+              teamTwoScore: finalTeam2Score,
+              waitingForNextRound: true
+            }).then(() => {
+              console.log("Round end state updated, waitingForNextRound = true");
+            });
+          }, 3000); // Show final trick for 3 seconds
+        } else {
+          // Not end of round, just end of trick - wait before clearing
+          setTimeout(() => {
+            gameStateRef.update({
+              playedCards: [],
+              currentLeader: winner,
+              currentTurn: winner,
+              demandedColor: "",
+              teamOneScore: newTeam1Score,
+              teamTwoScore: newTeam2Score
+            }).then(() => {
+              console.log("Trick cleared, continuing play");
+              
+              // Continue play
+              setTimeout(() => {
+                botPlay();
+              }, 500);
+            });
+          }, 2000); // Show trick for 2 seconds
         }
       });
     }
@@ -1269,9 +1363,17 @@
 
       gameStateRef.once('value').then(snapshot => {
         const state = snapshot.val();
+        originalTeamOneScore = state.teamOneScore;
+        originalTeamTwoScore = state.teamTwoScore;
+        
+        console.log("Starting next round. Current scores - Team1:", state.teamOneScore, "Team2:", state.teamTwoScore);
         
         // Check for game end
-        if (state.teamOneScore >= 41 || state.teamTwoScore >= 41) {
+        if (state.teamOneScore >= 41) {
+          log("🏆 L'équipe 1 gagne la partie!");
+          return; // Game is over
+        } else if (state.teamTwoScore >= 41) {
+          log("🏆 L'équipe 2 gagne la partie!");
           return; // Game is over
         }
 
@@ -1296,18 +1398,24 @@
         const newDealer = (state.dealerIndex + 1) % 4;
         const firstBidder = (newDealer + 1) % 4;
 
-        // Preserve botPlayers info
+        // Preserve botPlayers and playerNames
         const botPlayers = state.botPlayers || {0: true, 1: true, 2: true, 3: true};
+        const playerNamesFromState = state.playerNames || {};
 
-        gameStateRef.update({
+        console.log("Dealing new round. New dealer:", newDealer, "First bidder:", firstBidder);
+
+        // Use .set() to update everything atomically
+        gameStateRef.set({
           hands: hands,
           currentTurn: firstBidder,
           playedCards: [],
           trumpColor: "",
           demandedColor: "",
           currentLeader: firstBidder,
+          teamOneScore: state.teamOneScore,
+          teamTwoScore: state.teamTwoScore,
           dealerIndex: newDealer,
-          roundNumber: state.roundNumber + 1,
+          roundNumber: (state.roundNumber || 0) + 1,
           biddingPhase: true,
           currentBidder: firstBidder,
           highestBid: 0,
@@ -1316,7 +1424,10 @@
           bidsPlaced: [],
           takerTeam: -1,
           botPlayers: botPlayers,
+          playerNames: playerNamesFromState,
           waitingForNextRound: false
+        }).then(() => {
+          console.log("New round started successfully!");
         });
       });
     }
@@ -1399,14 +1510,29 @@
     }
 
     function updatePlayerLabels() {
+      console.log("Updating player labels with playerNames:", playerNames);
+      
       for (let i = 0; i < 4; i++) {
         const position = getPositionForPlayer(i);
         const label = document.getElementById(`label-${position}`);
         
+        if (!label) {
+          console.error(`Label not found for position: ${position}`);
+          continue;
+        }
+        
         if (i === myPlayerNumber) {
-          label.textContent = "Vous";
+          label.textContent = `Vous (${username})`;
+          console.log(`Set my label (${position}): Vous (${username})`);
         } else {
-          label.textContent = playerNames[i] || `Joueur ${i + 1}`;
+          const playerName = playerNames[i];
+          if (playerName) {
+            label.textContent = playerName;
+            console.log(`Set label (${position}) for player ${i}: ${playerName}`);
+          } else {
+            label.textContent = `Bot ${i + 1}`;
+            console.log(`No name for player ${i}, set to: Bot ${i + 1}`);
+          }
         }
       }
     }

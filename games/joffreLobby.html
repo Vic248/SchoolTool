@@ -102,7 +102,7 @@
       font-size: 1em;
     }
 
-    button {
+    .lobbyButton {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
@@ -162,20 +162,22 @@
   </style>
 </head>
 <body>
+  <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
+
   <div class="container" id="loginScreen">
     <h1>Connexion</h1>
     <input type="text" id="username" placeholder="Entrez votre pseudo" />
-    <button id="loginBtn">Se connecter</button>
+    <button id="loginBtn" class="lobbyButton">Se connecter</button>
   </div>
 
   <div class="container hidden" id="lobbyScreen">
     <h1>Bienvenue, <span id="playerName"></span></h1>
     <input type="text" id="lobbyName" placeholder="Nom du lobby" />
-    <button id="createLobbyBtn">Créer un lobby</button>
+    <button id="createLobbyBtn" class="lobbyButton">Créer un lobby</button>
 
     <hr style="margin: 20px 0; border: 0; border-top: 1px solid #444;">
     <input type="text" id="joinCode" placeholder="Code du lobby" />
-    <button id="joinLobbyBtn">Rejoindre un lobby</button>
+    <button id="joinLobbyBtn" class="lobbyButton">Rejoindre un lobby</button>
 
     <div class="link" id="logoutLink">Se déconnecter</div>
   </div>
@@ -185,7 +187,7 @@
       <div>
         <h1>Lobby : <span id="currentLobby"></span></h1>
         <div id="playersList"></div>
-        <button id="leaveLobbyBtn">Quitter le lobby</button>
+        <button id="leaveLobbyBtn" class="lobbyButton">Quitter le lobby</button>
       </div>
 
       <div id="hostSettings" class="hidden">
@@ -193,7 +195,7 @@
         <label>Nombre de manches :</label>
         <input type="number" id="roundsInput" min="1" max="10" value="3">
         <br><br>
-        <button id="startGameBtn">Démarrer la partie</button>
+        <button id="startGameBtn" class="lobbyButton">Démarrer la partie</button>
       </div>
     </div>
   </div>
@@ -219,7 +221,19 @@
     loadMenu();
   </script>
   <script>
-    requireRole('Tester');
+      document.getElementById("menu-btn").addEventListener("click", function () {
+        document.getElementById("menu").classList.toggle("open");    
+      });
+
+      function mouseEnter(id) {
+        const newId = document.getElementById(id);
+        newId.classList.add('fa-bounce');
+      }
+      
+      function mouseLeave(id) {
+        const newId = document.getElementById(id);
+        newId.classList.remove('fa-bounce');
+      }
   </script>
   <script>
       document.getElementById("menu-btn").addEventListener("click", function () {
@@ -307,42 +321,46 @@
     });
 
     startGameBtn.addEventListener('click', () => {
-      // Vérifie la composition des équipes
       currentLobbyRef.child('players').once('value').then(snapshot => {
         const players = snapshot.val() || {};
+        
         let redCount = 0, blueCount = 0;
         Object.values(players).forEach(player => {
           if (player.isRedTeam) redCount++;
           if (player.isBlueTeam) blueCount++;
         });
         if (Object.keys(players).length === 4 && (redCount !== 2 || blueCount !== 2)) {
-          alert("Il doit y avoir exactement 2 joueurs dans chaque équipe !");
+          alert("Il doit y avoir exactement 2 joueurs dans chaque Ã©quipe !");
           return;
         }
 
         if (Object.keys(players).length === 3 && (redCount === 3 || blueCount === 3)) {
-          alert("Avec 3 joueurs, il ne peut pas y avoir 3 joueurs dans la même équipe !");
+          alert("Avec 3 joueurs, il ne peut pas y avoir 3 joueurs dans la mÃªme Ã©quipe !");
           return;
         }
 
-        currentLobbyRef.update({ gameStarted: true });
-
-        const lobbyName = document.getElementById('lobbyName').value.trim();
-
-        // ...suite du code pour démarrer la partie...
-        /*const playerData = {
-          username: usernameInput.value.trim(),
-          lobbyName: lobbyName,
-          userId: userUid,
-          isHost: isHost,
-          lobbyId: lobbyKey,
-          playerNumber: playerNumber
+        if (Object.keys(players).length !== 4) {
+          alert("Pour le moment, la partie ne peut commencer qu'avec 4 joueurs.");
+          return;
         }
 
-        sessionStorage.setItem("playerData", JSON.stringify(playerData));*/
-        window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false`;
+        // Build botPlayers object
+        const botPlayers = {0: true, 1: true, 2: true, 3: true};
+        Object.values(players).forEach(player => {
+          const playerNum = player.playerNumber - 1;
+          botPlayers[playerNum] = false;
+        });
+        
+        console.log("Host sending botPlayers:", botPlayers);
+        
+        currentLobbyRef.update({ gameStarted: true });
+        
+        const lobbyName = document.getElementById('lobbyName').value.trim();
+        const botPlayersJSON = JSON.stringify(botPlayers);
+        
+        window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false&botPlayers=${encodeURIComponent(botPlayersJSON)}`;
       });
-    })
+    });
 
     function assignPlayerNumber(players) {
       // Find the first available number (1-4)
@@ -469,7 +487,8 @@
       const gameStartedRef = firebase.database().ref(`lobbies/${lobbyKey}/gameStarted`);
       gameStartedRef.on('value', snapshot => {
         if (snapshot.val() === true) {
-          // Optional: Save any needed data to sessionStorage here
+          const lobbyName = document.getElementById('lobbyName').value.trim();
+          // Non-host players don't send botPlayers
           window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false`;
         }
       });
