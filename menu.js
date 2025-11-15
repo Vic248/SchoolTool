@@ -22,14 +22,6 @@ function loadMenu() {
             });
 
             document.body.appendChild(menuContainer);
-
-            // ADD THIS: Attach the event listener after menu is in DOM
-            const menuBtn = document.getElementById("menu-btn");
-            if (menuBtn) {
-                menuBtn.addEventListener("click", function () {
-                    menuContainer.classList.toggle("open");
-                });
-            }
         })
         .catch(error => console.error("Erreur de chargement du menu :", error));
 }
