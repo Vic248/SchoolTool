@@ -107,6 +107,269 @@
       box-shadow: 0 0 24px 8px #ffd700, 0 4px 16px rgba(0,0,0,0.18);
     }
 
+    /* Card playing animations */
+    @keyframes slideUpAndFade {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    @keyframes dropOnTable {
+      0% {
+        transform: scale(2);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes specialRedPulse {
+      0%, 100% {
+        box-shadow: 0 0 18px 6px #ff1744, 0 4px 16px rgba(0,0,0,0.18);
+      }
+      50% {
+        box-shadow: 0 0 35px 12px #ff1744, 0 8px 32px rgba(255,23,68,0.4);
+      }
+    }
+
+    @keyframes specialBrownPulse {
+      0%, 100% {
+        box-shadow: 0 0 18px 6px #a0522d, 0 4px 16px rgba(0,0,0,0.18);
+      }
+      50% {
+        box-shadow: 0 0 35px 12px #8b4513, 0 8px 32px rgba(139,69,19,0.4);
+      }
+    }
+
+    .card.playing {
+      animation: slideUpAndFade 0.5s ease-out forwards;
+      pointer-events: none;
+    }
+
+    .card.appearing {
+      animation: dropOnTable 0.5s ease-out forwards;
+    }
+
+    .card.appearing.special-red {
+      animation: dropOnTable 0.5s ease-out forwards, specialRedPulse 1s ease-in-out 0.5s 2;
+    }
+
+    .card.appearing.special-brown {
+      animation: dropOnTable 0.5s ease-out forwards, specialBrownPulse 1s ease-in-out 0.5s 2;
+    }
+
+    /* Turn indicator - glowing border around active player */
+    .player.hand.active-turn {
+      box-shadow: 0 0 30px 5px #ffd700, 0 2px 8px rgba(0,0,0,0.08);
+      animation: turnPulse 2s ease-in-out infinite;
+      border: 2px solid #ffd700;
+    }
+
+    @keyframes turnPulse {
+      0%, 100% {
+        box-shadow: 0 0 30px 5px #ffd700, 0 2px 8px rgba(0,0,0,0.08);
+      }
+      50% {
+        box-shadow: 0 0 40px 8px #ffed4e, 0 4px 16px rgba(255,215,0,0.3);
+      }
+    }
+
+    /* Hover effect on opponent card backs */
+    #player-top .card:hover,
+    #player-left .card:hover,
+    #player-right .card:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+
+    #player-left .card:hover {
+      transform: rotate(-90deg) scale(1.05);
+    }
+
+    #player-right .card:hover {
+      transform: rotate(90deg) scale(1.05);
+    }
+
+    /* Score animation */
+    @keyframes scoreChange {
+      0%, 100% {
+        transform: translateX(-50%) scale(1);
+      }
+      50% {
+        transform: translateX(-50%) scale(1.1);
+        color: #fff;
+      }
+    }
+
+    #scoreDisplay.score-changed {
+      animation: scoreChange 0.5s ease-out;
+    }
+
+    /* Card fan effect for bottom player */
+    #player-bottom {
+      perspective: 1000px;
+    }
+
+    #player-bottom .card {
+      transition: transform 0.3s ease, margin 0.3s ease;
+    }
+
+    #player-bottom .card:hover {
+      transform: translateY(-20px) scale(1.15) !important;
+      z-index: 10;
+      margin: 8px 12px;
+    }
+
+    /* Confetti for winner */
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(600px) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      z-index: 100;
+      animation: confetti-fall 2s linear forwards;
+    }
+
+    /* Background particles */
+    .particle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.3;
+      animation: float 20s infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      33% {
+        transform: translate(30px, -30px) rotate(120deg);
+      }
+      66% {
+        transform: translate(-20px, 20px) rotate(240deg);
+      }
+    }
+
+    /* 3D table effect */
+    #table {
+      display: grid;
+      grid-template-areas:
+        "top top top"
+        "left center right"
+        "bottom bottom bottom";
+      grid-template-columns: 1fr 2fr 1fr;
+      grid-template-rows: 120px 220px 160px;
+      gap: 10px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.05));
+      border-radius: 24px;
+      box-shadow: 
+        0 8px 32px 0 rgba(31,38,135,0.18),
+        inset 0 2px 10px rgba(255,255,255,0.1),
+        0 20px 60px rgba(0,0,0,0.3);
+      padding: 18px;
+      margin: 70px auto 0 auto;
+      max-width: 1200px;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    /* Trump color indicator */
+    #trump-indicator {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      z-index: 1999;
+      display: none;
+      animation: trumpAppear 0.5s ease-out;
+    }
+
+    @keyframes trumpAppear {
+      0% {
+        transform: translateX(-50%) scale(0);
+        opacity: 0;
+      }
+      100% {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+      }
+    }
+
+    #trump-indicator.Rouge {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      box-shadow: 0 0 20px #e74c3c;
+    }
+
+    #trump-indicator.Bleu {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      box-shadow: 0 0 20px #3498db;
+    }
+
+    #trump-indicator.Vert {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      color: white;
+      box-shadow: 0 0 20px #2ecc71;
+    }
+
+    #trump-indicator.Brun {
+      background: linear-gradient(135deg, #a0522d, #8b4513);
+      color: white;
+      box-shadow: 0 0 20px #a0522d;
+    }
+
+    /* Sparkle effect for winner */
+    @keyframes sparkle {
+      0%, 100% {
+        opacity: 0;
+        transform: scale(0);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #ffd700, transparent);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkle 1s ease-out forwards;
+      z-index: 150;
+    }
+
     .player.hand {
       transform-origin: center;
       display: flex;
@@ -394,6 +657,8 @@
       <h1 id="scoreTitle">Team 1: 0 | Team 2: 0</h1>
     </div>
 
+    <div id="trump-indicator">🃏 Atout: <span id="trump-text">-</span></div>
+
   <div id="loading-screen">
     <h1>Chargement du jeu de Joffre...</h1>
     <div id="progress-bar">
@@ -401,6 +666,9 @@
     </div>
     <div id="tip">Astuce : Toujours prendre en brun</div>
   </div>
+
+  <!-- Background particles -->
+  <div id="particles-container"></div>
 
   <div id="game-content" style="display: none;"></div>
 
@@ -575,6 +843,27 @@
 
     firebase.auth().signInAnonymously();
 
+    // Create background particles
+    function createParticles() {
+      const container = document.getElementById('particles-container');
+      const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'];
+      
+      for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.width = (Math.random() * 4 + 2) + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    createParticles();
+
     function listenForLobbyDeletion() {
       lobbyRef.on('value', (snapshot) => {
         // Only react if we've successfully joined and lobby no longer exists
@@ -711,6 +1000,8 @@
       renderHands(state);
       updateCenter(state);
       updateScore(state);
+      updateTurnIndicator(state);
+      updateTrumpIndicator(state);
       
       // Handle bidding phase
       if (state.biddingPhase) {
@@ -1057,9 +1348,11 @@
           return;
         }
 
-        if (state.playedCards.length >= 4) {
+        if (state.playedCards) {
+          if (state.playedCards.length >= 4) {
           log("Attendez la prochaine manche!");
           return;
+        }
         }
 
         const hand = state.hands[myPlayerNumber];
@@ -1071,22 +1364,54 @@
         if (playedCards.length === 0) {
           // First card sets trump color
           const trumpColor = getColor(card);
-          playCardToFirebase(card, state, trumpColor);
+          animateCardPlay(card, () => {
+            playCardToFirebase(card, state, trumpColor);
+          });
         } else {
           // Must follow suit if possible
           const demandedColor = state.demandedColor || getColor(playedCards[0].card);
           const cardColor = getColor(card);
           
           if (cardColor === demandedColor) {
-            playCardToFirebase(card, state);
+            animateCardPlay(card, () => {
+              playCardToFirebase(card, state);
+            });
           } else if (hasColor(hand, demandedColor)) {
             log("Vous devez suivre la couleur!");
             return;
           } else {
-            playCardToFirebase(card, state);
+            animateCardPlay(card, () => {
+              playCardToFirebase(card, state);
+            });
           }
         }
       });
+    }
+
+    function animateCardPlay(card, callback) {
+      // Find the card image element
+      const position = getPositionForPlayer(myPlayerNumber);
+      const handEl = document.getElementById(`player-${position}`);
+      const cardImgs = handEl.querySelectorAll('img');
+      
+      let cardEl = null;
+      for (let img of cardImgs) {
+        if (img.src.includes(card)) {
+          cardEl = img;
+          break;
+        }
+      }
+      
+      if (cardEl) {
+        cardEl.classList.add('playing');
+        
+        // Wait for animation to complete before sending to Firebase
+        setTimeout(() => {
+          callback();
+        }, 500);
+      } else {
+        callback();
+      }
     }
 
     function playCardToFirebase(card, state, trumpColor = null) {
@@ -1259,6 +1584,10 @@
         if (playedCards.length !== 4) return;
 
         const winner = getWinner(playedCards, state.trumpColor);
+        
+        // Add confetti and sparkles for winner
+        createConfetti();
+        createSparkles(winner);
         
         let team1Points = 0;
         let team2Points = 0;
@@ -1473,15 +1802,29 @@
 
     function updateCenter(state) {
       const div = document.getElementById('center-play');
-      div.innerHTML = '';
-
       const playedCards = state.playedCards || [];
       const winner = playedCards.length === 4 ? getWinner(playedCards, state.trumpColor) : null;
 
-      for (let pc of playedCards) {
+      // If playedCards is empty, clear the center
+      if (playedCards.length === 0) {
+        div.innerHTML = '';
+        return;
+      }
+
+      // Get current cards in center
+      const currentCards = Array.from(div.querySelectorAll('img')).map(img => {
+        const match = img.src.match(/(\d+_\w+)\.png/);
+        return match ? match[1] : null;
+      }).filter(Boolean);
+
+      // Find new cards that need to be added
+      const newCards = playedCards.filter(pc => !currentCards.includes(pc.card));
+
+      // Add new cards with animation
+      for (let pc of newCards) {
         const img = document.createElement('img');
         img.src = `${pc.card}.png`;
-        img.className = 'card';
+        img.className = 'card appearing';
 
         if (pc.card === '0_Rouge') {
           img.classList.add('special-red');
@@ -1502,11 +1845,108 @@
 
         div.appendChild(img);
       }
+
+      // If all existing cards are still valid, just update winner status
+      if (newCards.length === 0) {
+        const imgs = div.querySelectorAll('img');
+        imgs.forEach((img, idx) => {
+          if (playedCards[idx]) {
+            if (playedCards[idx].player === winner) {
+              img.classList.add('winner');
+            } else {
+              img.classList.remove('winner');
+            }
+          }
+        });
+      }
     }
 
     function updateScore(state) {
       const scoreTitle = document.getElementById('scoreTitle');
-      scoreTitle.textContent = `Team 1: ${state.teamOneScore} | Team 2: ${state.teamTwoScore}`;
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const newText = `Team 1: ${state.teamOneScore} | Team 2: ${state.teamTwoScore}`;
+      
+      // Animate if score changed
+      if (scoreTitle.textContent !== newText) {
+        scoreDisplay.classList.add('score-changed');
+        setTimeout(() => {
+          scoreDisplay.classList.remove('score-changed');
+        }, 500);
+      }
+      
+      scoreTitle.textContent = newText;
+    }
+
+    function updateTurnIndicator(state) {
+      // Remove active-turn class from all hands
+      document.querySelectorAll('.player.hand').forEach(hand => {
+        hand.classList.remove('active-turn');
+      });
+
+      // Add active-turn to current player
+      if (!state.biddingPhase) {
+        const currentPlayerPosition = getPositionForPlayer(state.currentTurn);
+        const currentPlayerHand = document.getElementById(`player-${currentPlayerPosition}`);
+        if (currentPlayerHand) {
+          currentPlayerHand.classList.add('active-turn');
+        }
+      } else if (state.currentBidder >= 0) {
+        const currentBidderPosition = getPositionForPlayer(state.currentBidder);
+        const currentBidderHand = document.getElementById(`player-${currentBidderPosition}`);
+        if (currentBidderHand) {
+          currentBidderHand.classList.add('active-turn');
+        }
+      }
+    }
+
+    function updateTrumpIndicator(state) {
+      const indicator = document.getElementById('trump-indicator');
+      const trumpText = document.getElementById('trump-text');
+      
+      if (state.trumpColor) {
+        trumpText.textContent = state.trumpColor;
+        indicator.className = state.trumpColor;
+        indicator.style.display = 'block';
+      } else {
+        indicator.style.display = 'none';
+      }
+    }
+
+    function createConfetti() {
+      const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731'];
+      const center = document.getElementById('center');
+      
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = (Math.random() * 100) + '%';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = (Math.random() * 0.3) + 's';
+        confetti.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 2500);
+      }
+    }
+
+    function createSparkles(winnerPosition) {
+      const position = getPositionForPlayer(winnerPosition);
+      const centerPlay = document.getElementById('center-play');
+      const cards = centerPlay.querySelectorAll('.card.winner');
+      
+      cards.forEach(card => {
+        for (let i = 0; i < 5; i++) {
+          const sparkle = document.createElement('div');
+          sparkle.className = 'sparkle';
+          const rect = card.getBoundingClientRect();
+          sparkle.style.left = (rect.left + Math.random() * rect.width) + 'px';
+          sparkle.style.top = (rect.top + Math.random() * rect.height) + 'px';
+          sparkle.style.animationDelay = (Math.random() * 0.5) + 's';
+          document.body.appendChild(sparkle);
+          
+          setTimeout(() => sparkle.remove(), 1500);
+        }
+      });
     }
 
     function updatePlayerLabels() {

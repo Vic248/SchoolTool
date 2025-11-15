@@ -334,12 +334,12 @@
           if (player.isBlueTeam) blueCount++;
         });
         if (Object.keys(players).length === 4 && (redCount !== 2 || blueCount !== 2)) {
-          alert("Il doit y avoir exactement 2 joueurs dans chaque Ã©quipe !");
+          alert("Il doit y avoir exactement 2 joueurs dans chaque Équipe !");
           return;
         }
 
         if (Object.keys(players).length === 3 && (redCount === 3 || blueCount === 3)) {
-          alert("Avec 3 joueurs, il ne peut pas y avoir 3 joueurs dans la mÃªme Ã©quipe !");
+          alert("Avec 3 joueurs, il ne peut pas y avoir 3 joueurs dans la même Équipe !");
           return;
         }
 
@@ -423,9 +423,16 @@
 
           // Vérifie si le lobby existe avant de rejoindre
           lobbyRef.once('value').then(snapshot => {
+            const lobby = snapshot.val();
+
             if (!snapshot.exists()) {
               showLobbyNotFound();
               lobbyJoined = false; // on n'a pas rejoint
+              return;
+            }
+
+            if (lobby.players.userUid) {
+              alert("Vous êtes déjà dans ce lobby !");
               return;
             }
 
