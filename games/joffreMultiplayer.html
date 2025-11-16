@@ -8,7 +8,7 @@
   <title>Joffre - Multijoueur</title>
   <style>
     h1 {
-      font-size: 2rem;
+      font-size: 1.5rem;
     }
     #menu-btn {
       position: fixed;
@@ -193,11 +193,13 @@
     }
 
     #player-left .card:hover {
-      transform: rotate(-90deg) scale(1.05);
+      transform: rotate(-90deg) scale(1.15);
+      z-index: 10;
     }
 
     #player-right .card:hover {
-      transform: rotate(90deg) scale(1.05);
+      transform: rotate(90deg) scale(1.15);
+      z-index: 10;
     }
 
     /* Score animation */
@@ -280,7 +282,7 @@
         "left center right"
         "bottom bottom bottom";
       grid-template-columns: 1fr 2fr 1fr;
-      grid-template-rows: 120px 220px 160px;
+      grid-template-rows: auto 1fr auto;
       gap: 10px;
       background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.05));
       border-radius: 24px;
@@ -289,9 +291,10 @@
         inset 0 2px 10px rgba(255,255,255,0.1),
         0 20px 60px rgba(0,0,0,0.3);
       padding: 18px;
-      margin: 70px auto 0 auto;
-      max-width: 1200px;
-      height: 100%;
+      margin: 70px auto 20px auto;
+      max-width: 1400px;
+      width: 95vw;
+      min-height: calc(100vh - 110px);
       position: relative;
       transform-style: preserve-3d;
     }
@@ -299,13 +302,13 @@
     /* Trump color indicator */
     #trump-indicator {
       position: fixed;
-      top: 70px;
+      top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      padding: 8px 20px;
-      border-radius: 20px;
+      padding: 12px 30px;
+      border-radius: 25px;
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1.3rem;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       z-index: 1999;
       display: none;
@@ -370,6 +373,8 @@
       z-index: 150;
     }
 
+    /* Smoke effect for special cards - REMOVED */
+
     .player.hand {
       transform-origin: center;
       display: flex;
@@ -400,18 +405,18 @@
     #scoreDisplay {
       position: fixed;
       top: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 20px;
+      transform: none;
       background: rgba(0,0,0,0.7);
       color: #ffd700;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       letter-spacing: 1px;
-      padding: 18px 50px 12px 50px;
-      border-radius: 0 0 22px 22px;
+      padding: 15px 30px 10px 30px;
+      border-radius: 0 0 18px 18px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.25);
       z-index: 2000;
       text-align: center;
-      min-width: 340px;
+      min-width: 280px;
     }
 
     #table {
@@ -454,33 +459,49 @@
     }
 
     #player-bottom {
-      margin-top: 130px;
+      margin-top: 0;
     }
 
     #player-left {
-      flex-direction: column;
-      align-items: flex-start;
-      min-width: 80px;
-      min-height: 350px;
-      max-height: 350px;
-      justify-content: center;
+      display: grid;
+      grid-auto-flow: row;
+      grid-auto-rows: minmax(0, 1fr);
+      align-items: center;
+      justify-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 20px 10px;
+      overflow: hidden;
+      position: relative;
+      gap: 5px;
     }
+    
     #player-left .card {
       transform: rotate(-90deg);
-      margin-bottom: -30px;
+      transform-origin: center center;
+      transition: all 0.3s ease;
+      grid-column: 1;
     }
 
     #player-right {
-      flex-direction: column;
-      align-items: flex-end;
-      min-width: 80px;
-      min-height: 350px;
-      max-height: 350px;
-      justify-content: center;
+      display: grid;
+      grid-auto-flow: row;
+      grid-auto-rows: minmax(0, 1fr);
+      align-items: center;
+      justify-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 20px 10px;
+      overflow: hidden;
+      position: relative;
+      gap: 5px;
     }
+    
     #player-right .card {
       transform: rotate(90deg);
-      margin-bottom: -30px;
+      transform-origin: center center;
+      transition: all 0.3s ease;
+      grid-column: 1;
     }
 
     #center {
@@ -490,7 +511,7 @@
 
     #player-left .card:first-child,
     #player-right .card:first-child {
-      margin-bottom: 0;
+      margin: 0;
     }
 
     #bid-interface {
@@ -1315,7 +1336,10 @@
           });
         }
 
-        for (let card of displayHand) {
+        const totalCards = displayHand.length;
+
+        for (let i = 0; i < displayHand.length; i++) {
+          const card = displayHand[i];
           const img = document.createElement('img');
           
           // Show card face only for my hand
@@ -1350,9 +1374,9 @@
 
         if (state.playedCards) {
           if (state.playedCards.length >= 4) {
-          log("Attendez la prochaine manche!");
-          return;
-        }
+            log("Attendez la prochaine manche!");
+            return;
+          }
         }
 
         const hand = state.hands[myPlayerNumber];
@@ -1858,6 +1882,25 @@
             }
           }
         });
+      }
+    }
+
+    function createSmoke(cardElement, type) {
+      const rect = cardElement.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      // Create multiple smoke puffs for better effect
+      for (let i = 0; i < 4; i++) {
+        const smoke = document.createElement('div');
+        smoke.className = `smoke ${type}-smoke`;
+        smoke.style.left = centerX + (Math.random() - 0.5) * 40 + 'px';
+        smoke.style.top = centerY + (Math.random() - 0.5) * 40 + 'px';
+        smoke.style.animationDelay = (i * 0.15) + 's';
+        smoke.style.animationDuration = (1.5 + Math.random() * 0.5) + 's';
+        document.body.appendChild(smoke);
+        
+        setTimeout(() => smoke.remove(), 2500);
       }
     }
 
