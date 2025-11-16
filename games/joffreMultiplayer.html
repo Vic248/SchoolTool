@@ -1545,9 +1545,11 @@
           return;
         }
 
-        if (state.playedCards.length >= 4) {
-          log("Attendez la prochaine manche!");
-          return;
+        if (state.playedCards) {
+          if (state.playedCards.length >= 4) {
+            log("Attendez la prochaine manche!");
+            return;
+          }
         }
 
         const hand = state.hands[myPlayerNumber];
