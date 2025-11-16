@@ -375,6 +375,151 @@
 
     /* Smoke effect for special cards - REMOVED */
 
+    /* Game End Screen */
+    #gameEndScreen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #gameEndScreen.show {
+      display: flex;
+    }
+
+    .end-screen-content {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      padding: 50px 80px;
+      border-radius: 30px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      animation: slideUp 0.5s ease-out;
+      border: 3px solid #ffd700;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .winner-title {
+      font-size: 4rem;
+      color: #ffd700;
+      margin: 0 0 20px 0;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .final-score {
+      font-size: 2rem;
+      color: #ecf0f1;
+      margin: 20px 0;
+    }
+
+    .xp-gained {
+      font-size: 1.5rem;
+      color: #2ecc71;
+      margin: 20px 0;
+      animation: glow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(46, 204, 113, 1);
+      }
+    }
+
+    .end-screen-buttons {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .end-screen-btn {
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+
+    .restart-btn {
+      background: #3498db;
+      color: white;
+    }
+
+    .restart-btn:hover {
+      background: #2980b9;
+      transform: scale(1.05);
+    }
+
+    .lobby-btn {
+      background: #95a5a6;
+      color: white;
+    }
+
+    .lobby-btn:hover {
+      background: #7f8c8d;
+      transform: scale(1.05);
+    }
+
+    .host-only-message {
+      font-size: 1.1rem;
+      color: #f39c12;
+      margin-top: 20px;
+      font-style: italic;
+    }
+
+    /* Fireworks for winner */
+    @keyframes firework {
+      0% {
+        transform: translate(0, 0);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--x), var(--y));
+        opacity: 0;
+      }
+    }
+
+    .firework {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: firework 1s ease-out forwards;
+    }
+
     .player.hand {
       transform-origin: center;
       display: flex;
@@ -727,6 +872,20 @@
     </div>
   </div>
 
+  <!-- Game End Screen -->
+  <div id="gameEndScreen">
+    <div class="end-screen-content">
+      <h1 class="winner-title">🏆 <span id="winnerTeamName">Équipe 1</span> Gagne! 🏆</h1>
+      <p class="final-score">Score Final: <span id="finalScore">Team 1: 41 | Team 2: 30</span></p>
+      <p class="xp-gained" id="xpGained">+50 XP Gagné!</p>
+      <div class="end-screen-buttons" id="endScreenButtons">
+        <button class="end-screen-btn restart-btn" id="restartGameBtn">Rejouer</button>
+        <button class="end-screen-btn lobby-btn" id="backToLobbyBtn">Retour au Lobby</button>
+      </div>
+      <p class="host-only-message" id="hostOnlyMessage" style="display: none;">Seul l'hôte peut redémarrer la partie</p>
+    </div>
+  </div>
+
   <script src="/auth.js"></script>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="/menu.js"></script>
@@ -1068,8 +1227,22 @@
       // Check for game end
       if (state.teamOneScore >= 41) {
         log("🏆 L'équipe 1 gagne la partie!");
+        if (!state.gameEnded) {
+          gameStateRef.update({ gameEnded: true });
+          showGameEndScreen(1, state.teamOneScore, state.teamTwoScore);
+        }
       } else if (state.teamTwoScore >= 41) {
         log("🏆 L'équipe 2 gagne la partie!");
+        if (!state.gameEnded) {
+          gameStateRef.update({ gameEnded: true });
+          showGameEndScreen(2, state.teamOneScore, state.teamTwoScore);
+        }
+      }
+      
+      // Listen for game end state change
+      if (state.gameEnded && !document.getElementById('gameEndScreen').classList.contains('show')) {
+        const winningTeam = state.teamOneScore >= 41 ? 1 : 2;
+        showGameEndScreen(winningTeam, state.teamOneScore, state.teamTwoScore);
       }
     }
 
@@ -1372,11 +1545,9 @@
           return;
         }
 
-        if (state.playedCards) {
-          if (state.playedCards.length >= 4) {
-            log("Attendez la prochaine manche!");
-            return;
-          }
+        if (state.playedCards.length >= 4) {
+          log("Attendez la prochaine manche!");
+          return;
         }
 
         const hand = state.hands[myPlayerNumber];
@@ -2045,6 +2216,133 @@
       const logEl = document.getElementById('log');
       logEl.textContent = text;
     }
+
+    function showGameEndScreen(winningTeam, team1Score, team2Score) {
+      const endScreen = document.getElementById('gameEndScreen');
+      const winnerTeamName = document.getElementById('winnerTeamName');
+      const finalScore = document.getElementById('finalScore');
+      const xpGained = document.getElementById('xpGained');
+      const hostOnlyMessage = document.getElementById('hostOnlyMessage');
+      const restartBtn = document.getElementById('restartGameBtn');
+      
+      // Determine if player won
+      const myTeam = (myPlayerNumber === 0 || myPlayerNumber === 2) ? 1 : 2;
+      const didIWin = myTeam === winningTeam;
+      
+      // Calculate XP (more for winning)
+      const xpAmount = didIWin ? 100 : 50;
+      
+      winnerTeamName.textContent = `Équipe ${winningTeam}`;
+      finalScore.textContent = `Team 1: ${team1Score} | Team 2: ${team2Score}`;
+      xpGained.textContent = didIWin ? `🎉 +${xpAmount} XP Gagné! 🎉` : `+${xpAmount} XP`;
+      
+      // Show/hide restart button based on host status
+      if (!isHost) {
+        restartBtn.style.display = 'none';
+        hostOnlyMessage.style.display = 'block';
+      }
+      
+      endScreen.classList.add('show');
+      
+      // Create fireworks
+      if (didIWin) {
+        createFireworks();
+      }
+      
+      // Award XP to logged-in user
+      awardXP(xpAmount, didIWin);
+    }
+
+    function createFireworks() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffd700'];
+      
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const x = Math.random() * window.innerWidth;
+          const y = Math.random() * window.innerHeight * 0.5;
+          
+          for (let j = 0; j < 20; j++) {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.left = x + 'px';
+            firework.style.top = y + 'px';
+            firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            const angle = (Math.PI * 2 * j) / 20;
+            const distance = 100 + Math.random() * 100;
+            firework.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+            firework.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+            
+            document.body.appendChild(firework);
+            
+            setTimeout(() => firework.remove(), 1000);
+          }
+        }, i * 100);
+      }
+    }
+
+    async function awardXP(amount, won) {
+      // Check if user is logged in with Netlify Identity
+      const user = netlifyIdentity.currentUser();
+      
+      if (!user) {
+        console.log("User not logged in, XP not saved");
+        return;
+      }
+      
+      try {
+        // Get current XP from user metadata
+        const currentXP = user.user_metadata?.joffre_xp || 0;
+        const currentWins = user.user_metadata?.joffre_wins || 0;
+        const currentGames = user.user_metadata?.joffre_games || 0;
+        
+        const newXP = currentXP + amount;
+        const newWins = won ? currentWins + 1 : currentWins;
+        const newGames = currentGames + 1;
+        
+        // Update user metadata via Netlify Identity
+        await netlifyIdentity.gotrue.currentUser().update({
+          data: {
+            joffre_xp: newXP,
+            joffre_wins: newWins,
+            joffre_games: newGames,
+            joffre_level: Math.floor(newXP / 500) + 1
+          }
+        });
+        
+        console.log(`XP awarded: ${amount}. New total: ${newXP}`);
+      } catch (error) {
+        console.error("Error awarding XP:", error);
+      }
+    }
+
+    // Restart game button
+    document.getElementById('restartGameBtn').addEventListener('click', () => {
+      if (!isHost) return;
+      
+      // Reset game state
+      gameStateRef.update({
+        gameEnded: false,
+        teamOneScore: 0,
+        teamTwoScore: 0,
+        biddingPhase: true,
+        currentBidder: -1,
+        highestBid: 0,
+        highestBidder: -1,
+        passedPlayers: [],
+        bidsPlaced: [],
+        roundNumber: 0,
+        waitingForNextRound: false
+      }).then(() => {
+        document.getElementById('gameEndScreen').classList.remove('show');
+        initializeGame();
+      });
+    });
+
+    // Back to lobby button
+    document.getElementById('backToLobbyBtn').addEventListener('click', () => {
+      window.location.href = 'joffreLobby.html';
+    });
   </script>
 </body>
 </html>

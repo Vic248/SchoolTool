@@ -72,7 +72,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 20px;
     }
 
     .container {
@@ -159,6 +160,102 @@
       gap: 20px;
     }
 
+    /* XP and Level Display */
+    .auth-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 1002;
+    }
+
+    #auth-btn {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #auth-btn:hover {
+      background-color: #1f2e3a;
+    }
+
+    #userStats {
+      background: rgba(44, 62, 80, 0.9);
+      padding: 10px 20px;
+      border-radius: 12px;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    #userStats.show {
+      display: block;
+    }
+
+    .level-badge {
+      font-size: 1.2rem;
+      color: #ffd700;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .xp-bar-container {
+      width: 150px;
+      height: 10px;
+      background: #34495e;
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 5px 0;
+    }
+
+    .xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+      transition: width 0.5s ease;
+      box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+    }
+
+    .stats-text {
+      font-size: 0.85rem;
+      color: #ecf0f1;
+    }
+
+    /* Locked Feature Overlay */
+    .locked-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      cursor: not-allowed;
+    }
+
+    .lock-icon {
+      font-size: 2rem;
+      color: #e74c3c;
+    }
+
+    .feature-locked {
+      position: relative;
+      opacity: 0.5;
+    }
+
+    .unlock-message {
+      font-size: 0.9rem;
+      color: #f39c12;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -174,6 +271,18 @@
     <a href="/games/gameHome.html" onmouseenter="mouseEnter('gameIcon')" onmouseleave="mouseLeave('gameIcon')"><i class="fa-solid fa-gamepad" id="gameIcon"></i> Menu des jeux</a>
     <a href="/suggestionForm.html" onmouseenter="mouseEnter('sugg')" onmouseleave="mouseLeave('sugg')"><i class="fas fa-comment-dots" id="sugg"></i> Suggestion</a>
     <a href="https://www.mozaikportail.ca" onmouseenter="mouseEnter('mozaik')" onmouseleave="mouseLeave('mozaik')"><i class="fas fa-link" id="mozaik"></i> Mozaik</a>
+  </div>
+
+  <div class="auth-container">
+    <div id="userStats">
+      <div class="level-badge">⭐ Niveau <span id="userLevel">1</span></div>
+      <div class="xp-bar-container">
+        <div class="xp-bar-fill" id="xpBarFill" style="width: 0%"></div>
+      </div>
+      <div class="stats-text"><span id="userXP">0</span> / <span id="nextLevelXP">500</span> XP</div>
+      <div class="stats-text">🏆 <span id="userWins">0</span> Victoires</div>
+    </div>
+    <button id="auth-btn">Se connecter</button>
   </div>
 
   <div class="container" id="loginScreen">
@@ -212,14 +321,12 @@
     </div>
   </div>
 
-      <!-- Message d'erreur lobby non trouvé -->
-      <div class="container hidden" id="notFoundScreen">
-        <h1>Lobby non trouvé</h1>
-        <p>Aucun lobby avec ce code n’a été trouvé.</p>
-        <button id="backToLobbyBtn">Retour</button>
-      </div>
+  <div class="container hidden" id="notFoundScreen">
+    <h1>Lobby non trouvé</h1>
+    <p>Aucun lobby avec ce code n'a été trouvé.</p>
+    <button id="backToLobbyBtn" class="lobbyButton">Retour</button>
+  </div>
 
-  <!-- Message quand le host quitte -->
   <div class="container hidden" id="hostLeftScreen">
     <h1>🏠 L'hôte a quitté le lobby</h1>
     <p>Le lobby n'existe plus. Vous allez être redirigé.</p>
@@ -243,16 +350,6 @@
       document.getElementById("menu-btn").addEventListener("click", function () {
         document.getElementById("menu").classList.toggle("open");
       });
-
-      function mouseEnter(id) {
-        const newId = document.getElementById(id);
-        newId.classList.add('fa-bounce');
-      }
-      
-      function mouseLeave(id) {
-        const newId = document.getElementById(id);
-        newId.classList.remove('fa-bounce');
-      }
   </script>
 
   <!-- Firebase -->
@@ -276,6 +373,49 @@
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       return Array.from({length}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
     }
+
+    // Netlify Identity Setup
+    netlifyIdentity.init();
+
+    const authBtn = document.getElementById("auth-btn");
+    const userStats = document.getElementById("userStats");
+
+    function updateAuthButton(user) {
+      if (user) {
+        authBtn.textContent = "Se déconnecter";
+        authBtn.onclick = () => netlifyIdentity.logout();
+        
+        // Show user stats
+        updateUserStats(user);
+      } else {
+        authBtn.textContent = "Se connecter";
+        authBtn.onclick = () => netlifyIdentity.open();
+        userStats.classList.remove('show');
+      }
+    }
+
+    function updateUserStats(user) {
+      const xp = user.user_metadata?.joffre_xp || 0;
+      const level = Math.floor(xp / 500) + 1;
+      const xpInCurrentLevel = xp % 500;
+      const xpForNextLevel = 500;
+      const wins = user.user_metadata?.joffre_wins || 0;
+      
+      document.getElementById('userLevel').textContent = level;
+      document.getElementById('userXP').textContent = xpInCurrentLevel;
+      document.getElementById('nextLevelXP').textContent = xpForNextLevel;
+      document.getElementById('userWins').textContent = wins;
+      document.getElementById('xpBarFill').style.width = (xpInCurrentLevel / xpForNextLevel * 100) + '%';
+      
+      userStats.classList.add('show');
+    }
+
+    netlifyIdentity.on("init", updateAuthButton);
+    netlifyIdentity.on("login", (user) => {
+      updateAuthButton(user);
+      netlifyIdentity.close();
+    });
+    netlifyIdentity.on("logout", () => updateAuthButton(null));
   </script>
 
   <script>
@@ -301,13 +441,12 @@
     let currentPlayerRef = null;
     let userUid = null;
     let isHost = false;
-    let lobbyJoined = false; // devient true uniquement après un join/create réussi
+    let lobbyJoined = false;
     let playerNumber;
     let isBot;
 
-    const lobbyKey = createKey(6); // clé aléatoire pour le lobby
+    const lobbyKey = createKey(6);
 
-    // Connexion manuelle + Firebase
     loginBtn.addEventListener('click', () => {
       const username = usernameInput.value.trim();
       if (!username) return alert("Entrez un pseudo !");
@@ -348,14 +487,11 @@
           return;
         }
 
-        // Build botPlayers object
         const botPlayers = {0: true, 1: true, 2: true, 3: true};
         Object.values(players).forEach(player => {
           const playerNum = player.playerNumber - 1;
           botPlayers[playerNum] = false;
         });
-        
-        console.log("Host sending botPlayers:", botPlayers);
         
         currentLobbyRef.update({ gameStarted: true });
         
@@ -367,21 +503,17 @@
     });
 
     function assignPlayerNumber(players) {
-      // Find the first available number (1-4)
       const usedNumbers = Object.values(players).map(p => p.playerNumber).filter(Boolean);
       for (let i = 1; i <= 4; i++) {
         if (!usedNumbers.includes(i)) return i;
       }
-      return null; // Should not happen if <4 players
+      return null;
     }
 
-    // Firebase Auth
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         userUid = user.uid;
-        console.log("✅ Connecté :", userUid);
 
-        // Création du lobby (HOST)
         createLobbyBtn.addEventListener('click', () => {
           const lobbyName = document.getElementById('lobbyName').value.trim();
           if (!lobbyName) return alert("Entrez un nom de lobby !");
@@ -397,8 +529,6 @@
           });
 
           playerNumber = 1;
-
-          // Supprime le lobby si le host se déconnecte
           lobbyRef.onDisconnect().remove();
 
           currentLobbyRef = lobbyRef;
@@ -421,13 +551,12 @@
 
           const lobbyRef = firebase.database().ref(`lobbies/${code}`);
 
-          // Vérifie si le lobby existe avant de rejoindre
           lobbyRef.once('value').then(snapshot => {
             const lobby = snapshot.val();
 
             if (!snapshot.exists()) {
               showLobbyNotFound();
-              lobbyJoined = false; // on n'a pas rejoint
+              lobbyJoined = false;
               return;
             }
 
@@ -436,7 +565,6 @@
               return;
             }
 
-            // Le lobby existe → on rejoint
             isHost = false;
             const playerName = currentUser || "Inconnu";
             const players = snapshot.val().players || {};
@@ -449,7 +577,7 @@
 
             currentLobbyRef = lobbyRef;
             currentPlayerRef = playerRef;
-            lobbyJoined = true; // <-- important
+            lobbyJoined = true;
 
             currentLobbyDisplay.textContent = `${snapshot.val().name || code} (${code})`;
             lobbyScreen.classList.add('hidden');
@@ -457,7 +585,7 @@
             hostSettings.classList.add('hidden');
 
             listenForPlayers(code);
-            listenForLobbyDeletion(code); // on écoute la suppression **seulement** après avoir rejoint
+            listenForLobbyDeletion(code);
             listenForGameStart(code);
           }).catch(err => {
             console.error(err);
@@ -465,7 +593,6 @@
           });
         });
 
-        // Quitter le lobby
         leaveLobbyBtn.addEventListener('click', () => {
           if (currentPlayerRef) currentPlayerRef.remove();
           if (isHost && currentLobbyRef) currentLobbyRef.remove();
@@ -480,7 +607,6 @@
 
     firebase.auth().signInAnonymously();
 
-    // 🔁 Affichage en temps réel des joueurs
     function listenForPlayers(lobbyKey) {
       const playersRef = firebase.database().ref(`lobbies/${lobbyKey}/players`);
       const hostRef = firebase.database().ref(`lobbies/${lobbyKey}/host`);
@@ -499,13 +625,11 @@
       gameStartedRef.on('value', snapshot => {
         if (snapshot.val() === true) {
           const lobbyName = document.getElementById('lobbyName').value.trim();
-          // Non-host players don't send botPlayers
           window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false`;
         }
       });
     }
 
-    // 🧩 Met à jour les cases des joueurs
     function updatePlayerSlots(players, hostId) {
       const allPlayers = Object.values(players);
       playersList.innerHTML = "";
@@ -532,11 +656,9 @@
         }
         playersList.appendChild(slot);
 
-        // Only host can change team color
         slot.addEventListener('click', () => {
-          if (!isHost) return; // Only host can change
+          if (!isHost) return;
 
-          // Host changes the team of the clicked player
           const playerKey = Object.keys(players)[i];
           const playerRef = firebase.database().ref(`lobbies/${lobbyKey}/players/${playerKey}`);
 
@@ -549,7 +671,6 @@
       }
     }
 
-    // 🔄 Interface "Lobby non trouvé"
     const notFoundScreen = document.getElementById('notFoundScreen');
     const backToLobbyBtn = document.getElementById('backToLobbyBtn');
 
@@ -565,7 +686,6 @@
       lobbyScreen.classList.remove('hidden');
     });
 
-    // 🔄 Interface quand le host quitte
     const hostLeftScreen = document.getElementById('hostLeftScreen');
     const backFromHostLeftBtn = document.getElementById('backFromHostLeftBtn');
 
@@ -577,29 +697,19 @@
     function listenForLobbyDeletion(lobbyKey) {
       const lobbyRef = firebase.database().ref(`lobbies/${lobbyKey}`);
 
-      // on react seulement si on avait bien rejoint le lobby
       lobbyRef.on('value', (snapshot) => {
         if (!snapshot.exists()) {
-          // si on avait réellement rejoint le lobby, afficher le message
           if (lobbyJoined) {
-            lobbyJoined = false; // évite de ré-afficher
+            lobbyJoined = false;
             if (!isHost) {
               waitingScreen.classList.add('hidden');
               hostLeftScreen.classList.remove('hidden');
-              // Optionnel : revenir automatiquement après 3s
-              /*setTimeout(() => {
-                hostLeftScreen.classList.add('hidden');
-                lobbyScreen.classList.remove('hidden');
-              }, 3000);*/
             } else {
-              // Si on est host, le lobby a été supprimé par nous-mêmes (ou déjà nettoyé)
               waitingScreen.classList.add('hidden');
               lobbyScreen.classList.remove('hidden');
             }
-          } else {
-            // On avait jamais rejoint : ignorer (cela évite "host a quitté" sur code invalide)
           }
-          lobbyRef.off(); // arrête l'écoute
+          lobbyRef.off();
         }
       });
     }
