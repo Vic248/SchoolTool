@@ -370,7 +370,7 @@
     firebase.initializeApp(firebaseConfig);
 
     function createKey(length) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const chars = 'abcdefghijklmnopqrstuvwxyz123456789';
       return Array.from({length}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
     }
 

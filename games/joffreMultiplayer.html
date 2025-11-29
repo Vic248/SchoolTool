@@ -282,7 +282,7 @@
         "left center right"
         "bottom bottom bottom";
       grid-template-columns: 1fr 2fr 1fr;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto 50vh auto;
       gap: 10px;
       background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.05));
       border-radius: 24px;
@@ -294,7 +294,7 @@
       margin: 70px auto 20px auto;
       max-width: 1400px;
       width: 95vw;
-      min-height: calc(100vh - 110px);
+      height: calc(100vh - 90px);
       position: relative;
       transform-style: preserve-3d;
     }
@@ -571,7 +571,7 @@
         "left center right"
         "bottom bottom bottom";
       grid-template-columns: 1fr 2fr 1fr;
-      grid-template-rows: 120px 220px 160px;
+      grid-template-rows: auto 50vh auto;
       gap: 10px;
       background: rgba(255,255,255,0.07);
       border-radius: 24px;
@@ -579,7 +579,7 @@
       padding: 18px;
       margin: 70px auto 0 auto;
       max-width: 1200px;
-      height: 100%;
+      height: calc(100vh - 90px);
       position: relative;
     }
 
@@ -595,7 +595,6 @@
       min-height: 80px;
       width: 100%;
       box-sizing: border-box;
-      height: fit-content;
     }
 
     #player-bottom, #player-top {
@@ -997,10 +996,7 @@
 
         console.log("Loading players from:", `lobbies/${lobbyId}/players`);
 
-        // If host, set up disconnect handler to delete lobby
-        if (isHost) {
-          lobbyRef.onDisconnect().remove();
-        }
+        lobbyRef.onDisconnect().remove();
 
         // Wait a bit before starting lobby deletion listener
         setTimeout(() => {
@@ -1050,7 +1046,7 @@
         if (lobbyJoined && !snapshot.exists()) {
           console.log("Lobby deleted, redirecting to lobby screen");
           lobbyRef.off(); // Stop listening
-          alert("L'hôte a quitté la partie. Vous allez être redirigé.");
+          alert("Un joueur a quitté la partie. Vous allez être redirigé.");
           window.location.href = 'joffreLobby.html';
         } else if (snapshot.exists()) {
           // Lobby exists, everything is fine
