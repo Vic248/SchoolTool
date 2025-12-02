@@ -994,7 +994,14 @@
         playersRef = firebase.database().ref(`lobbies/${lobbyId}/players`);
         lobbyRef = firebase.database().ref(`lobbies/${lobbyId}`);
 
+        // Register my name as soon as I load into the game
+        gameStateRef.child(`playerNames/${myPlayerNumber}`).set(username);
+        console.log("Set my username into playerNames:", myPlayerNumber, username);
+
         console.log("Loading players from:", `lobbies/${lobbyId}/players`);
+
+        // Immediately report my username to gameState (for everyone)
+        gameStateRef.child(`playerNames/${myPlayerNumber}`).set(username);
 
         lobbyRef.onDisconnect().remove();
 
@@ -1106,14 +1113,10 @@
       // Read player names from lobby
       playersRef.once('value').then(snapshot => {
         const players = snapshot.val() || {};
-        const playerNamesForGame = {};
+        const playerNamesForGame = {0: null, 1: null, 2: null, 3: null};
         
         // Map player names to their positions (0-3)
-        Object.values(players).forEach(player => {
-          const playerNum = player.playerNumber - 1;
-          playerNamesForGame[playerNum] = player.name;
-          console.log(`Storing player name: position ${playerNum} = ${player.name}`);
-        });
+        playerNamesForGame[myPlayerNumber] = username; // Ensure my name is set
         
         console.log("Player names for game:", playerNamesForGame);
         
@@ -1154,6 +1157,8 @@
               });
             });
           }, 1000);
+
+          gameStateRef.child(`playerNames/${myPlayerNumber}`).set(username);
         });
       });
     }

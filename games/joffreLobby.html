@@ -573,6 +573,7 @@
             const playerRef = firebase.database().ref(`lobbies/${code}/players/${userUid}`);
 
             playerRef.set({ name: playerName, hand: [], isRedTeam: false, isBlueTeam: true, playerNumber});
+            lobbyRef.child(`playerNames/${playerNumber - 1}`).set(playerName);
             playerRef.onDisconnect().remove();
 
             currentLobbyRef = lobbyRef;
