@@ -116,7 +116,7 @@
     }
 
     button:hover { background: #ffd85a; }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
     .link { color: #aaa; margin-top: 15px; font-size: 0.9em; cursor: pointer; }
     .link:hover { color: #f7c74f; }
 
@@ -256,6 +256,36 @@
       color: #f39c12;
       margin-top: 10px;
     }
+    #lobbyChatContainer {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 260px;
+      height: 280px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      color: white;
+      z-index: 2000;
+    }
+
+    #lobbyChatMessages {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      padding-right: 5px;
+    }
+
+    #lobbyChatInput {
+      background: #333;
+      border: none;
+      border-radius: 6px;
+      padding: 8px;
+      color: white;
+      outline: none;
+    }
   </style>
 </head>
 <body>
@@ -272,6 +302,13 @@
     <a href="/suggestionForm.html" onmouseenter="mouseEnter('sugg')" onmouseleave="mouseLeave('sugg')"><i class="fas fa-comment-dots" id="sugg"></i> Suggestion</a>
     <a href="https://www.mozaikportail.ca" onmouseenter="mouseEnter('mozaik')" onmouseleave="mouseLeave('mozaik')"><i class="fas fa-link" id="mozaik"></i> Mozaik</a>
   </div>
+
+  <!-- 🔵 Lobby Chat -->
+  <div id="lobbyChatContainer" class="hidden">
+    <div id="lobbyChatMessages"></div>
+    <input id="lobbyChatInput" type="text" placeholder="Écrire un message..." />
+  </div>
+
 
   <div class="auth-container">
     <div id="userStats">
@@ -424,6 +461,8 @@
     const waitingScreen = document.getElementById('waitingScreen');
 
     const usernameInput = document.getElementById('username');
+    const lobbyNameInput = document.getElementById('lobbyName');
+    const joinCodeInput = document.getElementById('joinCode');
     const playerNameDisplay = document.getElementById('playerName');
     const currentLobbyDisplay = document.getElementById('currentLobby');
     const playersList = document.getElementById('playersList');
@@ -514,6 +553,18 @@
       if (user) {
         userUid = user.uid;
 
+        usernameInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') loginBtn.click();
+        });
+
+        lobbyNameInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') createLobbyBtn.click();
+        });
+
+        joinCodeInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') joinLobbyBtn.click();
+        });
+
         createLobbyBtn.addEventListener('click', () => {
           const lobbyName = document.getElementById('lobbyName').value.trim();
           if (!lobbyName) return alert("Entrez un nom de lobby !");
@@ -538,6 +589,9 @@
           lobbyScreen.classList.add('hidden');
           waitingScreen.classList.remove('hidden');
           hostSettings.classList.remove('hidden');
+
+          document.getElementById("lobbyChatContainer").classList.remove("hidden");
+          initializeLobbyChat(lobbyKey);
 
           lobbyJoined = true;
           listenForPlayers(lobbyKey);
@@ -584,6 +638,9 @@
             lobbyScreen.classList.add('hidden');
             waitingScreen.classList.remove('hidden');
             hostSettings.classList.add('hidden');
+
+            document.getElementById("lobbyChatContainer").classList.remove("hidden");
+            initializeLobbyChat(lobbyKey);
 
             listenForPlayers(code);
             listenForLobbyDeletion(code);
@@ -712,6 +769,37 @@
           }
           lobbyRef.off();
         }
+      });
+    }
+    function initializeLobbyChat(lobbyId) {
+      const chatRef = firebase.database().ref(`lobbies/${lobbyId}/lobbyChat`);
+      const chatInput = document.getElementById("lobbyChatInput");
+      const chatMessages = document.getElementById("lobbyChatMessages");
+
+      // Send a message
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && chatInput.value.trim() !== "") {
+          chatRef.push({
+            name: currentUser,
+            text: chatInput.value.trim(),
+            time: Date.now()
+          });
+          chatInput.value = "";
+        }
+      });
+
+      // Receive messages
+      chatRef.on("child_added", (snapshot) => {
+        const msg = snapshot.val();
+        const div = document.createElement("div");
+        const t = new Date(msg.time);
+        const timeStr = t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+        console.log("New chat message:", msg);
+
+        div.innerHTML = `<strong>${msg.name}</strong> <span style="color:#aaa;">(${timeStr})</span><br>${msg.text}`;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       });
     }
   </script>

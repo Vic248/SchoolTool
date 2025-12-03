@@ -813,6 +813,36 @@
     #label-top { top: 5px; left: 50%; transform: translateX(-50%); }
     #label-left { left: 5px; top: 50%; transform: translateY(-50%); }
     #label-right { right: 5px; top: 50%; transform: translateY(-50%); }
+    #chatContainer {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 260px;
+      height: 300px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      z-index: 9999;
+    }
+
+    #chatMessages {
+      flex: 1;
+      overflow-y: auto;
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    #chatInput {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: #333;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -820,6 +850,12 @@
 
     <div id="scoreDisplay">
       <h1 id="scoreTitle">Team 1: 0 | Team 2: 0</h1>
+    </div>
+
+    <!-- 🔴 Game Chat -->
+    <div id="chatContainer">
+      <div id="chatMessages"></div>
+      <input id="chatInput" type="text" placeholder="Message..." />
     </div>
 
     <div id="trump-indicator">🃏 Atout: <span id="trump-text">-</span></div>
@@ -993,6 +1029,35 @@
         gameStateRef = firebase.database().ref(`lobbies/${lobbyId}/gameState`);
         playersRef = firebase.database().ref(`lobbies/${lobbyId}/players`);
         lobbyRef = firebase.database().ref(`lobbies/${lobbyId}`);
+
+        const chatRef = lobbyRef.child("gameChat");
+        const chatInput = document.getElementById("chatInput");
+        const chatMessages = document.getElementById("chatMessages");
+
+        // SEND MESSAGE
+        chatInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && chatInput.value.trim() !== "") {
+            chatRef.push({
+              name: username,
+              text: chatInput.value.trim(),
+              time: Date.now()
+            });
+            chatInput.value = "";
+          }
+        });
+
+        // RECEIVE MESSAGE
+        chatRef.on("child_added", (snapshot) => {
+          const msg = snapshot.val();
+          const div = document.createElement("div");
+
+          const t = new Date(msg.time);
+          const timeStr = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          div.innerHTML = `<strong>${msg.name}</strong> <span style="color:#aaa;">(${timeStr})</span><br>${msg.text}`;
+          chatMessages.appendChild(div);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
 
         // Register my name as soon as I load into the game
         gameStateRef.child(`playerNames/${myPlayerNumber}`).set(username);
