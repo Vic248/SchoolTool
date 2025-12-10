@@ -521,10 +521,10 @@
           return;
         }
 
-        if (Object.keys(players).length !== 4) {
+        /*if (Object.keys(players).length !== 4) {
           alert("Pour le moment, la partie ne peut commencer qu'avec 4 joueurs.");
           return;
-        }
+        }*/
 
         const botPlayers = {0: true, 1: true, 2: true, 3: true};
         Object.values(players).forEach(player => {
@@ -640,7 +640,7 @@
             hostSettings.classList.add('hidden');
 
             document.getElementById("lobbyChatContainer").classList.remove("hidden");
-            initializeLobbyChat(lobbyKey);
+            initializeLobbyChat(code);
 
             listenForPlayers(code);
             listenForLobbyDeletion(code);
