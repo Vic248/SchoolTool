@@ -1438,481 +1438,483 @@
 
     // Replace the botBid() and chooseAdvancedCard() functions with these improved versions
 
-    function botBid() {
-      if (!isHost) return;
+    // Replace the botBid() and chooseAdvancedCard() functions with these improved versions
 
-      gameStateRef.once('value').then(snapshot => {
-        const state = snapshot.val();
-        const currentBidder = state.currentBidder;
-        
-        if (!state.botPlayers || state.botPlayers[currentBidder] !== true) {
-          console.log(`Position ${currentBidder} is not a bot, skipping`);
-          return;
-        }
+function botBid() {
+  if (!isHost) return;
 
-        console.log(`Bot at position ${currentBidder} is bidding`);
-
-        const hand = state.hands[currentBidder] || [];
-        const bidsPlaced = state.bidsPlaced || [];
-        const passedPlayers = state.passedPlayers || [];
-        
-        // Advanced bot bidding logic
-        const handStrength = evaluateHandStrength(hand);
-        const shouldBid = decideToBid(handStrength, state.highestBid, state.dealerIndex === currentBidder && passedPlayers.length === 3);
-        
-        if (shouldBid && state.highestBid < 12) {
-          const bidValue = calculateBidValue(handStrength, state.highestBid);
-          
-          bidsPlaced.push(currentBidder);
-          const nextBidder = (currentBidder + 1) % 4;
-          
-          gameStateRef.update({
-            highestBid: bidValue,
-            highestBidder: currentBidder,
-            currentBidder: nextBidder,
-            bidsPlaced: bidsPlaced,
-            lastBidderPosition: currentBidder
-          });
-          
-          log(`${playerNames[currentBidder] || 'Bot'} prend à ${bidValue}!`);
-        } else {
-          passedPlayers.push(currentBidder);
-          bidsPlaced.push(currentBidder);
-          const nextBidder = (currentBidder + 1) % 4;
-          
-          gameStateRef.update({
-            passedPlayers: passedPlayers,
-            currentBidder: nextBidder,
-            bidsPlaced: bidsPlaced
-          });
-          
-          log(`${playerNames[currentBidder] || 'Bot'} passe.`);
-        }
-        
-        checkBiddingEnd();
-      });
+  gameStateRef.once('value').then(snapshot => {
+    const state = snapshot.val();
+    const currentBidder = state.currentBidder;
+    
+    if (!state.botPlayers || state.botPlayers[currentBidder] !== true) {
+      console.log(`Position ${currentBidder} is not a bot, skipping`);
+      return;
     }
 
-    function evaluateHandStrength(hand) {
-      if (!hand || hand.length === 0) return 0;
+    console.log(`Bot at position ${currentBidder} is bidding`);
+
+    const hand = state.hands[currentBidder] || [];
+    const bidsPlaced = state.bidsPlaced || [];
+    const passedPlayers = state.passedPlayers || [];
+    
+    // Advanced bot bidding logic
+    const handStrength = evaluateHandStrength(hand);
+    const shouldBid = decideToBid(handStrength, state.highestBid, state.dealerIndex === currentBidder && passedPlayers.length === 3);
+    
+    if (shouldBid && state.highestBid < 12) {
+      const bidValue = calculateBidValue(handStrength, state.highestBid);
       
-      let strength = 0;
+      bidsPlaced.push(currentBidder);
+      const nextBidder = (currentBidder + 1) % 4;
       
-      // Count cards by color
-      const colorCounts = {Rouge: 0, Bleu: 0, Vert: 0, Brun: 0};
-      const colorValues = {Rouge: [], Bleu: [], Vert: [], Brun: []};
-      
-      hand.forEach(card => {
-        const color = getColor(card);
-        const value = getValue(card);
-        colorCounts[color]++;
-        colorValues[color].push(value);
+      gameStateRef.update({
+        highestBid: bidValue,
+        highestBidder: currentBidder,
+        currentBidder: nextBidder,
+        bidsPlaced: bidsPlaced,
+        lastBidderPosition: currentBidder
       });
       
-      // Evaluate each color
-      Object.keys(colorCounts).forEach(color => {
-        const count = colorCounts[color];
-        const values = colorValues[color];
-        
-        // Special handling for Brown - generally bad to take in brown
-        if (color === 'Brun') {
-          const highBrownCards = values.filter(v => v >= 5).length;
-          
-          // Brown is only good if you have 5+ high cards AND the 0_Brun
-          if (count >= 5 && highBrownCards >= 5 && values.includes(0)) {
-            strength += 4; // Decent brown hand
-          } else if (count >= 3) {
-            strength -= 2; // Having many brown cards is generally bad
-            
-            // Extra penalty for high brown cards without 0_Brun
-            const highCardsWithout0 = values.filter(v => v >= 5 && v !== 0).length;
-            strength -= highCardsWithout0 * 1.5; // Raw high brown cards are dangerous
-          }
-          return; // Skip normal evaluation for brown
-        }
-        
-        // Special handling for Red with 0_Rouge
-        if (color === 'Rouge' && values.includes(0)) {
-          if (count >= 4) {
-            // Having 0_Rouge with 4+ red cards is REALLY good
-            strength += 6;
-            if (count >= 5) strength += 2; // Even better with more cards
-            if (count >= 6) strength += 2; // Exceptional
-          } else if (count >= 3) {
-            strength += 3; // Still good with 3 cards
-          }
-        }
-        
-        // Normal color evaluation
-        if (count >= 3) {
-          // Strong color (can control)
-          strength += 3;
-          
-          // Bonus for high cards
-          const highCards = values.filter(v => v >= 5).length;
-          strength += highCards * 1.5;
-          
-          // Special bonus for having 7 in a strong color
-          if (values.includes(7)) strength += 2;
-        } else if (count === 2) {
-          // Medium color
-          strength += 1;
-          const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
-          if (avgValue >= 5) strength += 1;
-        } else if (count === 1) {
-          // Singleton - good for cutting
-          const value = values[0];
-          if (value >= 6) strength += 1; // High singleton
-          else strength += 0.5; // Can discard bad cards
-        }
+      log(`${playerNames[currentBidder] || 'Bot'} prend à ${bidValue}!`);
+    } else {
+      passedPlayers.push(currentBidder);
+      bidsPlaced.push(currentBidder);
+      const nextBidder = (currentBidder + 1) % 4;
+      
+      gameStateRef.update({
+        passedPlayers: passedPlayers,
+        currentBidder: nextBidder,
+        bidsPlaced: bidsPlaced
       });
       
-      // Special cards evaluation
-      if (hand.includes('0_Brun')) strength += 3; // Good - want to lose it
-      if (hand.includes('0_Rouge') && colorCounts['Rouge'] < 3) {
-        // 0_Rouge without enough red cards is bad
-        strength -= 3;
-      }
-      if (hand.includes('7_Brun')) strength += 2; // Can win 0_Brun with it
-      
-      // Bonus for having many high cards overall (except brown)
-      const highCardsNotBrown = hand.filter(c => getValue(c) >= 6 && getColor(c) !== 'Brun').length;
-      strength += highCardsNotBrown * 0.5;
-      
-      return strength;
+      log(`${playerNames[currentBidder] || 'Bot'} passe.`);
     }
+    
+    checkBiddingEnd();
+  });
+}
 
-    function decideToBid(handStrength, currentBid, mustTake) {
-      if (mustTake) return true; // Dealer must take if everyone passed
+function evaluateHandStrength(hand) {
+  if (!hand || hand.length === 0) return 0;
+  
+  let strength = 0;
+  
+  // Count cards by color
+  const colorCounts = {Rouge: 0, Bleu: 0, Vert: 0, Brun: 0};
+  const colorValues = {Rouge: [], Bleu: [], Vert: [], Brun: []};
+  
+  hand.forEach(card => {
+    const color = getColor(card);
+    const value = getValue(card);
+    colorCounts[color]++;
+    colorValues[color].push(value);
+  });
+  
+  // Evaluate each color
+  Object.keys(colorCounts).forEach(color => {
+    const count = colorCounts[color];
+    const values = colorValues[color];
+    
+    // Special handling for Brown - generally bad to take in brown
+    if (color === 'Brun') {
+      const highBrownCards = values.filter(v => v >= 5).length;
       
-      // Check if we have 4+ cards in any color
-      const hand = getCurrentBotHand(); // We need to pass the hand here
-      if (!hand) return false;
-      
-      const colorCounts = {Rouge: 0, Bleu: 0, Vert: 0, Brun: 0};
-      hand.forEach(card => {
-        colorCounts[getColor(card)]++;
-      });
-      
-      // Must have at least 4 cards in one color to bid
-      const maxColorCount = Math.max(...Object.values(colorCounts));
-      if (maxColorCount < 4) {
-        return false; // Don't bid without 4+ cards in a color
+      // Brown is only good if you have 5+ high cards AND the 0_Brun
+      if (count >= 5 && highBrownCards >= 5 && values.includes(0)) {
+        strength += 4; // Decent brown hand
+      } else if (count >= 3) {
+        strength -= 2; // Having many brown cards is generally bad
+        
+        // Extra penalty for high brown cards without 0_Brun
+        const highCardsWithout0 = values.filter(v => v >= 5 && v !== 0).length;
+        strength -= highCardsWithout0 * 1.5; // Raw high brown cards are dangerous
       }
-      
-      // Only bid if no one has bid yet (currentBid === 0)
-      // Or if we have an exceptionally strong hand
-      if (currentBid > 0) {
-        // Someone already bid - only overbid with exceptional hand
-        return handStrength >= 18 + (Math.random() * 2);
-      }
-      
-      // No one has bid yet - decide if we should take at 7
-      const threshold = 10; // Need decent hand to bid
-      const randomFactor = (Math.random() - 0.5) * 2;
-      
-      return (handStrength + randomFactor) >= threshold;
+      return; // Skip normal evaluation for brown
     }
-
-    function calculateBidValue(handStrength, currentBid) {
-      const minBid = currentBid > 0 ? currentBid + 1 : 7;
-      
-      // Bots should almost always bid 7 or 8
-      let suggestedBid = 7;
-      
-      if (currentBid === 0) {
-        // First bid - take at 7 with good hand, 8 with really good hand
-        if (handStrength >= 16) {
-          suggestedBid = 8;
-        } else {
-          suggestedBid = 7;
-        }
-      } else {
-        // Someone already bid - if we're bidding, we have exceptional hand
-        // Still keep it reasonable (7 or 8)
-        suggestedBid = Math.min(minBid, 8);
+    
+    // Special handling for Red with 0_Rouge
+    if (color === 'Rouge' && values.includes(0)) {
+      if (count >= 4) {
+        // Having 0_Rouge with 4+ red cards is REALLY good
+        strength += 6;
+        if (count >= 5) strength += 2; // Even better with more cards
+        if (count >= 6) strength += 2; // Exceptional
+      } else if (count >= 3) {
+        strength += 3; // Still good with 3 cards
       }
-      
-      return suggestedBid;
     }
+    
+    // Normal color evaluation
+    if (count >= 3) {
+      // Strong color (can control)
+      strength += 3;
+      
+      // Bonus for high cards
+      const highCards = values.filter(v => v >= 5).length;
+      strength += highCards * 1.5;
+      
+      // Special bonus for having 7 in a strong color
+      if (values.includes(7)) strength += 2;
+    } else if (count === 2) {
+      // Medium color
+      strength += 1;
+      const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
+      if (avgValue >= 5) strength += 1;
+    } else if (count === 1) {
+      // Singleton - good for cutting
+      const value = values[0];
+      if (value >= 6) strength += 1; // High singleton
+      else strength += 0.5; // Can discard bad cards
+    }
+  });
+  
+  // Special cards evaluation
+  if (hand.includes('0_Brun')) strength += 3; // Good - want to lose it
+  if (hand.includes('0_Rouge') && colorCounts['Rouge'] < 3) {
+    // 0_Rouge without enough red cards is bad
+    strength -= 3;
+  }
+  if (hand.includes('7_Brun')) strength += 2; // Can win 0_Brun with it
+  
+  // Bonus for having many high cards overall (except brown)
+  const highCardsNotBrown = hand.filter(c => getValue(c) >= 6 && getColor(c) !== 'Brun').length;
+  strength += highCardsNotBrown * 0.5;
+  
+  return strength;
+}
 
-    function chooseAdvancedCard(botIndex, hand, cardsPlayed, state) {
-      const demandedColor = state.demandedColor || getColor(cardsPlayed[0].card);
-      const trumpColor = state.trumpColor;
-      const hasColor = hand.filter(card => getColor(card) === demandedColor);
-      
-      // Analyze the trick
-      const trickAnalysis = analyzeTrick(cardsPlayed, demandedColor, trumpColor, botIndex);
-      
-      // Strategy 1: Handle 0_Rouge (red special - bad to win)
-      if (trickAnalysis.hasRedSpecial) {
-        return avoidWinningTrick(hand, hasColor, demandedColor, trickAnalysis);
-      }
-      
-      // Strategy 2: Handle 0_Brun (brown special - good to win)
-      if (trickAnalysis.hasBrownSpecial) {
+function decideToBid(handStrength, currentBid, mustTake) {
+  if (mustTake) return true; // Dealer must take if everyone passed
+  
+  // Check if we have 4+ cards in any color
+  const hand = getCurrentBotHand(); // We need to pass the hand here
+  if (!hand) return false;
+  
+  const colorCounts = {Rouge: 0, Bleu: 0, Vert: 0, Brun: 0};
+  hand.forEach(card => {
+    colorCounts[getColor(card)]++;
+  });
+  
+  // Must have at least 4 cards in one color to bid
+  const maxColorCount = Math.max(...Object.values(colorCounts));
+  if (maxColorCount < 4) {
+    return false; // Don't bid without 4+ cards in a color
+  }
+  
+  // Only bid if no one has bid yet (currentBid === 0)
+  // Or if we have an exceptionally strong hand
+  if (currentBid > 0) {
+    // Someone already bid - only overbid with exceptional hand
+    return handStrength >= 18 + (Math.random() * 2);
+  }
+  
+  // No one has bid yet - decide if we should take at 7
+  const threshold = 10; // Need decent hand to bid
+  const randomFactor = (Math.random() - 0.5) * 2;
+  
+  return (handStrength + randomFactor) >= threshold;
+}
+
+function calculateBidValue(handStrength, currentBid) {
+  const minBid = currentBid > 0 ? currentBid + 1 : 7;
+  
+  // Bots should almost always bid 7 or 8
+  let suggestedBid = 7;
+  
+  if (currentBid === 0) {
+    // First bid - take at 7 with good hand, 8 with really good hand
+    if (handStrength >= 16) {
+      suggestedBid = 8;
+    } else {
+      suggestedBid = 7;
+    }
+  } else {
+    // Someone already bid - if we're bidding, we have exceptional hand
+    // Still keep it reasonable (7 or 8)
+    suggestedBid = Math.min(minBid, 8);
+  }
+  
+  return suggestedBid;
+}
+
+function chooseAdvancedCard(botIndex, hand, cardsPlayed, state) {
+  const demandedColor = state.demandedColor || getColor(cardsPlayed[0].card);
+  const trumpColor = state.trumpColor;
+  const hasColor = hand.filter(card => getColor(card) === demandedColor);
+  
+  // Analyze the trick
+  const trickAnalysis = analyzeTrick(cardsPlayed, demandedColor, trumpColor, botIndex);
+  
+  // Strategy 1: Handle 0_Rouge (red special - bad to win)
+  if (trickAnalysis.hasRedSpecial) {
+    return avoidWinningTrick(hand, hasColor, demandedColor, trickAnalysis);
+  }
+  
+  // Strategy 2: Handle 0_Brun (brown special - good to win)
+  if (trickAnalysis.hasBrownSpecial) {
+    return tryWinningTrick(hand, hasColor, demandedColor, trickAnalysis, trumpColor);
+  }
+  
+  // Strategy 3: Normal play - consider if winning or losing is better
+  const myTeam = (botIndex === 0 || botIndex === 2) ? 1 : 2;
+  const currentWinnerTeam = (trickAnalysis.currentWinner === 0 || trickAnalysis.currentWinner === 2) ? 1 : 2;
+  
+  if (cardsPlayed.length === 3) {
+    // Last to play - have full information
+    if (currentWinnerTeam === myTeam) {
+      // Teammate winning - play lowest card possible
+      return playLowestPossibleCard(hand, hasColor, demandedColor);
+    } else {
+      // Opponent winning - try to overtake if reasonable
+      if (trickAnalysis.trickValue >= 2 || cardsPlayed.length <= 2) {
         return tryWinningTrick(hand, hasColor, demandedColor, trickAnalysis, trumpColor);
+      } else {
+        return playLowestPossibleCard(hand, hasColor, demandedColor);
       }
+    }
+  } else {
+    // Not last to play - play more conservatively
+    if (hasColor.length > 0) {
+      // Follow suit
+      const sortedByValue = [...hasColor].sort((a, b) => getValue(a) - getValue(b));
       
-      // Strategy 3: Normal play - consider if winning or losing is better
-      const myTeam = (botIndex === 0 || botIndex === 2) ? 1 : 2;
-      const currentWinnerTeam = (trickAnalysis.currentWinner === 0 || trickAnalysis.currentWinner === 2) ? 1 : 2;
-      
-      if (cardsPlayed.length === 3) {
-        // Last to play - have full information
-        if (currentWinnerTeam === myTeam) {
-          // Teammate winning - play lowest card possible
-          return playLowestPossibleCard(hand, hasColor, demandedColor);
+      if (trickAnalysis.currentWinner === botIndex - 1 && currentWinnerTeam === myTeam) {
+        // Partner just played, play low
+        return sortedByValue[0];
+      } else if (getValue(trickAnalysis.highestCard) <= 4) {
+        // Low trick, play medium card
+        const midIndex = Math.floor(sortedByValue.length / 2);
+        return sortedByValue[midIndex];
+      } else {
+        // High trick, play high if we can win, otherwise low
+        const canWin = sortedByValue.some(c => getValue(c) > getValue(trickAnalysis.highestCard));
+        if (canWin) {
+          const winningCards = sortedByValue.filter(c => getValue(c) > getValue(trickAnalysis.highestCard));
+          return winningCards[0]; // Lowest winning card
         } else {
-          // Opponent winning - try to overtake if reasonable
-          if (trickAnalysis.trickValue >= 2 || cardsPlayed.length <= 2) {
-            return tryWinningTrick(hand, hasColor, demandedColor, trickAnalysis, trumpColor);
-          } else {
-            return playLowestPossibleCard(hand, hasColor, demandedColor);
-          }
-        }
-      } else {
-        // Not last to play - play more conservatively
-        if (hasColor.length > 0) {
-          // Follow suit
-          const sortedByValue = [...hasColor].sort((a, b) => getValue(a) - getValue(b));
-          
-          if (trickAnalysis.currentWinner === botIndex - 1 && currentWinnerTeam === myTeam) {
-            // Partner just played, play low
-            return sortedByValue[0];
-          } else if (getValue(trickAnalysis.highestCard) <= 4) {
-            // Low trick, play medium card
-            const midIndex = Math.floor(sortedByValue.length / 2);
-            return sortedByValue[midIndex];
-          } else {
-            // High trick, play high if we can win, otherwise low
-            const canWin = sortedByValue.some(c => getValue(c) > getValue(trickAnalysis.highestCard));
-            if (canWin) {
-              const winningCards = sortedByValue.filter(c => getValue(c) > getValue(trickAnalysis.highestCard));
-              return winningCards[0]; // Lowest winning card
-            } else {
-              return sortedByValue[0]; // Lowest card
-            }
-          }
-        } else {
-          // Can't follow suit - strategic discard
-          return strategicDiscard(hand, botIndex, state);
+          return sortedByValue[0]; // Lowest card
         }
       }
+    } else {
+      // Can't follow suit - strategic discard
+      return strategicDiscard(hand, botIndex, state);
     }
+  }
+}
 
-    function analyzeTrick(cardsPlayed, demandedColor, trumpColor, myPosition) {
-      let hasRedSpecial = false;
-      let hasBrownSpecial = false;
-      let trickValue = 1; // Base value for winning
-      let currentWinner = cardsPlayed[0].player;
-      let highestCard = cardsPlayed[0].card;
-      let highestValue = getValue(highestCard);
-      
-      cardsPlayed.forEach(pc => {
-        if (pc.card === '0_Rouge') {
-          hasRedSpecial = true;
-          trickValue += 5;
-        }
-        if (pc.card === '0_Brun') {
-          hasBrownSpecial = true;
-          trickValue -= 3;
-        }
-        
-        // Determine current winner
-        const cardColor = getColor(pc.card);
-        const cardValue = getValue(pc.card);
-        const highestColor = getColor(highestCard);
-        
-        const cardIsTrump = cardColor === trumpColor;
-        const highestIsTrump = highestColor === trumpColor;
-        
-        if (cardIsTrump && !highestIsTrump) {
-          currentWinner = pc.player;
-          highestCard = pc.card;
-          highestValue = cardValue;
-        } else if (cardColor === highestColor && cardValue > highestValue) {
-          currentWinner = pc.player;
-          highestCard = pc.card;
-          highestValue = cardValue;
-        }
-      });
-      
-      return {
-        hasRedSpecial,
-        hasBrownSpecial,
-        trickValue,
-        currentWinner,
-        highestCard,
-        highestValue
-      };
+function analyzeTrick(cardsPlayed, demandedColor, trumpColor, myPosition) {
+  let hasRedSpecial = false;
+  let hasBrownSpecial = false;
+  let trickValue = 1; // Base value for winning
+  let currentWinner = cardsPlayed[0].player;
+  let highestCard = cardsPlayed[0].card;
+  let highestValue = getValue(highestCard);
+  
+  cardsPlayed.forEach(pc => {
+    if (pc.card === '0_Rouge') {
+      hasRedSpecial = true;
+      trickValue += 5;
     }
+    if (pc.card === '0_Brun') {
+      hasBrownSpecial = true;
+      trickValue -= 3;
+    }
+    
+    // Determine current winner
+    const cardColor = getColor(pc.card);
+    const cardValue = getValue(pc.card);
+    const highestColor = getColor(highestCard);
+    
+    const cardIsTrump = cardColor === trumpColor;
+    const highestIsTrump = highestColor === trumpColor;
+    
+    if (cardIsTrump && !highestIsTrump) {
+      currentWinner = pc.player;
+      highestCard = pc.card;
+      highestValue = cardValue;
+    } else if (cardColor === highestColor && cardValue > highestValue) {
+      currentWinner = pc.player;
+      highestCard = pc.card;
+      highestValue = cardValue;
+    }
+  });
+  
+  return {
+    hasRedSpecial,
+    hasBrownSpecial,
+    trickValue,
+    currentWinner,
+    highestCard,
+    highestValue
+  };
+}
 
-    function avoidWinningTrick(hand, hasColor, demandedColor, trickAnalysis) {
-      if (hasColor.length > 0) {
-        // Play lowest card in color
-        const sorted = [...hasColor].sort((a, b) => getValue(a) - getValue(b));
-        const lowestSafe = sorted.find(c => getValue(c) < trickAnalysis.highestValue);
-        return lowestSafe || sorted[0];
-      } else {
-        // Discard something useless, avoid 0_Brun
-        const safeDiscards = hand.filter(c => c !== '0_Brun' && getValue(c) <= 3);
-        if (safeDiscards.length > 0) {
-          return safeDiscards[0];
-        }
-        const notBrown = hand.filter(c => c !== '0_Brun');
-        return notBrown[0] || hand[0];
-      }
+function avoidWinningTrick(hand, hasColor, demandedColor, trickAnalysis) {
+  if (hasColor.length > 0) {
+    // Play lowest card in color
+    const sorted = [...hasColor].sort((a, b) => getValue(a) - getValue(b));
+    const lowestSafe = sorted.find(c => getValue(c) < trickAnalysis.highestValue);
+    return lowestSafe || sorted[0];
+  } else {
+    // Discard something useless, avoid 0_Brun
+    const safeDiscards = hand.filter(c => c !== '0_Brun' && getValue(c) <= 3);
+    if (safeDiscards.length > 0) {
+      return safeDiscards[0];
     }
+    const notBrown = hand.filter(c => c !== '0_Brun');
+    return notBrown[0] || hand[0];
+  }
+}
 
-    function tryWinningTrick(hand, hasColor, demandedColor, trickAnalysis, trumpColor) {
-      if (hasColor.length > 0) {
-        // Try to win with demanded color
-        const sorted = [...hasColor].sort((a, b) => getValue(b) - getValue(a));
-        const canWin = sorted.find(c => getValue(c) > trickAnalysis.highestValue);
-        if (canWin) return canWin;
-        
-        // Can't win, play highest to make it harder for next player
-        return sorted[0];
-      } else {
-        // Try to cut with trump
-        const trumpCards = hand.filter(c => getColor(c) === trumpColor);
-        if (trumpCards.length > 0) {
-          trumpCards.sort((a, b) => getValue(b) - getValue(a));
-          return trumpCards[0]; // Highest trump
-        }
-        
-        // Can't win - discard high useless card
-        return strategicDiscard(hand, -1, {});
-      }
+function tryWinningTrick(hand, hasColor, demandedColor, trickAnalysis, trumpColor) {
+  if (hasColor.length > 0) {
+    // Try to win with demanded color
+    const sorted = [...hasColor].sort((a, b) => getValue(b) - getValue(a));
+    const canWin = sorted.find(c => getValue(c) > trickAnalysis.highestValue);
+    if (canWin) return canWin;
+    
+    // Can't win, play highest to make it harder for next player
+    return sorted[0];
+  } else {
+    // Try to cut with trump
+    const trumpCards = hand.filter(c => getColor(c) === trumpColor);
+    if (trumpCards.length > 0) {
+      trumpCards.sort((a, b) => getValue(b) - getValue(a));
+      return trumpCards[0]; // Highest trump
     }
+    
+    // Can't win - discard high useless card
+    return strategicDiscard(hand, -1, {});
+  }
+}
 
-    function playLowestPossibleCard(hand, hasColor, demandedColor) {
-      if (hasColor.length > 0) {
-        const sorted = [...hasColor].sort((a, b) => getValue(a) - getValue(b));
-        return sorted[0];
-      } else {
-        // Discard lowest card overall
-        const sorted = [...hand].sort((a, b) => getValue(a) - getValue(b));
-        // Avoid discarding 0_Brun if possible
-        const notBrown = sorted.filter(c => c !== '0_Brun');
-        return notBrown[0] || sorted[0];
-      }
-    }
+function playLowestPossibleCard(hand, hasColor, demandedColor) {
+  if (hasColor.length > 0) {
+    const sorted = [...hasColor].sort((a, b) => getValue(a) - getValue(b));
+    return sorted[0];
+  } else {
+    // Discard lowest card overall
+    const sorted = [...hand].sort((a, b) => getValue(a) - getValue(b));
+    // Avoid discarding 0_Brun if possible
+    const notBrown = sorted.filter(c => c !== '0_Brun');
+    return notBrown[0] || sorted[0];
+  }
+}
 
-    function strategicDiscard(hand, botIndex, state) {
-      const trumpColor = state.trumpColor;
-      const playedCards = state.playedCards || [];
+function strategicDiscard(hand, botIndex, state) {
+  const trumpColor = state.trumpColor;
+  const playedCards = state.playedCards || [];
+  
+  // Check if 0_Brun has been played this round
+  const allPlayedCardsThisGame = getAllPlayedCards(state);
+  const brunZeroPlayed = allPlayedCardsThisGame.includes('0_Brun');
+  
+  // Analyze current trick to see if teammate is winning
+  const myTeam = (botIndex === 0 || botIndex === 2) ? 1 : 2;
+  let teammateIsWinning = false;
+  
+  if (playedCards.length > 0) {
+    const trickAnalysis = analyzeTrick(playedCards, state.demandedColor, trumpColor, botIndex);
+    const currentWinnerTeam = (trickAnalysis.currentWinner === 0 || trickAnalysis.currentWinner === 2) ? 1 : 2;
+    
+    // Check if teammate is currently winning and likely to hold
+    if (currentWinnerTeam === myTeam) {
+      // Check if it's secure (high card or trump)
+      const winningCard = playedCards.find(pc => pc.player === trickAnalysis.currentWinner).card;
+      const winningValue = getValue(winningCard);
+      const winningColor = getColor(winningCard);
       
-      // Check if 0_Brun has been played this round
-      const allPlayedCardsThisGame = getAllPlayedCards(state);
-      const brunZeroPlayed = allPlayedCardsThisGame.includes('0_Brun');
-      
-      // Analyze current trick to see if teammate is winning
-      const myTeam = (botIndex === 0 || botIndex === 2) ? 1 : 2;
-      let teammateIsWinning = false;
-      
-      if (playedCards.length > 0) {
-        const trickAnalysis = analyzeTrick(playedCards, state.demandedColor, trumpColor, botIndex);
-        const currentWinnerTeam = (trickAnalysis.currentWinner === 0 || trickAnalysis.currentWinner === 2) ? 1 : 2;
-        
-        // Check if teammate is currently winning and likely to hold
-        if (currentWinnerTeam === myTeam) {
-          // Check if it's secure (high card or trump)
-          const winningCard = playedCards.find(pc => pc.player === trickAnalysis.currentWinner).card;
-          const winningValue = getValue(winningCard);
-          const winningColor = getColor(winningCard);
-          
-          // Winning is secure if it's a trump or a high card (6+)
-          teammateIsWinning = (winningColor === trumpColor || winningValue >= 6);
-        }
-      }
-      
-      // Separate cards by priority for discarding
-      const trumpCards = hand.filter(c => getColor(c) === trumpColor);
-      const brownCards = hand.filter(c => getColor(c) === 'Brun');
-      const otherCards = hand.filter(c => getColor(c) !== trumpColor && getColor(c) !== 'Brun');
-      
-      // Never discard trump or brown cards (except high brown if 0_Brun hasn't been played)
-      let discardPool = [...otherCards];
-      
-      // Add high brown cards to discard pool if 0_Brun hasn't been played yet
-      if (!brunZeroPlayed) {
-        const highBrownCards = brownCards.filter(c => getValue(c) >= 5 && c !== '0_Brun');
-        discardPool.push(...highBrownCards);
-      }
-      
-      if (discardPool.length > 0) {
-        // Sort by value (lowest first)
-        discardPool.sort((a, b) => getValue(a) - getValue(b));
-        
-        // If teammate is winning securely, we CAN dump 0_Rouge safely
-        if (teammateIsWinning && hand.includes('0_Rouge')) {
-          return '0_Rouge'; // Safe to dump it!
-        }
-        
-        // Otherwise, avoid discarding 0_Rouge if possible
-        const notRedZero = discardPool.filter(c => c !== '0_Rouge');
-        if (notRedZero.length > 0) {
-          return notRedZero[0]; // Lowest non-0_Rouge card
-        }
-        
-        return discardPool[0]; // Lowest card
-      }
-      
-      // If we only have trump and/or brown cards left
-      // Discard lowest brown card (except 0_Brun)
-      const brownNotZero = brownCards.filter(c => c !== '0_Brun');
-      if (brownNotZero.length > 0) {
-        brownNotZero.sort((a, b) => getValue(a) - getValue(b));
-        return brownNotZero[0];
-      }
-      
-      // Last resort: discard lowest trump
-      if (trumpCards.length > 0) {
-        trumpCards.sort((a, b) => getValue(a) - getValue(b));
-        return trumpCards[0];
-      }
-      
-      // Absolute last resort
-      return hand[0];
+      // Winning is secure if it's a trump or a high card (6+)
+      teammateIsWinning = (winningColor === trumpColor || winningValue >= 6);
     }
+  }
+  
+  // Separate cards by priority for discarding
+  const trumpCards = hand.filter(c => getColor(c) === trumpColor);
+  const brownCards = hand.filter(c => getColor(c) === 'Brun');
+  const otherCards = hand.filter(c => getColor(c) !== trumpColor && getColor(c) !== 'Brun');
+  
+  // Never discard trump or brown cards (except high brown if 0_Brun hasn't been played)
+  let discardPool = [...otherCards];
+  
+  // Add high brown cards to discard pool if 0_Brun hasn't been played yet
+  if (!brunZeroPlayed) {
+    const highBrownCards = brownCards.filter(c => getValue(c) >= 5 && c !== '0_Brun');
+    discardPool.push(...highBrownCards);
+  }
+  
+  if (discardPool.length > 0) {
+    // Sort by value (lowest first)
+    discardPool.sort((a, b) => getValue(a) - getValue(b));
+    
+    // If teammate is winning securely, we CAN dump 0_Rouge safely
+    if (teammateIsWinning && hand.includes('0_Rouge')) {
+      return '0_Rouge'; // Safe to dump it!
+    }
+    
+    // Otherwise, avoid discarding 0_Rouge if possible
+    const notRedZero = discardPool.filter(c => c !== '0_Rouge');
+    if (notRedZero.length > 0) {
+      return notRedZero[0]; // Lowest non-0_Rouge card
+    }
+    
+    return discardPool[0]; // Lowest card
+  }
+  
+  // If we only have trump and/or brown cards left
+  // Discard lowest brown card (except 0_Brun)
+  const brownNotZero = brownCards.filter(c => c !== '0_Brun');
+  if (brownNotZero.length > 0) {
+    brownNotZero.sort((a, b) => getValue(a) - getValue(b));
+    return brownNotZero[0];
+  }
+  
+  // Last resort: discard lowest trump
+  if (trumpCards.length > 0) {
+    trumpCards.sort((a, b) => getValue(a) - getValue(b));
+    return trumpCards[0];
+  }
+  
+  // Absolute last resort
+  return hand[0];
+}
 
-    // Helper function to get all cards played in the current round
-    function getAllPlayedCards(state) {
-      const allPlayed = [];
-      
-      // Check what cards are missing from hands
-      const allCards = [];
-      for (let suit of ['Bleu', 'Brun', 'Rouge', 'Vert']) {
-        for (let val of [0, 1, 2, 3, 4, 5, 6, 7]) {
-          allCards.push(`${val}_${suit}`);
-        }
-      }
-      
-      const handsCards = new Set();
-      if (state.hands) {
-        Object.values(state.hands).forEach(hand => {
-          if (hand) {
-            hand.forEach(card => handsCards.add(card));
-          }
-        });
-      }
-      
-      // Cards currently on table
-      if (state.playedCards) {
-        state.playedCards.forEach(pc => handsCards.add(pc.card));
-      }
-      
-      // Cards that have been played are those not in hands or on table
-      allCards.forEach(card => {
-        if (!handsCards.has(card)) {
-          allPlayed.push(card);
-        }
-      });
-      
-      return allPlayed;
+// Helper function to get all cards played in the current round
+function getAllPlayedCards(state) {
+  const allPlayed = [];
+  
+  // Check what cards are missing from hands
+  const allCards = [];
+  for (let suit of ['Bleu', 'Brun', 'Rouge', 'Vert']) {
+    for (let val of [0, 1, 2, 3, 4, 5, 6, 7]) {
+      allCards.push(`${val}_${suit}`);
     }
+  }
+  
+  const handsCards = new Set();
+  if (state.hands) {
+    Object.values(state.hands).forEach(hand => {
+      if (hand) {
+        hand.forEach(card => handsCards.add(card));
+      }
+    });
+  }
+  
+  // Cards currently on table
+  if (state.playedCards) {
+    state.playedCards.forEach(pc => handsCards.add(pc.card));
+  }
+  
+  // Cards that have been played are those not in hands or on table
+  allCards.forEach(card => {
+    if (!handsCards.has(card)) {
+      allPlayed.push(card);
+    }
+  });
+  
+  return allPlayed;
+}
 
     function endBidding(winner, bid) {
       if (!isHost) return;
