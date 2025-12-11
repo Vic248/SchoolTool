@@ -521,10 +521,10 @@
           return;
         }
 
-        /*if (Object.keys(players).length !== 4) {
-          alert("Pour le moment, la partie ne peut commencer qu'avec 4 joueurs.");
+        if (Object.keys(players).length === 2 || Object.keys(players).length === 3) {
+          alert("Pour le moment, la partie ne peut commencer qu'avec 4 ou 1 joueur(s).");
           return;
-        }*/
+        }
 
         const botPlayers = {0: true, 1: true, 2: true, 3: true};
         Object.values(players).forEach(player => {
@@ -536,8 +536,8 @@
         
         const lobbyName = document.getElementById('lobbyName').value.trim();
         const botPlayersJSON = JSON.stringify(botPlayers);
-        
-        window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false&botPlayers=${encodeURIComponent(botPlayersJSON)}`;
+        userId
+        window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false&botPlayers=${encodeURIComponent(botPlayersJSON)}`;
       });
     });
 
@@ -681,7 +681,7 @@
     function listenForGameStart(lobbyKey) {
       const gameStartedRef = firebase.database().ref(`lobbies/${lobbyKey}/gameStarted`);
       gameStartedRef.on('value', snapshot => {
-        if (snapshot.val() === true) {
+        if (snapshot.val() === true) {        
           const lobbyName = document.getElementById('lobbyName').value.trim();
           window.location.href = `joffreMultiplayer.html?username=${usernameInput.value.trim()}&lobbyName=${lobbyName}&userId=${userUid}&isHost=${isHost}&lobbyId=${lobbyKey}&playerNumber=${playerNumber}&isBot=false`;
         }

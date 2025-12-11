@@ -1456,9 +1456,19 @@ function botBid() {
     const bidsPlaced = state.bidsPlaced || [];
     const passedPlayers = state.passedPlayers || [];
     
+    // Check if bot must take (dealer and everyone passed)
+    const mustTake = state.dealerIndex === currentBidder && passedPlayers.length === 3;
+    
+    // Check if bot has 4+ cards in any color (required to bid)
+    const colorCounts = {Rouge: 0, Bleu: 0, Vert: 0, Brun: 0};
+    hand.forEach(card => {
+      colorCounts[getColor(card)]++;
+    });
+    const maxColorCount = Math.max(...Object.values(colorCounts));
+    
     // Advanced bot bidding logic
     const handStrength = evaluateHandStrength(hand);
-    const shouldBid = decideToBid(handStrength, state.highestBid, state.dealerIndex === currentBidder && passedPlayers.length === 3);
+    const shouldBid = decideToBid(handStrength, state.highestBid, mustTake, maxColorCount);
     
     if (shouldBid && state.highestBid < 12) {
       const bidValue = calculateBidValue(handStrength, state.highestBid);
@@ -1491,6 +1501,28 @@ function botBid() {
     
     checkBiddingEnd();
   });
+}
+
+function decideToBid(handStrength, currentBid, mustTake, maxColorCount) {
+  if (mustTake) return true; // Dealer must take if everyone passed
+  
+  // Must have at least 4 cards in one color to bid
+  if (maxColorCount < 4) {
+    return false; // Don't bid without 4+ cards in a color
+  }
+  
+  // Only bid if no one has bid yet (currentBid === 0)
+  // Or if we have an exceptionally strong hand
+  if (currentBid > 0) {
+    // Someone already bid - only overbid with exceptional hand
+    return handStrength >= 18 + (Math.random() * 2);
+  }
+  
+  // No one has bid yet - decide if we should take at 7
+  const threshold = 10; // Need decent hand to bid
+  const randomFactor = (Math.random() - 0.5) * 2;
+  
+  return (handStrength + randomFactor) >= threshold;
 }
 
 function evaluateHandStrength(hand) {
@@ -1580,38 +1612,6 @@ function evaluateHandStrength(hand) {
   strength += highCardsNotBrown * 0.5;
   
   return strength;
-}
-
-function decideToBid(handStrength, currentBid, mustTake) {
-  if (mustTake) return true; // Dealer must take if everyone passed
-  
-  // Check if we have 4+ cards in any color
-  const hand = getCurrentBotHand(); // We need to pass the hand here
-  if (!hand) return false;
-  
-  const colorCounts = {Rouge: 0, Bleu: 0, Vert: 0, Brun: 0};
-  hand.forEach(card => {
-    colorCounts[getColor(card)]++;
-  });
-  
-  // Must have at least 4 cards in one color to bid
-  const maxColorCount = Math.max(...Object.values(colorCounts));
-  if (maxColorCount < 4) {
-    return false; // Don't bid without 4+ cards in a color
-  }
-  
-  // Only bid if no one has bid yet (currentBid === 0)
-  // Or if we have an exceptionally strong hand
-  if (currentBid > 0) {
-    // Someone already bid - only overbid with exceptional hand
-    return handStrength >= 18 + (Math.random() * 2);
-  }
-  
-  // No one has bid yet - decide if we should take at 7
-  const threshold = 10; // Need decent hand to bid
-  const randomFactor = (Math.random() - 0.5) * 2;
-  
-  return (handStrength + randomFactor) >= threshold;
 }
 
 function calculateBidValue(handStrength, currentBid) {
