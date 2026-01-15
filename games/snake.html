@@ -4,173 +4,397 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="icon" href="../schooltoolicon.png" type="image/x-icon">
   <title>Snake Game</title>
   <style>
-        #menu-btn {
-          position: fixed;
-          top: 20px;
-          left: 20px;
-          background-color: #2c3e50;
-          color: white;
-          border: none;
-          padding: 12px 18px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: bold;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-          z-index: 1001;
-          transition: background-color 0.3s;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        #menu-btn:hover {
-          background-color: #1f2e3a;
-        }
-
-        #menu {
-          position: fixed;
-          top: 0;
-          left: -260px;
-          width: 260px;
-          height: 100%;
-          background-color: #2c3e50;
-          color: white;
-          padding-top: 70px;
-          transition: left 0.3s ease;
-          z-index: 1000;
-          box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
-        }
-
-        #menu.open {
-          left: 0;
-        }
-
-        #menu a {
-          display: flex;
-          align-items: center;
-          padding: 14px 24px;
-          color: white;
-          text-decoration: none;
-          font-size: 1rem;
-          font-weight: 500;
-          transition: background-color 0.2s;
-        }
-
-        #menu a i {
-          margin-right: 12px;
-          width: 20px;
-        }
-
-        #menu a:hover {
-          background-color: #34495e;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 28px;
-            }
-        }
     body {
       margin: 0;
-      background: #111;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       color: white;
-      font-family: sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    .game-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 15px 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #00ff88, #00ccff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                  0 0 40px rgba(0, 255, 136, 0.3);
     }
 
     canvas {
-      background: #222;
-      border: 2px solid #444;
+      display: block;
+      background: #1a1a2e;
+      border: 3px solid rgba(0, 255, 136, 0.5);
+      transition: border-color 0.3s ease;
     }
 
-    #score {
-      position: absolute;
+    canvas.game-over {
+      border-color: rgba(255, 50, 50, 0.5);
+      animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      color: #0f0f23;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 255, 136, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.secondary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn.secondary:hover {
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+    }
+
+    #menu-btn {
+      position: fixed;
       top: 20px;
-      font-size: 24px;
+      left: 20px;
+      background: rgba(44, 62, 80, 0.9);
+      backdrop-filter: blur(10px);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      padding: 12px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+      transition: all 0.3s ease;
     }
 
-    .deadScreen {
+    #menu-btn:hover {
+      background: rgba(31, 46, 58, 0.95);
+      transform: translateX(5px);
+    }
+
+    #menu {
       position: fixed;
       top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
+      left: -260px;
+      width: 260px;
+      height: 100%;
+      background: rgba(44, 62, 80, 0.95);
+      backdrop-filter: blur(20px);
+      color: white;
+      padding-top: 70px;
+      transition: left 0.3s ease;
       z-index: 1000;
-      background: linear-gradient(45deg, blue, lightblue)
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
     }
 
-    .deadScreen iframe {
+    #menu.open {
+      left: 0;
+    }
+
+    #menu a {
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+
+    #menu a i {
+      margin-right: 12px;
+      width: 20px;
+    }
+
+    #menu a:hover {
+      background: rgba(52, 73, 94, 0.8);
+      border-left-color: #00ff88;
+    }
+
+    .game-over-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(5px);
     }
 
-    .deadScreenTitle {
-      position: absolute;
-      top: 10%;
-      border: none;
-      padding: 10px;
-      border-radius: 50%;
-      font-size: 50px;
-      font-family: Impact;
+    .game-over-overlay.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .game-over-text {
+      font-size: 48px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #ff5050, #ff8888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 20px rgba(255, 80, 80, 0.5);
+    }
+
+    .difficulty-selector {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .difficulty-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .difficulty-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .difficulty-btn.active {
+      background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+      color: #0f0f23;
+      border-color: #00ff88;
+    }
+
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 10px;
+      }
+      
+      canvas {
+        width: 90vw !important;
+        height: 90vw !important;
+      }
+
+      .stat-value {
+        font-size: 24px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="score">Score: 0</div>
-  <canvas id="game" width="400" height="400"></canvas>
+  <button id="menu-btn" onmouseenter="mouseEnter('menu-btn')" onmouseleave="mouseLeave('menu-btn')"><i class="fas fa-bars" id="bars"></i> Menu</button>
+  <div id="menu"></div>
 
-    <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
+  <div class="game-container">
+    <div class="header">
+      <div class="stat-box">
+        <div class="stat-label">Score</div>
+        <div class="stat-value" id="score">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">High Score</div>
+        <div class="stat-value" id="highScore">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Level</div>
+        <div class="stat-value" id="level">1</div>
+      </div>
+    </div>
 
-    <a href="https://www.bonk.io" accesskey="w"></a>
+    <div class="canvas-wrapper">
+      <canvas id="game" width="400" height="400"></canvas>
+      <div class="game-over-overlay" id="gameOverOverlay">
+        <div class="game-over-text">Game Over!</div>
+        <div style="font-size: 24px; opacity: 0.8;">Final Score: <span id="finalScore">0</span></div>
+        <button class="btn" onclick="restartGame()">Play Again</button>
+      </div>
+    </div>
 
-    <script src="/auth.js"></script>
-    <script src="/menu.js"></script>
-    <script>
-        loadMenu();
-    </script>
+    <div class="controls">
+      <button class="btn" onclick="togglePause()"><i class="fas fa-pause"></i> Pause</button>
+      <button class="btn secondary" onclick="restartGame()"><i class="fas fa-redo"></i> Restart</button>
+    </div>
+
+    <div class="difficulty-selector">
+      <button class="difficulty-btn active" onclick="setDifficulty('easy')">Easy</button>
+      <button class="difficulty-btn" onclick="setDifficulty('medium')">Medium</button>
+      <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard</button>
+    </div>
+  </div>
+  <script src="/menu.js"></script>
+  <script src="/auth.js"></script>
+  <script>
+    loadMenu();
+  </script>
+      <script>
+        document.getElementById("menu-btn").addEventListener("click", function () {
+            document.getElementById("menu").classList.toggle("open");
+        })
+        function mouseEnter(id) {
+            const newId = document.getElementById(id);
+            newId.classList.add('fa-bounce');
+        }
+            
+        function mouseLeave(id) {
+            const newId = document.getElementById(id);
+            newId.classList.remove('fa-bounce');
+        }
+      </script>
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
-    const box = 20; // size of snake block
+    const box = 20;
     const rows = canvas.width / box;
 
     let snake = [{ x: 10, y: 10 }];
     let direction = 'RIGHT';
     let food = spawnFood();
     let score = 0;
-    let speed = 300;
+    let highScore = 0;
+    let level = 1;
+    let baseSpeed = 150;
+    let currentSpeed = baseSpeed;
+    let gameInterval;
+    let isPaused = false;
+    let isGameOver = false;
+    let difficulty = 'easy';
+
+    const difficulties = {
+      easy: 150,
+      medium: 100,
+      hard: 60
+    };
 
     document.addEventListener('keydown', event => {
+      if (isPaused || isGameOver) return;
+      
       if ((event.key === 'ArrowUp' || event.key === 'w') && direction !== 'DOWN') direction = 'UP';
       else if ((event.key === 'ArrowDown' || event.key === 's') && direction !== 'UP') direction = 'DOWN';
       else if ((event.key === 'ArrowLeft' || event.key === 'a') && direction !== 'RIGHT') direction = 'LEFT';
       else if ((event.key === 'ArrowRight' || event.key === 'd') && direction !== 'LEFT') direction = 'RIGHT';
+      else if (event.key === ' ') togglePause();
     });
 
-    function openDeadScreen(url, title) {
-        const fullscreenDiv = document.createElement("div");
-        fullscreenDiv.style.textAlign = "center";
-        fullscreenDiv.className = "deadScreen";
-        fullscreenDiv.innerHTML = `<iframe></iframe><p class="fullscreenTitle">${title}</p>`;
-        document.body.appendChild(fullscreenDiv);
-    }
-
     function spawnFood() {
-      return {
-        x: Math.floor(Math.random() * rows),
-        y: Math.floor(Math.random() * rows)
-      };
+      let newFood;
+      do {
+        newFood = {
+          x: Math.floor(Math.random() * rows),
+          y: Math.floor(Math.random() * rows)
+        };
+      } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+      return newFood;
     }
 
     function gameLoop() {
+      if (isPaused || isGameOver) return;
+
       const head = { ...snake[0] };
 
       if (direction === 'UP') head.y--;
@@ -178,68 +402,130 @@
       if (direction === 'LEFT') head.x--;
       if (direction === 'RIGHT') head.x++;
 
-      // Game over: wall or self collision
       if (
         head.x < 0 || head.x >= rows ||
         head.y < 0 || head.y >= rows ||
         snake.some(segment => segment.x === head.x && segment.y === head.y)
       ) {
-
-        
-
-        snake = [{ x: 10, y: 10 }];
-        direction = 'RIGHT';
-        food = spawnFood();
-        score = 0;
-        document.getElementById('score').textContent = "Score: 0";
-        canvas.classList.add('fa-bounce');
-        setTimeout(function() {
-          canvas.classList.remove('fa-bounce')
-        }, 900);
+        gameOver();
         return;
       }
 
       snake.unshift(head);
 
-      // Eat food
       if (head.x === food.x && head.y === food.y) {
         score++;
-        document.getElementById('score').textContent = "Score: " + score;
+        document.getElementById('score').textContent = score;
+        document.getElementById('finalScore').textContent = score;
+        
+        if (score > highScore) {
+          highScore = score;
+          document.getElementById('highScore').textContent = highScore;
+        }
+
+        level = Math.floor(score / 5) + 1;
+        document.getElementById('level').textContent = level;
+        
         food = spawnFood();
-        speed = speed/2;
       } else {
         snake.pop();
       }
 
-      // Draw everything
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw snake
-      ctx.fillStyle = '#0f0';
-      snake.forEach(part => {
-        ctx.fillRect(part.x * box, part.y * box, box - 1, box - 1);
-      });
-
-      // Draw food
-      ctx.fillStyle = 'red';
-      ctx.fillRect(food.x * box, food.y * box, box - 1, box - 1);
+      draw();
     }
 
-    setInterval(gameLoop, 150)
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= rows; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * box, 0);
+        ctx.lineTo(i * box, canvas.height);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * box);
+        ctx.lineTo(canvas.width, i * box);
+        ctx.stroke();
+      }
+
+      // Draw snake with gradient
+      snake.forEach((part, index) => {
+        const gradient = ctx.createLinearGradient(
+          part.x * box, part.y * box,
+          part.x * box + box, part.y * box + box
+        );
+        gradient.addColorStop(0, index === 0 ? '#00ff88' : '#00cc66');
+        gradient.addColorStop(1, index === 0 ? '#00ccff' : '#0099ff');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(part.x * box + 1, part.y * box + 1, box - 2, box - 2);
+        
+        if (index === 0) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.beginPath();
+          ctx.arc(part.x * box + box/2 - 3, part.y * box + box/2 - 2, 2, 0, Math.PI * 2);
+          ctx.arc(part.x * box + box/2 + 3, part.y * box + box/2 - 2, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Draw food with glow
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#ff5050';
+      ctx.fillStyle = '#ff5050';
+      ctx.beginPath();
+      ctx.arc(food.x * box + box/2, food.y * box + box/2, box/2 - 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    function gameOver() {
+      isGameOver = true;
+      canvas.classList.add('game-over');
+      document.getElementById('gameOverOverlay').classList.add('show');
+      clearInterval(gameInterval);
+    }
+
+    function restartGame() {
+      snake = [{ x: 10, y: 10 }];
+      direction = 'RIGHT';
+      food = spawnFood();
+      score = 0;
+      level = 1;
+      isPaused = false;
+      isGameOver = false;
+      
+      document.getElementById('score').textContent = "0";
+      document.getElementById('level').textContent = "1";
+      canvas.classList.remove('game-over');
+      document.getElementById('gameOverOverlay').classList.remove('show');
+      
+      clearInterval(gameInterval);
+      gameInterval = setInterval(gameLoop, difficulties[difficulty]);
+    }
+
+    function togglePause() {
+      if (isGameOver) return;
+      isPaused = !isPaused;
+      event.target.innerHTML = isPaused ? '<i class="fas fa-play"></i> Resume' : '<i class="fas fa-pause"></i> Pause';
+    }
+
+    function setDifficulty(diff) {
+      difficulty = diff;
+      document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      restartGame();
+    }
 
     document.getElementById("menu-btn").addEventListener("click", function () {
       document.getElementById("menu").classList.toggle("open");
     });
 
-    function mouseEnter(id) {
-      const newId = document.getElementById(id);
-      newId.classList.add('fa-bounce');
-    }
-    
-    function mouseLeave(id) {
-      const newId = document.getElementById(id);
-      newId.classList.remove('fa-bounce');
-    }
+    gameInterval = setInterval(gameLoop, difficulties[difficulty]);
+    draw();
   </script>
 </body>
 </html>
