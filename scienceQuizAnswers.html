@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .question-block {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question-block label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        /* Text input styling */
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Radio and checkbox styling */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 400;
+            flex: 1;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Answer page styling */
+        .answer-page {
+            display: none;
+            text-align: center;
+        }
+
+        .answer-page.active {
+            display: block;
+        }
+
+        .answer-content {
+            background: #f0f4ff;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .answer-content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .answer-content p {
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .question-block {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Science Quiz</h1>
+            <p>Answer the questions below to access the science answer</p>
+        </div>
+
+        <div class="content">
+            <!-- QUIZ FORM -->
+            <form name="science-quiz" method="POST" data-netlify="true" id="quizForm">
+                <input type="hidden" name="form-name" value="science-quiz">
+
+                <!-- TEMPLATE: WRITTEN ANSWER QUESTION -->
+                <div class="question-block">
+                    <label for="q1">1. What is your name?</label>
+                    <input type="text" id="q1" name="question-1" required>
+                </div>
+
+                <!-- TEMPLATE: TEXT AREA (LONG ANSWER) -->
+                <div class="question-block">
+                    <label for="q2">2. Why do you need this science answer?</label>
+                    <textarea id="q2" name="question-2" required></textarea>
+                </div>
+
+                <!-- TEMPLATE: SINGLE CHOICE (RADIO BUTTONS) -->
+                <div class="question-block">
+                    <label>3. How will you use this information?</label>
+                    <div class="option-group">
+                        <div class="option">
+                            <input type="radio" id="q3a" name="question-3" value="Study" required>
+                            <label for="q3a">For studying</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3b" name="question-3" value="Homework">
+                            <label for="q3b">For homework</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3c" name="question-3" value="Research">
+                            <label for="q3c">For research</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3d" name="question-3" value="Other">
+                            <label for="q3d">Other</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TEMPLATE: MULTIPLE CHOICE (CHECKBOXES) -->
+                <div class="question-block">
+                    <label>4. Which topics are you interested in? (Select all that apply)</label>
+                    <div class="option-group">
+                        <div class="option">
+                            <input type="checkbox" id="q4a" name="topics" value="Physics">
+                            <label for="q4a">Physics</label>
+                        </div>
+                        <div class="option">
+                            <input type="checkbox" id="q4b" name="topics" value="Chemistry">
+                            <label for="q4b">Chemistry</label>
+                        </div>
+                        <div class="option">
+                            <input type="checkbox" id="q4c" name="topics" value="Biology">
+                            <label for="q4c">Biology</label>
+                        </div>
+                        <div class="option">
+                            <input type="checkbox" id="q4d" name="topics" value="Earth Science">
+                            <label for="q4d">Earth Science</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit & Get Answer</button>
+            </form>
+
+            <!-- ANSWER PAGE (SHOWN AFTER SUBMISSION) -->
+            <div class="answer-page" id="answerPage">
+                <div class="success-icon">✓</div>
+                <h2>Thank you for completing the quiz!</h2>
+                
+                <div class="answer-content">
+                    <h2>📚 Science Answer</h2>
+                    
+                    <!-- TEMPLATE: EDIT YOUR SCIENCE ANSWER HERE -->
+                    <p><strong>Question:</strong> What is the chemical formula for water?</p>
+                    <p><strong>Answer:</strong> H₂O (two hydrogen atoms bonded to one oxygen atom)</p>
+                    
+                    <p><strong>Explanation:</strong></p>
+                    <p>Water is a polar molecule composed of two hydrogen atoms covalently bonded to one oxygen atom. The oxygen atom is more electronegative, creating a partial negative charge on the oxygen and partial positive charges on the hydrogens. This polarity makes water an excellent solvent and gives it unique properties such as high surface tension, high specific heat capacity, and the ability to form hydrogen bonds.</p>
+                    
+                    <p><strong>Additional Information:</strong></p>
+                    <p>Water covers approximately 71% of Earth's surface and is essential for all known forms of life. It exists in three states: solid (ice), liquid (water), and gas (water vapor). Water has a density of 1 g/cm³ at 4°C and expands when it freezes, which is why ice floats on water.</p>
+                    
+                    <!-- ADD MORE SCIENCE CONTENT HERE AS NEEDED -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle form submission
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            
+            // Submit to Netlify
+            fetch('/', {
+                method: 'POST',
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(formData).toString()
+            })
+            .then(() => {
+                // Hide form and show answer
+                document.getElementById('quizForm').style.display = 'none';
+                document.getElementById('answerPage').classList.add('active');
+            })
+            .catch((error) => {
+                alert('Error submitting form. Please try again.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
