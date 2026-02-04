@@ -119,9 +119,10 @@
             width: 20px;
             height: 20px;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
-        .option label {
+        .option-label {
             margin: 0;
             cursor: pointer;
             font-weight: 400;
@@ -243,60 +244,93 @@
 
                 <!-- TEMPLATE: WRITTEN ANSWER QUESTION -->
                 <div class="question-block">
-                    <label for="q1">1. What is your name?</label>
+                    <label for="q1">1. Quel est ton nom bebous?</label>
                     <input type="text" id="q1" name="question-1" required>
                 </div>
 
                 <!-- TEMPLATE: TEXT AREA (LONG ANSWER) -->
                 <div class="question-block">
-                    <label for="q2">2. Why do you need this science answer?</label>
+                    <label for="q2">2. Pourquoi as-tu besoin des réponses en sciences?</label>
                     <textarea id="q2" name="question-2" required></textarea>
                 </div>
 
                 <!-- TEMPLATE: SINGLE CHOICE (RADIO BUTTONS) -->
                 <div class="question-block">
-                    <label>3. How will you use this information?</label>
+                    <label>3. Quel est la fille la plus belle de la classe?</label>
                     <div class="option-group">
-                        <div class="option">
-                            <input type="radio" id="q3a" name="question-3" value="Study" required>
-                            <label for="q3a">For studying</label>
-                        </div>
-                        <div class="option">
-                            <input type="radio" id="q3b" name="question-3" value="Homework">
-                            <label for="q3b">For homework</label>
-                        </div>
-                        <div class="option">
-                            <input type="radio" id="q3c" name="question-3" value="Research">
-                            <label for="q3c">For research</label>
-                        </div>
-                        <div class="option">
-                            <input type="radio" id="q3d" name="question-3" value="Other">
-                            <label for="q3d">Other</label>
-                        </div>
+                        <label class="option">
+                            <input type="radio" id="q3a" name="question-3" value="Camilly" required>
+                            <span class="option-label">Camilly</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3b" name="question-3" value="Lilou">
+                            <span class="option-label">Lilou</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3c" name="question-3" value="Krystel">
+                            <span class="option-label">Krystel</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3d" name="question-3" value="Lilly">
+                            <span class="option-label">Lily</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3e" name="question-3" value="Béatrice">
+                            <span class="option-label">Béatrice</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3f" name="question-3" value="Frédérique">
+                            <span class="option-label">Frédérique</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3g" name="question-3" value="Évelyne">
+                            <span class="option-label">Évelyne</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3h" name="question-3" value="Prunelle">
+                            <span class="option-label">Prunelle</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3i" name="question-3" value="Zhara">
+                            <span class="option-label">Zhara</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3j" name="question-3" value="Kelly-Ann">
+                            <span class="option-label">Kelly-Ann</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3k" name="question-3" value="Kaila">
+                            <span class="option-label">Kaila</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3l" name="question-3" value="Rosalie">
+                            <span class="option-label">Rosalie</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3m" name="question-3" value="Jane">
+                            <span class="option-label">Jane</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q3n" name="question-3" value="Kiara">
+                            <span class="option-label">Kiara</span>
+                        </label>
                     </div>
                 </div>
 
-                <!-- TEMPLATE: MULTIPLE CHOICE (CHECKBOXES) -->
                 <div class="question-block">
-                    <label>4. Which topics are you interested in? (Select all that apply)</label>
-                    <div class="option-group">
-                        <div class="option">
-                            <input type="checkbox" id="q4a" name="topics" value="Physics">
-                            <label for="q4a">Physics</label>
-                        </div>
-                        <div class="option">
-                            <input type="checkbox" id="q4b" name="topics" value="Chemistry">
-                            <label for="q4b">Chemistry</label>
-                        </div>
-                        <div class="option">
-                            <input type="checkbox" id="q4c" name="topics" value="Biology">
-                            <label for="q4c">Biology</label>
-                        </div>
-                        <div class="option">
-                            <input type="checkbox" id="q4d" name="topics" value="Earth Science">
-                            <label for="q4d">Earth Science</label>
-                        </div>
-                    </div>
+                    <label for="q4">4. Are you gay?</label>
+                    <label class="option">
+                        <input type="radio" id="q4yes" name="question-4" value="Yes" required>
+                        <span class="option-label">Yes</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" id="q4no" name="question-4" value="No">
+                        <span class="option-label">No</span>
+                </div>
+
+                <div class="question-block">
+                    <label for="q5">5. Quelle est ton identité aujourd'hui?</label>
+                    <input type="text" id="q5" name="question-5" required>
                 </div>
 
                 <button type="submit" class="submit-btn">Submit & Get Answer</button>
