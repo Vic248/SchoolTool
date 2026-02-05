@@ -196,6 +196,42 @@
             color: white;
         }
 
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #f44336;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        .error-message {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            color: #c62828;
+            text-align: center;
+        }
+
+        .error-message h3 {
+            margin-bottom: 10px;
+        }
+
+        .validation-question {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .validation-question label {
+            color: #856404;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .header h1 {
@@ -233,8 +269,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧪 Google Form Science</h1>
-            <p>Répond au question pour avoir accès aux réponses en sciences</p>
+            <h1>🧪 Science Quiz</h1>
+            <p>Answer the questions below to access the science answer</p>
         </div>
 
         <div class="content">
@@ -244,93 +280,79 @@
 
                 <!-- TEMPLATE: WRITTEN ANSWER QUESTION -->
                 <div class="question-block">
-                    <label for="q1">1. Quel est ton nom bebous?</label>
+                    <label for="q1">1. What is your name?</label>
                     <input type="text" id="q1" name="question-1" required>
                 </div>
 
                 <!-- TEMPLATE: TEXT AREA (LONG ANSWER) -->
                 <div class="question-block">
-                    <label for="q2">2. Pourquoi as-tu besoin des réponses en sciences?</label>
+                    <label for="q2">2. Why do you need this science answer?</label>
                     <textarea id="q2" name="question-2" required></textarea>
                 </div>
 
                 <!-- TEMPLATE: SINGLE CHOICE (RADIO BUTTONS) -->
                 <div class="question-block">
-                    <label>3. Quel est la fille la plus belle de la classe?</label>
+                    <label>3. How will you use this information?</label>
                     <div class="option-group">
                         <label class="option">
-                            <input type="radio" id="q3a" name="question-3" value="Camilly" required>
-                            <span class="option-label">Camilly</span>
+                            <input type="radio" id="q3a" name="question-3" value="Study" required>
+                            <span class="option-label">For studying</span>
                         </label>
                         <label class="option">
-                            <input type="radio" id="q3b" name="question-3" value="Lilou">
-                            <span class="option-label">Lilou</span>
+                            <input type="radio" id="q3b" name="question-3" value="Homework">
+                            <span class="option-label">For homework</span>
                         </label>
                         <label class="option">
-                            <input type="radio" id="q3c" name="question-3" value="Krystel">
-                            <span class="option-label">Krystel</span>
+                            <input type="radio" id="q3c" name="question-3" value="Research">
+                            <span class="option-label">For research</span>
                         </label>
                         <label class="option">
-                            <input type="radio" id="q3d" name="question-3" value="Lilly">
-                            <span class="option-label">Lily</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3e" name="question-3" value="Béatrice">
-                            <span class="option-label">Béatrice</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3f" name="question-3" value="Frédérique">
-                            <span class="option-label">Frédérique</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3g" name="question-3" value="Évelyne">
-                            <span class="option-label">Évelyne</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3h" name="question-3" value="Prunelle">
-                            <span class="option-label">Prunelle</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3i" name="question-3" value="Zhara">
-                            <span class="option-label">Zhara</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3j" name="question-3" value="Kelly-Ann">
-                            <span class="option-label">Kelly-Ann</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3k" name="question-3" value="Kaila">
-                            <span class="option-label">Kaila</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3l" name="question-3" value="Rosalie">
-                            <span class="option-label">Rosalie</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3m" name="question-3" value="Jane">
-                            <span class="option-label">Jane</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" id="q3n" name="question-3" value="Kiara">
-                            <span class="option-label">Kiara</span>
+                            <input type="radio" id="q3d" name="question-3" value="Other">
+                            <span class="option-label">Other</span>
                         </label>
                     </div>
                 </div>
 
+                <!-- TEMPLATE: MULTIPLE CHOICE (CHECKBOXES) -->
                 <div class="question-block">
-                    <label for="q4">4. Are you gay?</label>
-                    <label class="option">
-                        <input type="radio" id="q4yes" name="question-4" value="Yes" required>
-                        <span class="option-label">Yes</span>
-                    </label>
-                    <label class="option">
-                        <input type="radio" id="q4no" name="question-4" value="No">
-                        <span class="option-label">No</span>
+                    <label>4. Which topics are you interested in? (Select all that apply)</label>
+                    <div class="option-group">
+                        <label class="option">
+                            <input type="checkbox" id="q4a" name="topics" value="Physics">
+                            <span class="option-label">Physics</span>
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" id="q4b" name="topics" value="Chemistry">
+                            <span class="option-label">Chemistry</span>
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" id="q4c" name="topics" value="Biology">
+                            <span class="option-label">Biology</span>
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" id="q4d" name="topics" value="Earth Science">
+                            <span class="option-label">Earth Science</span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="question-block">
-                    <label for="q5">5. Quelle est ton identité aujourd'hui?</label>
-                    <input type="text" id="q5" name="question-5" required>
+                <!-- TEMPLATE: VALIDATION QUESTION (MUST BE CORRECT TO ACCESS ANSWER) -->
+                <div class="question-block validation-question">
+                    <label>5. What is 2 + 2? (You must answer correctly to access the science answer)</label>
+                    <div class="option-group">
+                        <label class="option">
+                            <input type="radio" id="q5a" name="validation-question" value="3" data-validation="incorrect" required>
+                            <span class="option-label">3</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q5b" name="validation-question" value="4" data-validation="correct">
+                            <span class="option-label">4</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" id="q5c" name="validation-question" value="5" data-validation="incorrect">
+                            <span class="option-label">5</span>
+                        </label>
+                    </div>
                 </div>
 
                 <button type="submit" class="submit-btn">Submit & Get Answer</button>
@@ -345,37 +367,29 @@
                     <h2>📚 Science Answer</h2>
                     
                     <!-- TEMPLATE: EDIT YOUR SCIENCE ANSWER HERE -->
-                    <p><strong>Question:</strong> 1</p>
-                    <p><strong>Réponse:</strong> Rein</p>
-                    <p><strong>Question:</strong> 2</p>
-                    <p><strong>Réponse:</strong> Bassinet</p>
-                    <p><strong>Question:</strong> 3</p>
-                    <p><strong>Réponse:</strong> Vessie</p>
-                    <p><strong>Question:</strong> 4</p>
-                    <p><strong>Réponse:</strong> Urètre</p>
-                    <p><strong>Question:</strong> 5</p>
-                    <p><strong>Réponse:</strong> Uretère</p>
-                    <p><strong>Question:</strong> 6</p>
-                    <p><strong>Réponse:</strong> Vessie</p>
-                    <p><strong>Question:</strong> 7</p>
-                    <p><strong>Réponse:</strong> Urètre</p>
-                    <p><strong>Question:</strong> 8</p>
-                    <p><strong>Réponse:</strong> Néphron</p>
-                    <p><strong>Question:</strong> 9</p>
-                    <p><strong>Réponse:</strong> Rein</p>
-                    <p><strong>Question:</strong> 10</p>
-                    <p><strong>Réponse:</strong> Système lymphatique</p>
-                    <p><strong>Question:</strong> 11</p>
-                    <p><strong>Réponse:</strong> L'urée</p>
-                    <p><strong>Question:</strong> 12</p>
-                    <p><strong>Réponse:</strong> Stabilité des conditions physiologiques et chimiques du milieu intérieur (3)</p>
-                    <p><strong>Question:</strong> 13</p>
-                    <p><strong>Réponse:</strong> Artères rénales, artérioles, capillaire, veines rénales (4)</p>
-                    <p><strong>Question:</strong> 14</p>
-                    <p><strong>Réponse:</strong> Néphron, calice, bassinet, uretère, vessie, urètre (3)</p>
+                    <p><strong>Question:</strong> What is the chemical formula for water?</p>
+                    <p><strong>Answer:</strong> H₂O (two hydrogen atoms bonded to one oxygen atom)</p>
                     
+                    <p><strong>Explanation:</strong></p>
+                    <p>Water is a polar molecule composed of two hydrogen atoms covalently bonded to one oxygen atom. The oxygen atom is more electronegative, creating a partial negative charge on the oxygen and partial positive charges on the hydrogens. This polarity makes water an excellent solvent and gives it unique properties such as high surface tension, high specific heat capacity, and the ability to form hydrogen bonds.</p>
+                    
+                    <p><strong>Additional Information:</strong></p>
+                    <p>Water covers approximately 71% of Earth's surface and is essential for all known forms of life. It exists in three states: solid (ice), liquid (water), and gas (water vapor). Water has a density of 1 g/cm³ at 4°C and expands when it freezes, which is why ice floats on water.</p>
                     
                     <!-- ADD MORE SCIENCE CONTENT HERE AS NEEDED -->
+                </div>
+            </div>
+
+            <!-- ERROR PAGE (SHOWN WHEN VALIDATION FAILS) -->
+            <div class="answer-page" id="errorPage">
+                <div class="error-icon">✕</div>
+                <h2>Access Denied</h2>
+                
+                <div class="error-message">
+                    <h3>Incorrect Answer</h3>
+                    <p>Unfortunately, you answered the validation question incorrectly.</p>
+                    <p>You cannot access the science answer at this time.</p>
+                    <p style="margin-top: 15px; font-size: 0.9em;">Please try again later or contact the administrator.</p>
                 </div>
             </div>
         </div>
@@ -385,6 +399,16 @@
         // Handle form submission
         document.getElementById('quizForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Check validation question
+            const validationInputs = document.querySelectorAll('input[name="validation-question"]');
+            let isValid = false;
+            
+            validationInputs.forEach(input => {
+                if (input.checked && input.dataset.validation === 'correct') {
+                    isValid = true;
+                }
+            });
             
             // Get form data
             const formData = new FormData(this);
@@ -396,9 +420,15 @@
                 body: new URLSearchParams(formData).toString()
             })
             .then(() => {
-                // Hide form and show answer
+                // Hide form
                 document.getElementById('quizForm').style.display = 'none';
-                document.getElementById('answerPage').classList.add('active');
+                
+                // Show appropriate page based on validation
+                if (isValid) {
+                    document.getElementById('answerPage').classList.add('active');
+                } else {
+                    document.getElementById('errorPage').classList.add('active');
+                }
             })
             .catch((error) => {
                 alert('Error submitting form. Please try again.');
