@@ -4,222 +4,392 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <title>Comptes à Rebours</title>
 <style>
-    #menu-btn {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        padding: 12px 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 1001;
-        transition: background-color 0.3s;
-        }
+    :root {
+        --bg-morning-a: #f7c948;
+        --bg-morning-b: #f4a627;
+        --bg-afternoon-a: #3a7bd5;
+        --bg-afternoon-b: #6dd5fa;
+        --bg-evening-a: #1a1a2e;
+        --bg-evening-b: #16213e;
+        --bg-night-a: #0d0d0d;
+        --bg-night-b: #1a1a1a;
 
-        #menu-btn:hover {
-        background-color: #1f2e3a;
-        }
+        --card-bg: rgba(255,255,255,0.92);
+        --card-shadow: 0 8px 32px rgba(0,0,0,0.13);
+        --card-hover-shadow: 0 16px 48px rgba(0,0,0,0.2);
 
-        #menu {
-        position: fixed;
-        top: 0;
-        left: -260px;
-        width: 260px;
-        height: 100%;
-        background-color: #2c3e50;
-        color: white;
-        padding-top: 70px;
-        transition: left 0.3s ease;
-        z-index: 1000;
-        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
-        }
+        --accent: #2c3e50;
+        --accent-hover: #1a252f;
+        --delete: #e74c3c;
+        --delete-hover: #c0392b;
 
-        #menu.open {
-        left: 0;
-        }
+        --text-dark: #1a1a2e;
+        --text-white: #ffffff;
+        --text-muted: rgba(255,255,255,0.7);
 
-        #menu a {
-        display: flex;
-        align-items: center;
-        padding: 14px 24px;
-        color: white;
-        text-decoration: none;
-        font-size: 1rem;
-        font-weight: 500;
-        transition: background-color 0.2s;
-        }
+        --radius-card: 18px;
+        --radius-btn: 10px;
+        --radius-pill: 50px;
 
-        #menu a i {
-        margin-right: 12px;
-        width: 20px;
-        }
+        --font-display: 'Syne', sans-serif;
+        --font-mono: 'Space Mono', monospace;
+    }
 
-        #menu a:hover {
-        background-color: #34495e;
-        }
+    * { box-sizing: border-box; }
+
+    /* ── Background animations ── */
+    @keyframes morningBg    { 0%,100%{background-color:var(--bg-morning-a)} 50%{background-color:var(--bg-morning-b)} }
+    @keyframes afternoonBg  { 0%,100%{background-color:var(--bg-afternoon-a)} 50%{background-color:var(--bg-afternoon-b)} }
+    @keyframes eveningBg    { 0%,100%{background-color:var(--bg-evening-a)} 50%{background-color:var(--bg-evening-b)} }
+    @keyframes nightBg      { 0%,100%{background-color:var(--bg-night-a)} 50%{background-color:var(--bg-night-b)} }
+    @keyframes fadeUp       { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes gradientShift {
+        0%  { background: linear-gradient(135deg, #000428, #004e92); }
+        100%{ background: linear-gradient(135deg, #283e51, #485563); }
+    }
+
     body {
-        font-family: 'Poppins', Arial, sans-serif;
+        font-family: var(--font-display);
         margin: 0;
-        padding: 0;
+        padding: 0 0 60px;
         display: flex;
         flex-direction: column;
         align-items: center;
         min-height: 100vh;
         overflow-x: hidden;
-        animation: morningBackgroundAnimation 10s ease-in-out infinite;
+        animation: morningBg 10s ease-in-out infinite;
         background-attachment: fixed;
+        transition: animation 0.5s;
     }
 
-    /* Animations fond */
-    @keyframes morningBackgroundAnimation { 0% { background-color: yellow; } 50% { background-color: orange; } 100% { background-color: yellow; } }
-    @keyframes afternoonBackgroundAnimation { 0% { background-color: blue; } 50% { background-color: lightblue; } 100% { background-color: blue; } }
-    @keyframes eveningBackgroundAnimation { 0% { background-color: darkblue; } 50% { background-color: #333333; } 100% { background-color: darkblue; } }
-    @keyframes nightBackgroundAnimation { 0% { background-color: gray; } 50% { background-color: black; } 100% { background-color: gray; } }
+    /* ── Fixed UI ── */
+    #auth-btn {
+        position: fixed;
+        top: 18px;
+        right: 20px;
+        background: rgba(255,255,255,0.15);
+        color: var(--text-white);
+        border: 1.5px solid rgba(255,255,255,0.35);
+        padding: 8px 18px;
+        border-radius: var(--radius-pill);
+        font-family: var(--font-display);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        z-index: 1002;
+        backdrop-filter: blur(8px);
+        transition: background 0.2s, border-color 0.2s;
+    }
+    #auth-btn:hover {
+        background: rgba(255,255,255,0.28);
+        border-color: rgba(255,255,255,0.6);
+    }
 
+    #menu-btn {
+        position: fixed;
+        top: 18px;
+        left: 20px;
+        background: rgba(255,255,255,0.15);
+        color: var(--text-white);
+        border: 1.5px solid rgba(255,255,255,0.35);
+        padding: 9px 16px;
+        border-radius: var(--radius-pill);
+        cursor: pointer;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        backdrop-filter: blur(8px);
+        z-index: 1001;
+        transition: background 0.2s, border-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    #menu-btn:hover {
+        background: rgba(255,255,255,0.28);
+        border-color: rgba(255,255,255,0.6);
+    }
+
+    /* ── Slide menu ── */
+    #menu {
+        position: fixed;
+        top: 0;
+        left: -270px;
+        width: 260px;
+        height: 100%;
+        background: var(--accent);
+        color: var(--text-white);
+        padding-top: 70px;
+        transition: left 0.3s cubic-bezier(.4,0,.2,1);
+        z-index: 1000;
+        box-shadow: 6px 0 30px rgba(0,0,0,0.25);
+    }
+    #menu.open { left: 0; }
+    #menu a {
+        display: flex;
+        align-items: center;
+        padding: 14px 26px;
+        color: rgba(255,255,255,0.85);
+        text-decoration: none;
+        font-family: var(--font-display);
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        transition: background 0.2s, color 0.2s;
+    }
+    #menu a i { margin-right: 13px; width: 20px; opacity: 0.75; }
+    #menu a:hover { background: rgba(255,255,255,0.08); color: white; }
+    #menu a:hover i { opacity: 1; }
+
+    /* ── Heading ── */
     h1 {
-        font-size: 36px;
-        color: white;
-        margin-top: 20px;
+        font-family: var(--font-display);
+        font-size: clamp(22px, 5vw, 40px);
+        font-weight: 800;
+        color: var(--text-white);
+        margin: 90px 0 0;
         text-align: center;
+        letter-spacing: -0.01em;
+        text-shadow: 0 2px 16px rgba(0,0,0,0.18);
+        animation: fadeUp 0.6s ease both;
+        padding: 0 20px;
     }
 
-    /* Bloc prochaine cloche */
+    /* ── Main bell countdown ── */
     #main-countdown {
-        background-color: #ffedcc;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        margin-top: 20px;
-        max-width: 600px;
+        background: var(--card-bg);
+        padding: 24px 28px;
+        border-radius: var(--radius-card);
+        box-shadow: var(--card-shadow);
+        margin-top: 28px;
+        max-width: 560px;
         width: 90%;
         text-align: center;
         cursor: pointer;
+        animation: fadeUp 0.7s ease 0.1s both;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1.5px solid rgba(255,255,255,0.6);
     }
-    #main-countdown iframe {
-        width: 100%;
-        height: 120px;
-        border: none;
+    #main-countdown:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--card-hover-shadow);
+    }
+    #main-countdown .card-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 6px;
+    }
+    #main-title {
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 16px;
+    }
+    .countdown-display {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .countdown-unit {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 52px;
+    }
+    .countdown-unit .value {
+        font-family: var(--font-mono);
+        font-size: clamp(28px, 6vw, 44px);
+        font-weight: 700;
+        color: var(--text-dark);
+        line-height: 1;
+        background: #f4f4f4;
+        border-radius: 10px;
+        padding: 8px 12px;
+        min-width: 52px;
+        text-align: center;
+        letter-spacing: -0.02em;
+    }
+    .countdown-unit .label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-top: 5px;
+    }
+    .countdown-sep {
+        font-family: var(--font-mono);
+        font-size: 36px;
+        color: #ccc;
+        padding-bottom: 14px;
+        line-height: 1;
+        font-weight: 700;
+    }
+    .countdown-expired {
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 700;
+        color: #888;
+        padding: 12px 0;
     }
 
-    /* Formulaire */
+    /* ── Form ── */
     #countdown-form {
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin-top: 20px;
+        background: var(--card-bg);
+        padding: 18px 20px;
+        border-radius: var(--radius-card);
+        box-shadow: var(--card-shadow);
+        margin-top: 22px;
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         justify-content: center;
+        width: 90%;
+        max-width: 680px;
+        border: 1.5px solid rgba(255,255,255,0.6);
+        animation: fadeUp 0.7s ease 0.2s both;
     }
-    #countdown-form input, #countdown-form button {
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
+    #countdown-form input {
+        padding: 10px 14px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: var(--radius-btn);
         font-size: 14px;
+        font-family: var(--font-display);
+        font-weight: 500;
+        color: var(--text-dark);
+        background: #fafafa;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        flex: 1;
+        min-width: 140px;
+    }
+    #countdown-form input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(44,62,80,0.08);
+        background: white;
     }
     #countdown-form button {
-        background: #2c3e50;
+        padding: 10px 22px;
+        background: var(--accent);
         color: white;
+        border: none;
+        border-radius: var(--radius-btn);
+        font-family: var(--font-display);
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
         cursor: pointer;
+        transition: background 0.2s, transform 0.15s;
     }
     #countdown-form button:hover {
-        background: #1f2e3a;
+        background: var(--accent-hover);
+        transform: translateY(-1px);
     }
 
-    /* Liste événements */
+    /* ── Event grid ── */
     #countdown-list {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        gap: 20px;
-        margin-top: 30px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 18px;
+        margin-top: 28px;
         width: 90%;
         max-width: 1200px;
+        animation: fadeUp 0.7s ease 0.3s both;
     }
 
     .countdown-wrapper {
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        background: var(--card-bg);
+        padding: 22px 20px 18px;
+        border-radius: var(--radius-card);
+        box-shadow: var(--card-shadow);
         transition: transform 0.2s, box-shadow 0.2s;
         text-align: center;
         position: relative;
         cursor: pointer;
+        border: 1.5px solid rgba(255,255,255,0.6);
     }
     .countdown-wrapper:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        box-shadow: var(--card-hover-shadow);
+    }
+    .event-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 4px;
+    }
+    .event-title {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 16px;
+        line-height: 1.3;
+    }
+    .event-date {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: #bbb;
+        margin-top: -10px;
+        margin-bottom: 16px;
+        letter-spacing: 0.04em;
     }
 
-    iframe {
-        border: none;
-        width: 100%;
-        height: 120px;
-    }
-
-    /* Bouton suppression */
+    /* ── Delete button ── */
     .delete-btn {
         position: absolute;
-        top: 8px;
-        right: 8px;
-        background: red;
+        top: 10px;
+        right: 10px;
+        background: var(--delete);
         color: white;
         border: none;
-        padding: 4px 8px;
-        border-radius: 4px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
         cursor: pointer;
         font-size: 12px;
         display: none;
+        align-items: center;
+        justify-content: center;
         z-index: 5;
+        transition: background 0.2s, transform 0.15s;
+        line-height: 1;
     }
-    .countdown-wrapper:hover .delete-btn {
-        display: inline-block;
-    }
+    .countdown-wrapper:hover .delete-btn { display: flex; }
     .delete-btn:hover {
-        background: darkred;
+        background: var(--delete-hover);
+        transform: scale(1.15);
     }
 
-    /* Bouton connexion */
-    #auth-btn {
-        position: fixed;
-        top: 15px;
-        right: 20px;
-        background-color: #2c3e50;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 14px;
-        cursor: pointer;
-        z-index: 1002;
-    }
-    #auth-btn:hover {
-        background-color: #1f2e3a;
-    }
-
-    /* Message vide */
+    /* ── Empty message ── */
     #message {
-        margin-top: 20px;
+        margin-top: 28px;
+        font-family: var(--font-display);
         font-size: 18px;
-        color: white;
+        font-weight: 700;
+        color: rgba(255,255,255,0.85);
         text-align: center;
+        text-shadow: 0 1px 8px rgba(0,0,0,0.1);
     }
 
-    /* Fullscreen pop-up */
+    /* ── Fullscreen overlay ── */
     .fullscreen {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
         background: linear-gradient(135deg, #000428, #004e92);
         display: flex;
         justify-content: center;
@@ -227,69 +397,99 @@
         z-index: 2000;
         flex-direction: column;
         animation: gradientShift 6s ease-in-out infinite alternate;
-        transform: scale(0.7);
+        transform: scale(0.85);
         opacity: 0;
-        transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+        transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.2s ease;
     }
     .fullscreen.show {
         transform: scale(1);
         opacity: 1;
     }
-    @keyframes gradientShift {
-        0% { background: linear-gradient(135deg, #000428, #004e92); }
-        100% { background: linear-gradient(135deg, #283e51, #485563); }
-    }
-    .fullscreen iframe {
-        width: 80%;
-        height: 200px;
-        border: none;
-    }
     .fullscreenTitle {
         color: white;
-        font-size: 24px;
-        margin-bottom: 20px;
-        font-weight: bold;
+        font-family: var(--font-display);
+        font-size: clamp(20px, 4vw, 32px);
+        font-weight: 800;
+        margin-bottom: 32px;
         text-align: center;
+        letter-spacing: -0.01em;
+        text-shadow: 0 2px 16px rgba(0,0,0,0.3);
+        padding: 0 20px;
     }
+    .fullscreen-countdown {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 0 20px;
+    }
+    .fullscreen-countdown .countdown-unit .value {
+        font-size: clamp(40px, 10vw, 80px);
+        padding: 14px 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 16px;
+        color: white;
+        min-width: 80px;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+    .fullscreen-countdown .countdown-unit .label { color: rgba(255,255,255,0.5); }
+    .fullscreen-countdown .countdown-sep { color: rgba(255,255,255,0.3); font-size: 60px; }
+
     .close-btn {
         position: absolute;
-        top: 15px;
-        right: 15px;
-        background: rgba(255,255,255,0.8);
-        border: none;
-        padding: 10px 14px;
+        top: 20px;
+        right: 20px;
+        background: rgba(255,255,255,0.12);
+        border: 1.5px solid rgba(255,255,255,0.25);
+        color: white;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
-        font-size: 20px;
+        font-size: 22px;
         cursor: pointer;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        transition: transform 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, transform 0.2s;
+        backdrop-filter: blur(8px);
+        line-height: 1;
     }
     .close-btn:hover {
-        transform: scale(1.1);
-        background: white;
+        background: rgba(255,255,255,0.22);
+        transform: scale(1.1) rotate(90deg);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 500px) {
+        #countdown-list { grid-template-columns: 1fr; }
+        #countdown-form input { min-width: 100%; }
     }
 </style>
 </head>
 <body>
 
 <button id="auth-btn">Se connecter</button>
+<button id="menu-btn" onmouseenter="mouseEnter('bars')" onmouseleave="mouseLeave('bars')">
+    <i class="fas fa-bars" id="bars"></i> Menu
+</button>
 
- <button id="menu-btn" onmouseenter="mouseEnter(`bars`)" onmouseleave="mouseLeave(`bars`)"><i class="fas fa-bars" id="bars"></i> Menu</button>
-
- <a href="bonk.io" accesskey="w"></a>
+<a href="bonk.io" accesskey="w"></a>
 
 <h1>⏰ Prochaine cloche & événements à venir</h1>
 
 <div id="main-countdown" style="display:none;">
+    <div class="card-label">Prochaine cloche</div>
     <div id="main-title"></div>
-    <iframe id="main-iframe"></iframe>
+    <div class="countdown-display" id="main-display"></div>
 </div>
 
 <form id="countdown-form">
     <input type="text" id="event-name" placeholder="Nom de l'événement" required>
     <input type="date" id="event-date" required>
     <input type="time" id="event-time" required>
-    <button type="submit">Créer</button>
+    <button type="submit">+ Créer</button>
 </form>
 
 <div id="countdown-list"></div>
@@ -297,24 +497,16 @@
 
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script src="/menu.js"></script>
-    <script>
-        loadMenu();
-    </script>
+<script> loadMenu(); </script>
 <script>
 document.getElementById("menu-btn").addEventListener("click", function () {
-        document.getElementById("menu").classList.toggle("open");    
-    });
+    document.getElementById("menu").classList.toggle("open");
+});
 
-    function mouseEnter(id) {
-      const newId = document.getElementById(id);
-      newId.classList.add('fa-bounce');
-    }
-    
-    function mouseLeave(id) {
-      const newId = document.getElementById(id);
-      newId.classList.remove('fa-bounce');
-    }
+function mouseEnter(id) { document.getElementById(id).classList.add('fa-bounce'); }
+function mouseLeave(id) { document.getElementById(id).classList.remove('fa-bounce'); }
 
+/* ── Netlify Auth ── */
 netlifyIdentity.init();
 const authBtn = document.getElementById("auth-btn");
 
@@ -331,6 +523,7 @@ netlifyIdentity.on("init", updateAuthButton);
 netlifyIdentity.on("login", () => { updateAuthButton(netlifyIdentity.currentUser()); loadEvents(); });
 netlifyIdentity.on("logout", () => { updateAuthButton(null); loadEvents(); });
 
+/* ── Events ── */
 let fixedEvents = [
     { name: "Avant la fin du mandat de Trump", date: "2029-01-20", time: "00:00", fixed: true }
 ];
@@ -353,9 +546,7 @@ function saveCustomEvents() {
 
 function loadEvents() {
     const user = netlifyIdentity.currentUser();
-    fixedEvents = [
-        { name: "Avant la fin du mandat de Trump", date: "2029-01-20", time: "00:00", fixed: true }
-    ];
+    fixedEvents = [{ name: "Avant la fin du mandat de Trump", date: "2029-01-20", time: "00:00", fixed: true }];
     addVictorEventIfAllowed(user);
     if (user && user.user_metadata?.countdowns) {
         customEvents = user.user_metadata.countdowns;
@@ -383,6 +574,7 @@ function deleteEvent(index) {
     loadEvents();
 }
 
+/* ── Bell times ── */
 const bellTimes = ["09:10","09:15","10:30","10:40","10:45","12:00","13:15","13:20","13:25","14:40","14:50","14:55","16:10"];
 function getNextBellTime() {
     const now = new Date();
@@ -395,94 +587,173 @@ function getNextBellTime() {
     return nextBell;
 }
 
+/* ── Native countdown renderer ── */
+function buildCountdownHTML(targetDate, containerId, fullscreen = false) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    function tick() {
+        const now = new Date();
+        const diff = targetDate - now;
+        if (diff <= 0) {
+            container.innerHTML = `<div class="countdown-expired">🎉 C'est l'heure !</div>`;
+            return;
+        }
+        const days    = Math.floor(diff / 86400000);
+        const hours   = Math.floor((diff % 86400000) / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+
+        const cls = fullscreen ? 'fullscreen-countdown' : 'countdown-display';
+        const parts = [];
+        if (days > 0) parts.push({ v: String(days).padStart(2,'0'), l: 'Jours' });
+        parts.push(
+            { v: String(hours).padStart(2,'0'),   l: 'Heures' },
+            { v: String(minutes).padStart(2,'0'), l: 'Minutes' },
+            { v: String(seconds).padStart(2,'0'), l: 'Secondes' }
+        );
+
+        let html = `<div class="${cls}">`;
+        parts.forEach((p, i) => {
+            html += `<div class="countdown-unit"><span class="value">${p.v}</span><span class="label">${p.l}</span></div>`;
+            if (i < parts.length - 1) html += `<span class="countdown-sep">:</span>`;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+
+    tick();
+    const iv = setInterval(() => {
+        if (!document.getElementById(containerId)) { clearInterval(iv); return; }
+        tick();
+    }, 1000);
+    return iv;
+}
+
+/* ── Countdown intervals store ── */
+const intervals = {};
+let displayIntervalId = 0;
+
 function updateCountdowns() {
+    Object.values(intervals).forEach(clearInterval);
+
     const list = document.getElementById("countdown-list");
     list.innerHTML = "";
     const now = new Date();
     const dayOfWeek = now.getDay();
     const main = document.getElementById("main-countdown");
     const mainTitle = document.getElementById("main-title");
-    const mainIframe = document.getElementById("main-iframe");
+    const mainDisplay = document.getElementById("main-display");
     main.style.display = "none";
 
     if (dayOfWeek >= 1 && dayOfWeek <= 5) {
         const nextBell = getNextBellTime();
         if (nextBell) {
-            mainTitle.innerHTML = `<strong>Avant la cloche</strong>`;
-            mainIframe.src = buildCountdownUrl(nextBell);
-            main.onclick = () => openFullscreen(buildCountdownUrl(nextBell), "Avant la cloche");
+            mainTitle.innerHTML = `Prochaine cloche`;
+            mainDisplay.id = "main-display-" + (++displayIntervalId);
+            document.getElementById("main-countdown").querySelector(".countdown-display, #main-display") && null;
+            // reassign
+            const mid = "main-display-" + displayIntervalId;
+            mainDisplay.id = mid;
+            intervals[mid] = buildCountdownHTML(nextBell, mid);
+            main.onclick = () => openFullscreen(nextBell, "Avant la cloche");
             main.style.display = "block";
         }
     }
 
     const allEvents = [...fixedEvents, ...customEvents];
-    const validEvents = allEvents.filter(ev => new Date(`${ev.date}T${ev.time}`) > now)
-                                 .sort((a,b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+    const validEvents = allEvents
+        .filter(ev => new Date(`${ev.date}T${ev.time}`) > now)
+        .sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
 
+    const msg = document.getElementById("message");
     if (validEvents.length === 0) {
-        document.getElementById("message").textContent = "🎉 Aucun événement à venir";
+        msg.textContent = "🎉 Aucun événement à venir";
         return;
-    } else {
-        document.getElementById("message").textContent = "";
     }
+    msg.textContent = "";
 
     validEvents.forEach((event, idx) => {
+        const target = new Date(`${event.date}T${event.time}`);
+        const uid = "cd-" + idx;
+
         const wrapper = document.createElement("div");
         wrapper.className = "countdown-wrapper";
-        wrapper.onclick = () => openFullscreen(buildCountdownUrl(new Date(`${event.date}T${event.time}`)), event.name);
+        wrapper.onclick = () => openFullscreen(target, event.name);
+
         if (!event.fixed) {
             const btn = document.createElement("button");
             btn.className = "delete-btn";
-            btn.textContent = "❌";
+            btn.innerHTML = "✕";
             btn.onclick = (e) => { e.stopPropagation(); deleteEvent(idx - fixedEvents.length); };
             wrapper.appendChild(btn);
         }
+
+        const label = document.createElement("div");
+        label.className = "event-label";
+        label.textContent = event.fixed ? "Événement" : "Personnalisé";
+
         const title = document.createElement("div");
-        title.innerHTML = `<strong>${event.name} - Le ${new Date(`${event.date}T${event.time}`).toLocaleDateString('fr-CA')} à ${event.time}</strong>`;
-        const iframe = document.createElement("iframe");
-        iframe.src = buildCountdownUrl(new Date(`${event.date}T${event.time}`));
+        title.className = "event-title";
+        title.textContent = event.name;
+
+        const date = document.createElement("div");
+        date.className = "event-date";
+        date.textContent = target.toLocaleDateString('fr-CA', { day:'numeric', month:'long', year:'numeric' }) + " à " + event.time;
+
+        const display = document.createElement("div");
+        display.id = uid;
+
+        wrapper.appendChild(label);
         wrapper.appendChild(title);
-        wrapper.appendChild(iframe);
+        wrapper.appendChild(date);
+        wrapper.appendChild(display);
         list.appendChild(wrapper);
+
+        intervals[uid] = buildCountdownHTML(target, uid);
     });
 }
 
-function buildCountdownUrl(date) {
-    const formattedTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().replace(/-|:|\.\d+/g, "");
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return `https://embed-countdown.onlinealarmkur.com/fr/#${formattedTime}@${encodeURIComponent(timezone)}`;
-}
-
-function updateBackground() {
-    const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) document.body.style.animation = "morningBackgroundAnimation 10s ease-in-out infinite";
-    else if (hour >= 12 && hour < 18) document.body.style.animation = "afternoonBackgroundAnimation 10s ease-in-out infinite";
-    else if (hour >= 18 && hour < 21) document.body.style.animation = "eveningBackgroundAnimation 10s ease-in-out infinite";
-    else document.body.style.animation = "nightBackgroundAnimation 10s ease-in-out infinite";
-}
-
-function openFullscreen(url, title) {
-    const fullscreenDiv = document.createElement("div");
-    fullscreenDiv.className = "fullscreen";
-    fullscreenDiv.innerHTML = `
+/* ── Fullscreen overlay ── */
+function openFullscreen(targetDate, title) {
+    const fsId = "fs-display";
+    const div = document.createElement("div");
+    div.className = "fullscreen";
+    div.innerHTML = `
         <button class="close-btn" onclick="closeFullscreen(this)">×</button>
         <div class="fullscreenTitle">${title}</div>
-        <iframe src="${url}"></iframe>
+        <div id="${fsId}"></div>
     `;
-    document.body.appendChild(fullscreenDiv);
-    setTimeout(() => fullscreenDiv.classList.add("show"), 10);
+    document.body.appendChild(div);
+    setTimeout(() => {
+        div.classList.add("show");
+        intervals[fsId] = buildCountdownHTML(targetDate, fsId, true);
+    }, 10);
     document.body.style.overflow = "hidden";
 }
 
 function closeFullscreen(btn) {
     const fs = btn.parentElement;
     fs.classList.remove("show");
+    clearInterval(intervals["fs-display"]);
     setTimeout(() => fs.remove(), 250);
     document.body.style.overflow = "";
 }
 
+/* ── Background by time of day ── */
+function updateBackground() {
+    const h = new Date().getHours();
+    const anim =
+        h >= 6  && h < 12 ? "morningBg 10s ease-in-out infinite" :
+        h >= 12 && h < 18 ? "afternoonBg 10s ease-in-out infinite" :
+        h >= 18 && h < 21 ? "eveningBg 10s ease-in-out infinite" :
+                            "nightBg 10s ease-in-out infinite";
+    document.body.style.animation = anim;
+}
+
 updateBackground();
 setInterval(updateBackground, 60000);
+setInterval(updateCountdowns, 1000);
 loadEvents();
 </script>
 </body>
