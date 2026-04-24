@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<title>Président — Lobby</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg1: #0f0c1a;
+    --bg2: #1a1530;
+    --glass: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.12);
+    --glass-hover: rgba(255,255,255,0.10);
+    --accent: #a78bfa;
+    --accent2: #7c3aed;
+    --gold: #fbbf24;
+    --red: #f87171;
+    --green: #34d399;
+    --text: #f1f0ff;
+    --muted: #9ca3af;
+    --radius: 18px;
+  }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: radial-gradient(ellipse at 20% 50%, #1e0a3c 0%, #0f0c1a 60%),
+                radial-gradient(ellipse at 80% 20%, #0d1b3e 0%, transparent 50%);
+    background-color: var(--bg1);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  /* Floating cards BG */
+  .bg-cards {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .bg-card {
+    position: absolute;
+    font-size: 4rem;
+    opacity: 0.04;
+    animation: floatCard linear infinite;
+  }
+
+  @keyframes floatCard {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.04; }
+    90% { opacity: 0.04; }
+    100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .header .emoji { font-size: 3rem; display: block; margin-bottom: 8px; }
+  .header h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 6px;
+  }
+
+  /* Glass card */
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 28px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .glass h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Input */
+  .field { margin-bottom: 16px; }
+  .field label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .field input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field input::placeholder { color: #4b5563; }
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(167,139,250,0.15);
+  }
+
+  /* Code display */
+  .code-display {
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 12px;
+    padding: 14px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .code-display .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .code-display .code {
+    font-family: 'DM Mono', monospace;
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 8px;
+  }
+
+  /* Player count slider */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .slider-row input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--pct, 50%), rgba(255,255,255,0.1) var(--pct, 50%));
+    outline: none;
+    cursor: pointer;
+  }
+  .slider-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(167,139,250,0.5);
+    cursor: pointer;
+  }
+  .slider-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 28px;
+    text-align: center;
+  }
+  .slider-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Players list */
+  .players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    min-height: 48px;
+  }
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .player-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .player-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    flex: 1;
+  }
+  .player-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(167,139,250,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(167,139,250,0.3);
+  }
+  .player-badge.host { background: rgba(251,191,36,0.15); color: var(--gold); border-color: rgba(251,191,36,0.3); }
+
+  .waiting-slot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+  }
+  .waiting-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* Buttons */
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: white;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(124,58,237,0.5);
+  }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    background: var(--glass);
+    color: var(--text);
+    border: 1px solid var(--glass-border);
+  }
+  .btn-secondary:hover {
+    background: var(--glass-hover);
+    border-color: var(--accent);
+  }
+  .btn-danger {
+    background: rgba(248,113,113,0.1);
+    color: var(--red);
+    border: 1px solid rgba(248,113,113,0.3);
+  }
+  .btn-danger:hover { background: rgba(248,113,113,0.2); }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--glass-border);
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.orange { background: #fb923c; box-shadow: 0 0 6px #fb923c; animation: pulse 1.5s infinite; }
+
+  /* Roles preview */
+  .roles-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .role-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+  .role-chip.president { background: rgba(251,191,36,0.1); color: var(--gold); border-color: rgba(251,191,36,0.3); }
+  .role-chip.vp { background: rgba(167,139,250,0.1); color: var(--accent); border-color: rgba(167,139,250,0.3); }
+  .role-chip.neutre { background: rgba(156,163,175,0.1); color: var(--muted); border-color: rgba(156,163,175,0.3); }
+  .role-chip.vtdc { background: rgba(251,146,60,0.1); color: #fb923c; border-color: rgba(251,146,60,0.3); }
+  .role-chip.tdc { background: rgba(248,113,113,0.1); color: var(--red); border-color: rgba(248,113,113,0.3); }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: rgba(30,20,50,0.95);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    z-index: 999;
+    transition: transform 0.3s ease;
+    backdrop-filter: blur(12px);
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Loading overlay */
+  #loading {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,8,20,0.8);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    backdrop-filter: blur(4px);
+  }
+  #loading.show { display: flex; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(167,139,250,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- Floating BG cards -->
+<div class="bg-cards" id="bgCards"></div>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner"></div>
+  <span style="font-family:'DM Mono',monospace;color:var(--muted);font-size:0.85rem;">Connexion...</span>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<div class="container">
+
+  <!-- SCREEN 1: Username -->
+  <div class="screen active" id="screenName">
+    <div class="header">
+      <span class="emoji">🃏</span>
+      <h1>Le Président</h1>
+      <p>Multijoueur en ligne · 3 à 6 joueurs</p>
+    </div>
+    <div class="glass">
+      <h2>👤 Ton pseudo</h2>
+      <div class="field">
+        <label>PSEUDO</label>
+        <input id="inputName" type="text" placeholder="Entre ton pseudo..." maxlength="16" autocomplete="off"/>
+      </div>
+      <button class="btn btn-primary" id="btnContinue">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Create or Join -->
+  <div class="screen" id="screenChoice">
+    <div class="header">
+      <span class="emoji">🃏</span>
+      <h1>Le Président</h1>
+      <p id="welcomeText">Bienvenue !</p>
+    </div>
+    <div class="glass">
+      <h2>🎮 Créer une partie</h2>
+      <div class="slider-label">NOMBRE DE JOUEURS</div>
+      <div class="slider-row">
+        <input type="range" id="playerCountSlider" min="3" max="6" value="4" style="--pct:33%"/>
+        <div class="slider-val" id="sliderVal">4</div>
+      </div>
+      <div class="roles-row" id="rolesPreview"></div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary" id="btnCreate">Créer la partie</button>
+      </div>
+    </div>
+    <div class="divider">ou rejoindre</div>
+    <div class="glass">
+      <h2>🔗 Rejoindre une partie</h2>
+      <div class="field">
+        <label>CODE DE LA SALLE</label>
+        <input id="inputCode" type="text" placeholder="Ex: A4K9" maxlength="4" style="text-transform:uppercase;letter-spacing:4px;font-size:1.3rem;text-align:center;"/>
+      </div>
+      <button class="btn btn-secondary" id="btnJoin">Rejoindre →</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Lobby (host) -->
+  <div class="screen" id="screenLobbyHost">
+    <div class="header">
+      <span class="emoji">⏳</span>
+      <h1>Salon d'attente</h1>
+    </div>
+    <div class="glass">
+      <h2>🔑 Code de la salle</h2>
+      <div class="code-display">
+        <div class="label">PARTAGE CE CODE AVEC TES AMIS</div>
+        <div class="code" id="displayCode">----</div>
+      </div>
+      <div class="status-bar">
+        <div class="status-dot orange" id="statusDot"></div>
+        <span id="statusText">En attente de joueurs...</span>
+      </div>
+    </div>
+    <div class="glass">
+      <h2>👥 Joueurs <span id="playerCountLabel" style="color:var(--muted);font-weight:400;font-size:0.85rem;"></span></h2>
+      <div class="players-list" id="hostPlayersList"></div>
+      <button class="btn btn-primary" id="btnStart" disabled>Lancer la partie</button>
+      <div style="margin-top:10px;">
+        <button class="btn btn-danger" id="btnCancelHost">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: Lobby (guest) -->
+  <div class="screen" id="screenLobbyGuest">
+    <div class="header">
+      <span class="emoji">⏳</span>
+      <h1>Salon d'attente</h1>
+    </div>
+    <div class="glass">
+      <h2>🔑 Salle rejointe</h2>
+      <div class="code-display">
+        <div class="label">CODE DE LA SALLE</div>
+        <div class="code" id="displayCodeGuest">----</div>
+      </div>
+      <div class="status-bar">
+        <div class="status-dot orange"></div>
+        <span id="guestStatusText">En attente du démarrage...</span>
+      </div>
+    </div>
+    <div class="glass">
+      <h2>👥 Joueurs</h2>
+      <div class="players-list" id="guestPlayersList"></div>
+      <button class="btn btn-danger" id="btnLeave">Quitter la salle</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+// ─── Firebase ──────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDVlj8ZM8tipP_CEZZsspt5gnPupMQCIKU",
+  authDomain: "joffre-17fad.firebaseapp.com",
+  databaseURL: "https://joffre-17fad-default-rtdb.firebaseio.com",
+  projectId: "joffre-17fad",
+  storageBucket: "joffre-17fad.firebasestorage.app",
+  messagingSenderId: "379635357873",
+  appId: "1:379635357873:web:a16437780f312ea56eaa90"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let myName = '';
+let myId = '';
+let currentLobbyId = '';
+let isHost = false;
+let maxPlayers = 4;
+let lobbyRef = null;
+
+// ─── BG Cards ──────────────────────────────────────────────────────────────
+const suits = ['♠','♥','♦','♣'];
+const bgCards = document.getElementById('bgCards');
+for (let i = 0; i < 12; i++) {
+  const el = document.createElement('div');
+  el.className = 'bg-card';
+  el.textContent = suits[i % 4];
+  el.style.left = (Math.random() * 100) + '%';
+  el.style.animationDuration = (18 + Math.random() * 20) + 's';
+  el.style.animationDelay = (Math.random() * 20) + 's';
+  bgCards.appendChild(el);
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+const avatarColors = ['#7c3aed','#0d9488','#b45309','#be185d','#1d4ed8','#15803d'];
+const avatarEmojis = ['👑','🃏','🎴','🎲','♟️','🎯'];
+
+function genId() {
+  return Math.random().toString(36).substr(2, 9);
+}
+
+function genCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showLoading(v) {
+  document.getElementById('loading').classList.toggle('show', v);
+}
+
+let toastTimer;
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function getRoles(n) {
+  if (n === 3) return ['Président','Neutre','Trou-du-cul'];
+  if (n === 4) return ['Président','Vice-Président','Vice-Trou-du-cul','Trou-du-cul'];
+  if (n === 5) return ['Président','Vice-Président','Neutre','Vice-Trou-du-cul','Trou-du-cul'];
+  return ['Président','Vice-Président','Neutre','Neutre','Vice-Trou-du-cul','Trou-du-cul'];
+}
+
+function getRoleClass(r) {
+  if (r === 'Président') return 'president';
+  if (r === 'Vice-Président') return 'vp';
+  if (r === 'Neutre') return 'neutre';
+  if (r === 'Vice-Trou-du-cul') return 'vtdc';
+  if (r === 'Trou-du-cul') return 'tdc';
+  return 'neutre';
+}
+
+function updateRolesPreview(n) {
+  const roles = getRoles(n);
+  const row = document.getElementById('rolesPreview');
+  row.innerHTML = roles.map(r => `<div class="role-chip ${getRoleClass(r)}">${r}</div>`).join('');
+}
+
+// ─── Slider ────────────────────────────────────────────────────────────────
+const slider = document.getElementById('playerCountSlider');
+const sliderVal = document.getElementById('sliderVal');
+slider.addEventListener('input', () => {
+  const v = parseInt(slider.value);
+  sliderVal.textContent = v;
+  const pct = ((v - 3) / 3 * 100) + '%';
+  slider.style.setProperty('--pct', pct);
+  updateRolesPreview(v);
+});
+updateRolesPreview(4);
+
+// ─── Screen 1: Name ────────────────────────────────────────────────────────
+document.getElementById('btnContinue').addEventListener('click', () => {
+  const name = document.getElementById('inputName').value.trim();
+  if (!name) { toast('Entre ton pseudo !'); return; }
+  myName = name;
+  myId = genId();
+  document.getElementById('welcomeText').textContent = `Bienvenue, ${myName} !`;
+  showScreen('screenChoice');
+});
+document.getElementById('inputName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btnContinue').click();
+});
+
+// ─── Screen 2: Create ──────────────────────────────────────────────────────
+document.getElementById('btnCreate').addEventListener('click', async () => {
+  showLoading(true);
+  maxPlayers = parseInt(slider.value);
+  const code = genCode();
+  currentLobbyId = code;
+  isHost = true;
+
+  const lobbyData = {
+    code,
+    maxPlayers,
+    host: myId,
+    status: 'waiting',
+    createdAt: Date.now(),
+    players: {
+      [myId]: {
+        name: myName,
+        id: myId,
+        joinedAt: Date.now(),
+        isHost: true,
+        slot: 0
+      }
+    }
+  };
+
+  await db.ref(`president_lobbies/${code}`).set(lobbyData);
+  db.ref(`president_lobbies/${code}`).onDisconnect().remove();
+
+  showLoading(false);
+  document.getElementById('displayCode').textContent = code;
+  showScreen('screenLobbyHost');
+  listenLobbyHost(code);
+});
+
+// ─── Screen 2: Join ────────────────────────────────────────────────────────
+document.getElementById('btnJoin').addEventListener('click', async () => {
+  const code = document.getElementById('inputCode').value.trim().toUpperCase();
+  if (code.length !== 4) { toast('Entre un code à 4 caractères !'); return; }
+  joinLobby(code);
+});
+document.getElementById('inputCode').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btnJoin').click();
+});
+document.getElementById('inputCode').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase();
+});
+
+async function joinLobby(code) {
+  showLoading(true);
+  const snap = await db.ref(`president_lobbies/${code}`).once('value');
+  if (!snap.exists()) {
+    showLoading(false);
+    toast('❌ Salle introuvable !'); return;
+  }
+  const lobby = snap.val();
+  if (lobby.status !== 'waiting') {
+    showLoading(false);
+    toast('❌ La partie a déjà commencé !'); return;
+  }
+  const players = lobby.players ? Object.values(lobby.players) : [];
+  if (players.length >= lobby.maxPlayers) {
+    showLoading(false);
+    toast('❌ La salle est pleine !'); return;
+  }
+
+  currentLobbyId = code;
+  isHost = false;
+  maxPlayers = lobby.maxPlayers;
+
+  const slot = players.length;
+  await db.ref(`president_lobbies/${code}/players/${myId}`).set({
+    name: myName, id: myId, joinedAt: Date.now(), isHost: false, slot
+  });
+  db.ref(`president_lobbies/${code}/players/${myId}`).onDisconnect().remove();
+
+  showLoading(false);
+  document.getElementById('displayCodeGuest').textContent = code;
+  showScreen('screenLobbyGuest');
+  listenLobbyGuest(code);
+}
+
+// ─── Host lobby listener ───────────────────────────────────────────────────
+function listenLobbyHost(code) {
+  lobbyRef = db.ref(`president_lobbies/${code}`);
+  lobbyRef.on('value', snap => {
+    if (!snap.exists()) { showScreen('screenChoice'); return; }
+    const lobby = snap.val();
+    const players = lobby.players ? Object.values(lobby.players).sort((a,b)=>a.slot-b.slot) : [];
+
+    // Status
+    const ready = players.length >= 3;
+    const full = players.length >= lobby.maxPlayers;
+    document.getElementById('playerCountLabel').textContent = `${players.length}/${lobby.maxPlayers}`;
+    document.getElementById('statusText').textContent = full
+      ? '✅ Salle complète — prêt à lancer !'
+      : `En attente de joueurs (min. 3)...`;
+    document.getElementById('statusDot').className = 'status-dot ' + (full ? 'green' : 'orange');
+    document.getElementById('btnStart').disabled = !ready;
+
+    // Players list
+    renderPlayersList('hostPlayersList', players, lobby.maxPlayers);
+
+    // Game started by check (shouldn't happen from host side but safety)
+    if (lobby.status === 'playing') {
+      redirectToGame(lobby, players);
+    }
+  });
+}
+
+// ─── Guest lobby listener ──────────────────────────────────────────────────
+function listenLobbyGuest(code) {
+  lobbyRef = db.ref(`president_lobbies/${code}`);
+  lobbyRef.on('value', snap => {
+    if (!snap.exists()) {
+      toast('❌ La salle a été fermée.');
+      showScreen('screenChoice');
+      return;
+    }
+    const lobby = snap.val();
+    const players = lobby.players ? Object.values(lobby.players).sort((a,b)=>a.slot-b.slot) : [];
+
+    document.getElementById('guestStatusText').textContent =
+      lobby.status === 'playing'
+        ? '🚀 La partie démarre...'
+        : `En attente du démarrage... (${players.length}/${lobby.maxPlayers})`;
+
+    renderPlayersList('guestPlayersList', players, lobby.maxPlayers);
+
+    if (lobby.status === 'playing') {
+      redirectToGame(lobby, players);
+    }
+  });
+}
+
+// ─── Render players ────────────────────────────────────────────────────────
+function renderPlayersList(containerId, players, max) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+
+  players.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    const color = avatarColors[i % avatarColors.length];
+    const emoji = avatarEmojis[i % avatarEmojis.length];
+    row.innerHTML = `
+      <div class="player-avatar" style="background:${color}22;border:2px solid ${color}44;">${emoji}</div>
+      <div class="player-name">${p.name}</div>
+      <div class="player-badge ${p.isHost ? 'host' : ''}">${p.isHost ? '👑 Hôte' : 'Joueur'}</div>
+    `;
+    el.appendChild(row);
+  });
+
+  // Empty slots
+  for (let i = players.length; i < max; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'waiting-slot';
+    slot.innerHTML = `<div class="waiting-dot"></div> En attente d'un joueur...`;
+    el.appendChild(slot);
+  }
+}
+
+// ─── Start game ────────────────────────────────────────────────────────────
+document.getElementById('btnStart').addEventListener('click', async () => {
+  showLoading(true);
+  await db.ref(`president_lobbies/${currentLobbyId}/status`).set('playing');
+  showLoading(false);
+});
+
+// ─── Redirect to game ──────────────────────────────────────────────────────
+function redirectToGame(lobby, players) {
+  if (lobbyRef) lobbyRef.off();
+  const mySlot = players.findIndex(p => p.id === myId);
+  const params = new URLSearchParams({
+    lobbyId: currentLobbyId,
+    playerId: myId,
+    playerName: myName,
+    playerSlot: mySlot,
+    maxPlayers: lobby.maxPlayers,
+    isHost: isHost ? 'true' : 'false'
+  });
+  window.location.href = `president.html?${params.toString()}`;
+}
+
+// ─── Cancel / Leave ────────────────────────────────────────────────────────
+document.getElementById('btnCancelHost').addEventListener('click', async () => {
+  if (lobbyRef) lobbyRef.off();
+  await db.ref(`president_lobbies/${currentLobbyId}`).remove();
+  showScreen('screenChoice');
+});
+
+document.getElementById('btnLeave').addEventListener('click', async () => {
+  if (lobbyRef) lobbyRef.off();
+  await db.ref(`president_lobbies/${currentLobbyId}/players/${myId}`).remove();
+  showScreen('screenChoice');
+});
+</script>
+</body>
+</html>
